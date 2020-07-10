@@ -1,0 +1,17 @@
+<aura:component access="global">
+    <aura:attribute name="toastmsg" type="String" default=""/>
+    <aura:attribute name="toastType" type="String" default=""/>
+    <aura:attribute name="toastcss" type="String" default=""/>
+   <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <div class="slds-notify_container slds-is-relative" id="toastCmp">
+        <div  class="{!v.toastcss}" role="alert">
+            <div class="slds-notify__content">
+                <h2 class="slds-text-heading_small ">{!v.toastmsg}</h2>
+            </div>
+            <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" title="Close" >
+                <span onclick="{!c.closeIcon}">X</span>
+                <span class="slds-assistive-text">Close</span>
+            </button>
+        </div>
+    </div>
+</aura:component>

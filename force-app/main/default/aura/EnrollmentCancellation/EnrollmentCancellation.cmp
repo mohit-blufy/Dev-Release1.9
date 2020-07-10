@@ -1,0 +1,97 @@
+<aura:component implements="force:hasRecordId,force:lightningQuickActionwithoutheader" controller="EnrollmentCancellationCmpApexController" access="global" >
+    
+    <aura:html tag="style">
+        .cuf-scroller-content{
+        background:#fff;
+        }
+        .slds-modal__container { 
+        max-width: 100%; 
+        width: 70%;
+        }
+        .modal-body{ 
+        height :  100% !important; 
+        min-height: 450px !important; 
+        }
+    </aura:html>
+    
+    <aura:attribute name="showSpinner" type="Boolean" default="false" />
+    <aura:attribute name="canReaPicklist" type="List" />
+    <!--<aura:attribute name="listCreditNote" type="List" />-->
+    <aura:attribute name="depositedAmount" type="Decimal" />
+    <aura:attribute name="unBilledAmount" type="Decimal" default=""/>
+    <aura:attribute name="custEnrolCount" type="Boolean" default="false" />
+    <aura:attribute name="showComponent" type="Boolean" default="false" />
+    <aura:attribute name="wrpCls" type="Object" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/> 
+    <aura:if isTrue="{!v.showComponent}">
+        <lightning:card title="">
+            <aura:if isTrue="{!v.showSpinner}">
+                <lightning:spinner name="mySpinner" variant="brand" size="medium" />
+            </aura:if>
+            <div class="slds-size_1-of-1 slds-modal__header" style="background-color: #2F5597;height:60px">
+                <div class=" slds-float_left" style="font-size:20px;color:white">Enrollment Cancellation</div>	
+            </div>
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-size_1-of-2">
+                    <div class="slds-p-horizontal_small slds-p-top_small">                    
+                        <lightning:input label="Name" value="{!v.wrpCls.enrolName}" disabled="true" />                                                     
+                    </div>
+                </div>
+                <div class="slds-size_1-of-2">
+                    <div class="slds-p-horizontal_small slds-p-top_small">                    
+                        <lightning:input label="Class" value="{!v.wrpCls.enrolClassName}" disabled="true" />                                                     
+                    </div>
+                </div>
+                <div class="slds-size_1-of-2">
+                    <div class="slds-p-horizontal_small slds-p-top_small">                    
+                        <!--<lightning:input label="Enrollment End Date" value="{}" disabled="true" /> -->  
+                        <div >Enrollment End Date</div>
+                        <ui:outputDate value="{!v.wrpCls.enrolEndDate}" format="dd/MM/yyyy"/>
+                    </div>
+                </div>
+                <div class="slds-size_1-of-2">
+                    <div class="slds-p-horizontal_small slds-p-top_small">                    
+                        <!--<lightning:input label="Cancellation Date" value="{!v.enrollment.Cancellation_Date__c}" disabled="true" /> -->
+                        <div>Cancellation Date</div>
+                        <ui:outputDate value="{!v.wrpCls.enrolCanDate}" format="dd/MM/yyyy"/>
+                    </div>
+                </div>
+                <div class="slds-size_1-of-2">
+                    <div class="slds-p-horizontal_small slds-p-top_small">                    
+                        <!--<lightning:input label="Deposited Amount" value="{!v.depositedAmount}" disabled="true" />-->
+                        <div>Deposited Amount</div>
+                        <lightning:formattedNumber label="Deposited Amount" value="{!v.depositedAmount}" style="currency" currencyCode="USD"/>
+                    </div>
+                </div>
+                <div class="slds-size_1-of-2">
+                    <div class="slds-p-horizontal_small slds-p-top_small">                    
+                        <!--<lightning:input label="Deposited Amount" value="{!v.depositedAmount}" disabled="true" />-->
+                        <div>Unbilled Amount</div>
+                        <lightning:formattedNumber label="Billed Amount" value="{!v.unBilledAmount}" style="currency" currencyCode="USD"/>
+                    </div>
+                </div>
+                <div class="slds-size_1-of-2 slds-p-horizontal_small slds-p-top_small">
+                    <lightning:select aura:id="canResn" name="cancelReason" label="Reason for Cancellation" value="{!v.wrpCls.enrolCancelResn}" required="true" messageWhenValueMissing="Field is required" >                        
+                        <option value="">--None--</option>
+                        <aura:iteration items="{!v.canReaPicklist}" var="option">
+                            <option value="{!option}">{!option}</option>
+                        </aura:iteration>
+                    </lightning:select>
+                </div>
+                <div class="slds-size_1-of-2">
+                    <div class="slds-p-horizontal_small slds-p-top_small">                    
+                        <lightning:textarea aura:id="cancelCom" label="Cancellation Comments" value="{!v.wrpCls.enrolCancelComm}" required="true" messageWhenValueMissing="Field is required" />                                                     
+                    </div>
+                </div>
+            </div>
+            <aura:set attribute="footer" >   
+                <div class="slds-modal__footer">
+                    <lightning:button label="Process Invoice" onclick="{!c.doProcessEnrolment}" variant="success" title="Brand action" iconName="utility:download" disabled="{!v.custEnrolCount ? 'true' : 'false'}"/>   
+                    <lightning:button label="Cancel Enrollment" onclick="{!c.doProcessEnrolment}" variant="brand"  title="Base action" iconName="utility:close" />
+                    <lightning:button label="Close" onclick="{!c.doClose}" variant="destructive"  title="Base action" iconName="utility:close" />
+                </div>
+            </aura:set>
+        </lightning:card>
+    </aura:if>
+</aura:component>

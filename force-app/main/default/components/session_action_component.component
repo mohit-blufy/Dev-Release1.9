@@ -1,0 +1,884 @@
+<apex:component controller="SessionActionController">
+    <apex:attribute name="customMetaDataConfig" type="Full_Calendar_Configuration__mdt" description="for custom data Configration"
+                    />
+    <style>
+        .custom-anchor {
+        text-decoration: none !important;
+        }
+        
+        .slds-scope .slds-tabs_default__item.slds-is-active:after {
+        background-color: rgb(89, 81, 208);
+        }
+        
+        .slds-modal__header {
+        background: {!customMetaDataConfig.Modal_Header_Footer_Color__c}!important;
+        color: #ffffff;
+        }
+        
+        .custom-btn {
+        background: #4bca81 !important;
+        color: #fff !important;
+        border-color: #4bca81 !important;
+        }
+        
+        .font-label-weight {
+        font-weight: 600;
+        }
+        
+        .custm-modal-footer-btn {
+        box-shadow: 3px 2px 2px #c1c1c1;
+        border-radius: 7px;
+        height: 37px;
+        }
+        
+        .custom-anchor {
+        color: #2f5597 !important
+        }
+        
+        .custom-pointer {
+        cursor: pointer;
+        }
+        
+        .custom-border {
+        border: 0px !important;
+        border-top: 1px solid #dddbda !important;
+        border-radius: 0px !important;
+        }
+        
+        .custom-slds-text-heading {
+        font-weight: 400 !important;
+        font-size: 1.01rem !important;
+        line-height: 1.7 !important;
+        }
+        
+        .custom-slds-p {
+        font-size: 1.09em !important;
+        }
+        
+        .custom-mini-modal-button {
+        box-shadow: 3px 2px 4px #dddbda;
+        }
+        
+    </style>
+    <script>    
+    var selectedStudentsId 		= '';
+    var selectedSessionId 		= '';
+    var selectedResourceId 		= '';
+    var selectedAccountId 		= '';
+    var selectedCrsAssesId      = '';
+    var selectedCourseId        = '';
+    var selectedStudRecords     = [];
+    
+    var oldCalendarInfoForStudent;
+    
+    function handleChangeTab(event) {
+        //console.log(event);
+        let evt = event;
+        let tabs = document.querySelectorAll('.slds-tabset');
+        tabs.forEach(e => {
+            e.classList.remove('slds-is-active');
+        });
+            evt.classList.add('slds-is-active');
+            document.querySelectorAll('.slds-tabs_default__content').forEach(ele => {
+            ele.classList.add('slds-hide');
+            ele.classList.remove('slds-show');
+        });
+            let tabClass = '';
+            if (evt.dataset.index == 'tab-1')
+            tabClass = 'tab-content-1';
+            else if (evt.dataset.index == 'tab-2')
+            tabClass = 'tab-content-2';
+            else if (evt.dataset.index == 'tab-3')
+            tabClass = 'tab-content-3';
+            else if (evt.dataset.index == 'tab-4')
+            tabClass = 'tab-content-4';
+            
+            document.querySelector('.' + tabClass).classList.add('slds-show');
+            document.querySelector('.' + tabClass).classList.remove('slds-hide');
+            // //console.log('class', this.template.querySelector('.slds_tab-1'));*/
+        }
+            function makeTabActive() {
+            let tabs = document.querySelectorAll('.slds-tabset');
+            tabs.forEach(function (e, indx) {
+            e.classList.remove('slds-is-active');
+            if (indx == 0) {
+            e.classList.add('slds-is-active');
+        }
+        });
+            
+            document.querySelectorAll('.slds-tabs_default__content').forEach(ele => {
+            ele.classList.add('slds-hide');
+            ele.classList.remove('slds-show');
+        });
+            document.querySelector('.tab-content-1').classList.add('slds-show');
+            document.querySelector('.tab-content-1').classList.remove('slds-hide');
+        }
+            // commment function after discussed with Dharam And NITIN 
+            // function getResourceDetailFromSF(resourceId) {
+            //     selectedResourceId = resourceId;
+            //     selectedSessionId = '';
+            //     document.getElementById("spinner").style.display = "block";
+            //     Visualforce.remoting.Manager.invokeAction(
+            //         'RemoteAction.SessionActionController.fecthSessionResourceDetail}',
+            //         selectedResourceId,
+            //         function (result, event) {
+            //             document.getElementById("spinner").style.display = "none";
+            //             //console.log(event.status);
+            //             //console.log('Event --> ', result);
+            //             let contentDiv = '';
+            //             if (document.querySelector('.content-session-detail') != null) {
+            //                 document.querySelector('.content-session-detail').remove();
+            //             }
+            //             if (result != null) {
+            //                 for (idx of result) {
+            //                     contentDiv += '<div class="slds-grid slds-wrap"><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label  class="slds-text-heading_small font-label-weight">Location : </label><span class="slds-text-heading_small custom-text-color">';
+            //                     contentDiv += idx.Session__r.Teacher__r.Location__r.Name;
+            //                     contentDiv += '</span></div><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Teacher : </label><span class="slds-text-heading_small custom-text-color">';
+            //                     contentDiv += idx.Session__r.Teacher__r.Name;
+            //                     contentDiv += '</span></div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Date : </label><span class="slds-text-heading_small custom-text-color">';
+            //                     contentDiv += getLongDate(new Date(idx.Session__r.Session_Date__c));
+            //                     contentDiv += '</span> </div><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small">   <label class="slds-text-heading_small font-label-weight">Time : </label>  <span class="slds-text-heading_small custom-text-color">';
+            //                     contentDiv += timeConvert(msToTime(idx.Session__r.Start_Time__c, true));
+            //                     contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Duration : </label> <span class="slds-text-heading_small custom-text-color">';
+            //                     contentDiv += idx.Session__r.Duration__c +' '+ idx.Session__r.Duration_Unit__c;
+            //                     contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Class : </label><span class="slds-text-heading_small custom-text-color">';
+            //                     contentDiv += idx.Session__r.Class__r.Name;
+            //                     contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Resource : </label><span class="slds-text-heading_small custom-text-color">';
+            //                     contentDiv += idx.Resource__r.Name;
+            //                     contentDiv += '</span> </div></div></div>';
+            //                 }
+            //                 let tabContent = document.querySelector('.tab-content-1');
+            //                 let newSessionElement = document.createElement('div');
+            //                 newSessionElement.className = 'content-session-detail';
+            //                 newSessionElement.innerHTML = contentDiv;
+            //                 tabContent.prepend(newSessionElement);
+            //             } else {
+            //                 let tabContent = document.querySelector('.tab-content-1');
+            //                 let newSessionElement = document.createElement('div');
+            //                 newSessionElement.className = 'content-session-detail';
+            //                 newSessionElement.innerHTML = '<div>Something went wrong</div>';
+            //                 tabContent.prepend(newSessionElement);
+            
+            //             }
+            //             getStudentSessionFromSF();
+            //             makeTabActive();
+            //         },
+            //         { escape: true }
+            //     );
+            // }
+            
+            function getSessionDeatilFromSF(sessionId) {
+            selectedSessionId = sessionId;
+            console.log('selectedSessionId',selectedSessionId);
+            let isPhType = false;
+            document.getElementById("spinner").style.display = "block";
+            Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.SessionActionController.fetchSessionsDetail}',
+            selectedSessionId,
+            function (result, event) {
+            document.getElementById("spinner").style.display = "none";
+            //console.log(event.status);
+            //console.log('Event --> ', result);
+            let contentDiv = '';
+            if (document.querySelector('.content-session-detail') != null) {
+            document.querySelector('.content-session-detail').remove();
+        }
+            if (result != null) {
+            for (idx of result) {
+            if(idx.educato__Type__c != undefined && idx.educato__Type__c == 'Placeholder'){
+            isPhType = true;
+        }  
+            contentDiv += '<div class="slds-grid slds-wrap"><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label  class="slds-text-heading_small font-label-weight">Location : </label><span class="slds-text-heading_small custom-text-color">';
+            contentDiv += document.querySelector('.select-location').selectedOptions[0].label;
+            contentDiv += '</span></div><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Teacher : </label><span class="slds-text-heading_small custom-text-color">';
+            contentDiv += idx.educato__Teacher__r == undefined ? '' : idx.educato__Teacher__r.Name;
+            contentDiv += '</span></div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Date : </label><span class="slds-text-heading_small custom-text-color">';
+            contentDiv += getLongDate(new Date(idx.educato__Session_Date__c));
+            contentDiv += '</span> </div><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small">   <label class="slds-text-heading_small font-label-weight">Time : </label>  <span class="slds-text-heading_small custom-text-color">';
+            contentDiv += timeConvert(msToTime(idx.educato__Start_Time__c, true));
+            contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Course : </label> <span class="slds-text-heading_small custom-text-color">';
+            contentDiv += idx.educato__Class__r.educato__Course__r.Name == undefined ? '' : idx.educato__Class__r.educato__Course__r.Name;
+            contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Class : </label><span class="slds-text-heading_small custom-text-color">';
+            contentDiv += idx.educato__Class__r == undefined ? '' : idx.educato__Class__r.Name ;
+            contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Module : </label><span class="slds-text-heading_small custom-text-color">';
+            contentDiv += idx.educato__Module__c == undefined ? '' : idx.educato__Module__c;
+            contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Lesson : </label><span class="slds-text-heading_small custom-text-color">';
+            contentDiv += idx.educato__Lesson__c == undefined ? '' : idx.educato__Lesson__c;
+            contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Duration : </label> <span class="slds-text-heading_small custom-text-color">';
+            contentDiv += idx.educato__Duration__c +' '+ idx.educato__Duration_Unit__c;
+            contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Notes : </label><span class="slds-text-heading_small custom-text-color">';
+            contentDiv += idx.educato__Notes__c == undefined ? '' : idx.educato__Notes__c;
+            contentDiv += '</span> </div></div></div>';
+
+            var sessName = document.getElementById('sessId');
+            sessName.innerHTML = idx.Name;
+        }                    
+        let tabContent = document.querySelector('.tab-content-1');
+        let newSessionElement = document.createElement('div');
+        newSessionElement.className = 'content-session-detail';
+        newSessionElement.innerHTML = contentDiv;
+        tabContent.prepend(newSessionElement);
+        let newDate = calendarInfo.event.start;
+        let currentDate = new Date();
+        if (currentDate.getTime() < newDate.getTime()) {
+            document.querySelectorAll('.session-detail-footer-btn').forEach(ele =>{
+                ele.disabled = false;
+            });
+            }else{
+                document.querySelectorAll('.session-detail-footer-btn').forEach(ele =>{
+                ele.disabled = true;
+            });
+            }
+            } else {
+                let tabContent = document.querySelector('.tab-content-1');
+                let newSessionElement = document.createElement('div');
+                newSessionElement.className = 'content-session-detail';
+                newSessionElement.innerHTML = '<div>Something went wrong</div>';
+                tabContent.prepend(newSessionElement);
+                document.querySelectorAll('.session-detail-footer-btn').forEach(ele =>{
+                ele.disabled = true;
+            });
+                
+            }
+                //Added on 24-04-20 hide both footer buttons when user profile type is equal to teacher
+                if(currentUserProfileName == 'Teacher'){
+                document.querySelectorAll('.session-detail-footer-btn').forEach(ele =>{
+                ele.style.display = 'none';
+            });
+            } 
+                
+                if(!isPhType){
+                document.querySelector("#tab-default-2__item").classList.remove('slds-hide');
+                document.querySelector("#tab-default-3__item").classList.remove('slds-hide');
+                document.querySelector("#tab-default-4__item").classList.remove('slds-hide');
+                getStudentSessionFromSF();
+                getSessionAssessmentFromSF();
+            }else{
+                document.querySelector("#tab-default-2__item").classList.add('slds-hide');
+                document.querySelector("#tab-default-3__item").classList.add('slds-hide');
+                document.querySelector("#tab-default-4__item").classList.add('slds-hide');
+            }
+                makeTabActive();
+            },
+                { escape: true }
+                                                                           );
+        }
+        
+        function getStudentSessionFromSF() {
+            let newDate = calendarInfo.event.start;
+            let currentDate = new Date();
+            document.getElementById("spinner").style.display = "block";
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.SessionActionController.getSessionStudent}',
+                selectedSessionId,
+                function (result, event) {
+                    //console.log(event.status);
+                    document.getElementById("spinner").style.display = "none";
+                    if (document.querySelector('.content-student-detail') != null) {
+                        document.querySelector('.content-student-detail').remove();
+                    }
+                    let table = '<table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered"> <thead> <tr> <th>';
+                    table += '<div class="slds-form-element__control">';
+                    table += '<div class="slds-checkbox">';
+                    table += '<input type="checkbox" name="options" class="all-select-checkbox" id="select-all-checkbox" onchange="checkAllTheBoxes(this);" />';
+                    table += '<label class="slds-checkbox__label" for="select-all-checkbox">';
+                    table += '<span class="slds-checkbox_faux"></span>';
+                    table += '<span class="slds-form-element__label"> </span> </label> </div> </div> </div> </th>';
+                    table += '<th>Name</th> <th>Status</th> <th>Teacher</th> <th>Class</th>';
+                    if(currentDate.getTime() < newDate.getTime() && currentUserProfileName != 'Teacher'){
+                        table += '<th>Action</th>';
+                    }                
+                    table += ' </tr> </thead> <tbody>';
+                    if (result.length > 0) {
+                        for (idx of result) {
+                            table += '<tr> <td>';
+                            table += '<div class="slds-form-element__control"><div class="slds-checkbox"><input type="checkbox" class="tbody-checkboxes" name="options" id=' + idx.Id + ' onchange="getCheckBoxState(this);" /> <label class="slds-checkbox__label" for="' + idx.Id + '"><span class="slds-checkbox_faux"></span><span class="slds-form-element__label"> </span> </label></div></div>';
+                            table += '</td> <td>';
+                            table += idx.educato__Account__r != undefined ? idx.educato__Account__r.Name : '';
+                            table += '</td> <td>';
+                            table += idx.educato__Status__c;
+                            table += '</td> <td>';
+                            table += idx.educato__Session__r.educato__Teacher__r.Name;
+                            table += '</td> <td>';
+                            table += idx.educato__Session__r.educato__Class__r.Name;
+                            if(currentDate.getTime() < newDate.getTime() && currentUserProfileName != 'Teacher'){
+                                table += '</td> <td>';
+                                //commment line after discussed with Dharam And NITIN
+                                //table += '<a href="#" class="custom-anchor" onclick="toggleConfirmationModal(this);" data-id="' + idx.Id + '" >Cancel</a>/<a href="#" class="custom-anchor"  name="reschedule-student" onclick="activeRescheduleMode(this);" data-id="' + idx.Id + '" data-classid="' + idx.Session__r.Class__c + '" data-accid="' + idx.Account__c + '" >Reschedule</a>';
+                                table += '<a href="#" class="custom-anchor" onclick="toggleConfirmationModal(this);" data-id="' + idx.Id + '" >Cancel</a>';
+                            }
+                            table += '</td> </tr>';
+                        }
+                        table += '</tbody> </table>';
+                        let tabContent = document.querySelector('.tab-content-2');
+                        let newSessionElement = document.createElement('div');
+                        newSessionElement.className = 'content-student-detail';
+                        newSessionElement.innerHTML = table;
+                        tabContent.append(newSessionElement);
+                    } else {
+                        let tabContent = document.querySelector('.tab-content-2');
+                        let newSessionElement = document.createElement('div');
+                        newSessionElement.className = 'content-student-detail';
+                        newSessionElement.innerHTML = '<div>There are zero number of students for this session event</div>';
+                        tabContent.append(newSessionElement);
+                    }                    
+                    getSessionHistoryRecordsFromSF();
+                },
+                { escape: true }
+            );
+        }
+        
+    /**
+	Name         :   StudentSessions- Assessment Tab (getSessionAssessmentFromSF)
+	Date         :   8 Jun 2020
+	Description  :   Function is used to get student sessions.
+	*/       
+        
+        function getSessionAssessmentFromSF() {
+            document.getElementById("spinner").style.display = "block";
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.SessionActionController.getSessionStudentForAssessment}',
+                selectedSessionId,
+                function (result, event) {
+                    //console.log(result);
+                    document.getElementById("spinner").style.display = "none";
+                    if (document.querySelector('.content-student-detail-4') != null) {
+                        document.querySelector('.content-student-detail-4').remove();
+                    }    
+                    if(result.length > 0){                    
+                        selectedCourseId    = result[0].stuSess.educato__Session__r.educato__Class__r.educato__Course__c;
+                        //console.log('selectedCourseId@@'+selectedCourseId);      
+                        fetchCrsAssessmentPlist(selectedCourseId);
+                    }
+                    
+                    let table = '<table class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_bordered"> <thead> <tr> <th>';
+                    table += '<div class="slds-form-element__control">';
+                    table += '<div class="slds-checkbox">';
+                    table += '<input type="checkbox" name="options" class="all-select-checkboxes" id="select-all-checkboxes" onchange="checkAllTheBoxesInitial(this);" />';
+                    table += '<label class="slds-checkbox__label" for="select-all-checkboxes">';
+                    table += '<span class="slds-checkbox_faux"></span>';
+                    table += '<span class="slds-form-element__label"> </span> </label> </div> </div> </div> </th>';
+                    table += '<th>S/N</th> <th>Name</th> <th>Grade</th>';              
+                    table += ' </tr> </thead> <tbody>';
+                    
+                    if (result.length > 0) {
+                        var counter = 0;
+                        for (indx of result) {
+                            table += '<tr> <td>';
+                            table += '<div class="slds-form-element__control"><div class="slds-checkbox"><input type="checkbox" class="tbody-checkbox" name="checkbox" id="' + indx.stuSess.Id + 'cb" onchange="getCheckBoxStateInitial(this,'+counter+');" /> <label class="slds-checkbox__label" for="' + indx.stuSess.Id + 'cb"><span class="slds-checkbox_faux"></span><span class="slds-form-element__label"> </span> </label></div></div>';
+                            table += '</td> <td>';
+                            table += indx != null ? counter+1 : '';
+                            table += '</td> <td>';
+                            table += indx.stuSess.educato__Account__r != undefined ? indx.stuSess.educato__Account__r.Name : '';
+                            table += '</td> <td>';
+                            table += '<select class="slds-select tbody-picklist" id="'+indx.stuSess.Id+'grade"  onchange="GetSelectedValue(this,'+counter+');">';
+                            table += '<option value="" > None </option>';
+                            for(index = 0; index < indx.gradeList.length; index++){
+                                table += '<option value="'+indx.gradeList[index]+'">'+indx.gradeList[index]+'</option>';
+                            }
+                            table += '</select>';
+                            table += '</td> </tr>';
+                            counter += 1;
+                            selectedStudRecords.push(indx);
+                        }                          
+                        //console.log(selectedStudRecords);
+                        table += '</tbody> </table>';
+                        let tabContent = document.querySelector('.tab-content-4');
+                        let newSessionElement = document.createElement('div');
+                        newSessionElement.className = 'content-student-detail-4';
+                        document.querySelector('.crsAssessmentName').classList.remove('slds-hide');
+                        document.querySelector('#assessment-button').classList.remove('slds-hide');
+                        newSessionElement.innerHTML = table;
+                        tabContent.append(newSessionElement);
+                    } else {
+                        let tabContent = document.querySelector('.tab-content-4');
+                        let newSessionElement = document.createElement('div');
+                        newSessionElement.className = 'content-student-detail-4';
+                        document.querySelector('#assessment-button').classList.add('slds-hide');
+                        document.querySelector('.crsAssessmentName').classList.add('slds-hide');
+                        newSessionElement.innerHTML = '<div>There are zero number of students for this session event</div>';
+                        tabContent.append(newSessionElement);
+                    }                    
+                },
+                { escape: true }
+            );
+        }
+        
+        function GetSelectedValue(option,counter) {     
+            if (option.value != 'None') { 
+                selectedStudRecords[counter].selectedGrade=option.value;
+           }
+        }
+        
+        function checkAllTheBoxesInitial(event) {
+            var counter = 0;
+            document.querySelectorAll('.tbody-checkbox').forEach(ele => {
+                event.checked == true ? ele.checked = true : ele.checked = false;
+                if (ele.checked == true) {
+                selectedStudRecords[counter].isSelect = true;
+            } else {
+				selectedStudRecords[counter].isSelect = false;      
+            }
+            	counter++;                                                     
+            });
+            //console.log(selectedStudRecords);
+        }
+        
+        function getCheckBoxStateInitial(event,counter) {
+            selectedStudRecords[counter].isSelect=event.checked;
+        }
+    
+    /**
+	Name        :   insertAssessmentRecords
+	Date        :   11 Jun 2020
+	Description :   It's used for inserting assessment records as per selected student and it's corresponding grade.  
+	*/  
+        function insertAssessmentRecords(){
+            let status = event.name;
+            let validation = false;
+            for(var index = 0; index < selectedStudRecords.length; index++){
+                if(selectedStudRecords[index].isSelect && selectedStudRecords[index].selectedGrade === undefined){
+                    validation = false;
+                    break;
+                }
+                else if (selectedStudRecords[index].isSelect && selectedStudRecords[index].selectedGrade != undefined && selectedStudRecords[index].selectedGrade != ''){
+                	validation = true;
+                }
+            }
+            
+            if (validation == true) {
+                document.getElementById("spinner").style.display = "block";
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.SessionActionController.insertAssessmentRecords}',
+                    selectedStudRecords, selectedCrsAssesId,
+                    function (result, event) {
+                    document.getElementById("spinner").style.display = "none";
+                    if (document.querySelector('.content-student-detail-4') != null) {
+                        document.querySelector('.content-student-detail-4').remove();
+                        document.querySelector('.content-student-detail-5').remove();
+                    }
+                        //console.log(event.status);
+                    if (event.status) {                           
+                        document.querySelector('.assessment-toast').classList.remove('slds-hide');
+                        setTimeout(ele => {
+                            document.querySelector('.assessment-toast').classList.add('slds-hide');
+                        }, 1000);
+                            window.location.href = '/'+selectedSessionId;                              
+                        }
+                        },
+                            { escape: true }
+                                  );
+                    } else {
+                        document.querySelector('.student-grade-toast').classList.remove('slds-hide');
+                        setTimeout(ele => {
+                            document.querySelector('.student-grade-toast').classList.add('slds-hide');
+                        }, 1000);
+                        }
+                        }                            
+                            
+    /**
+	Name        :   fetchCrsAssessmentPlist
+	Date        :   10 Jun 2020
+	Description :   Function is used to fetch names from educato__Course_Assessment__c according to selected session and populate that in picklist.  
+	*/        
+                        
+                        function fetchCrsAssessmentPlist(selectedCourseId) {   
+                            Visualforce.remoting.Manager.invokeAction(
+                                '{!$RemoteAction.SessionActionController.getCrsAssessmentNames}', 
+                                selectedCourseId,
+                                function (result, event) {	
+                                    if (document.querySelector('.content-student-detail-5') != null) {
+                                        document.querySelector('.content-student-detail-5').remove();
+                                    }
+                                    if (result != null){
+                                        table = '<select class="slds-select" id="selectedCrsAssesId" onchange="getValue(this);">';
+                                        table += '<option value="">None</option>';
+                                        for(index = 0; index < result.length; index++){
+                                            table += '<option value="'+result[index].Id+'">'+result[index].Name+'</option>';
+                                        }
+                                        table += '</select>';
+                                        let tabContent = document.querySelector('.crsAssessmentName');
+                                        let newSessionElement = document.createElement('div');
+                                        newSessionElement.className = 'content-student-detail-5';
+                                        newSessionElement.innerHTML = table;
+                                        tabContent.append(newSessionElement);
+                                    }
+                                },
+                                { escape: true }
+                            );
+                            
+                        }
+                        
+                        function getValue(option) {
+                            selectedCrsAssesId = '';
+                            option.value != '' ? selectedCrsAssesId = option.value : selectedCrsAssesId = '';
+                            //console.log(selectedCrsAssesId);
+                        }
+                        
+
+                        
+                        function getSessionHistoryRecordsFromSF() {
+                            document.getElementById("spinner").style.display = "block";
+                            Visualforce.remoting.Manager.invokeAction(
+                                '{!$RemoteAction.SessionActionController.getSessionHistoryRecords}',
+                                selectedSessionId,
+                                function (result, event) {
+                                    //console.log(event.status);
+                                    //console.log('History Records --> ', result);
+                                    document.getElementById("spinner").style.display = "none";
+                                    if (document.querySelector('.content-history-detail') != null) {
+                                        document.querySelector('.content-history-detail').remove();
+                                    }
+                                    if (event.status) {
+                                        let contentDiv = '';
+                                        contentDiv += '<div>';
+                                        contentDiv += '<ul class="slds-has-dividers_around-space">';
+                                        result.forEach(ele => {
+                                            contentDiv += '<li class="slds-item custom-border">';
+                                            contentDiv += '<article class="slds-tile slds-tile_board">   ';
+                                            contentDiv += '<div class="slds-tile__detail">';
+                                            contentDiv += '<p class="slds-text-heading_medium custom-slds-text-heading">' + ele.createdDate + ' - by ' + ele.historyBy;
+                                            contentDiv += '<br />';
+                                            contentDiv += '<p class="slds-truncate custom-slds-p">' + ele.description + '</p>';
+                                            contentDiv += '</div>';
+                                            contentDiv += '</article>';
+                                            contentDiv += '</li>';
+                                        });
+                                            contentDiv += '</ul>';
+                                            contentDiv += '</div>';
+                                            let tabContent = document.querySelector('.tab-content-3');
+                                            let newSessionElement = document.createElement('div');
+                                            newSessionElement.className = 'content-history-detail';
+                                            newSessionElement.innerHTML = contentDiv;
+                                            tabContent.append(newSessionElement);
+                                        }
+                                            
+                                        },
+                                            { escape: true }
+                                                      );
+                                    }
+                                    
+                                    
+                                    function updateStudentStatusFromSF(event) {
+                                        selectedStudentsId = selectedStudentsId.replace(/,\s*$/, "");
+                                        //console.log(event);
+                                        let status = event.name;
+                                        if (selectedStudentsId != '') {
+                                            document.getElementById("spinner").style.display = "block";
+                                            Visualforce.remoting.Manager.invokeAction(
+                                                '{!$RemoteAction.SessionActionController.changeStudentStatus}',
+                                                selectedStudentsId, status,
+                                                function (result, event) {
+                                                    document.getElementById("spinner").style.display = "none";
+                                                    console.log(event.status);
+                                                    console.log('result--> ', result);
+                                                    if (event.status) {
+                                                        selectedStudentsId = '';
+                                                        getStudentSessionFromSF();
+                                                    }
+                                                    
+                                                },
+                                                { escape: true }
+                                            );
+                                        } else {
+                                            document.querySelector('.student-toast').classList.remove('slds-hide');
+                                            setTimeout(ele => {
+                                                document.querySelector('.student-toast').classList.add('slds-hide');
+                                            }, 1000);
+                                            }
+                                            }
+                                                
+                                                function checkAllTheBoxes(event) {
+                                                selectedStudentsId = '';
+                                                document.querySelectorAll('.tbody-checkboxes').forEach(ele => {
+                                                event.checked == true ? ele.checked = true : ele.checked = false;
+                                                if (ele.checked == true) {
+                                                selectedStudentsId += ele.id + ',';
+                                            }
+                                                       });
+                                            console.log('selectedStudentsId@@@'+selectedStudentsId);
+                                        }
+                                        
+                                        
+                                        
+                                        function getCheckBoxState(event) {
+                                            if (event.checked == true) {
+                                                selectedStudentsId += event.id + ',';
+                                            } else if (event.checked == false) {
+                                                selectedStudentsId = selectedStudentsId.replace(event.id + ',', '');
+                                                if (selectedStudentsId.includes(event.id)) {
+                                                    selectedStudentsId = selectedStudentsId.replace(event.id, '');
+                                                }
+                                                document.querySelector(".all-select-checkbox").checked = false;
+                                            }
+                                            console.log('selectedStudentsId@@@'+selectedStudentsId);
+                                        }
+                                        
+                                        function cancelStudentSession(event) {
+                                            //console.log(event);
+                                            Visualforce.remoting.Manager.invokeAction(
+                                                '{!$RemoteAction.SessionActionController.cancelStudentForSession}',
+                                                selectedStudentsId,
+                                                function (result, event) {
+                                                    document.getElementById("spinner").style.display = "none";
+                                                    //console.log(event.status);
+                                                    //console.log('result--> ', result);
+                                                    if (event.status) {
+                                                        selectedStudentsId = '';
+                                                        document.querySelector('.student-confirmation-model').classList.toggle('slds-hide');
+                                                        getStudentSessionFromSF();
+                                                    }
+                                                    
+                                                },
+                                                { escape: true }
+                                            );
+                                        }
+                                        
+                                        function cancelSession() {
+                                            Visualforce.remoting.Manager.invokeAction(
+                                                '{!$RemoteAction.SessionActionController.cancelSession}',
+                                                selectedSessionId,
+                                                function (result, event) {
+                                                    document.getElementById("spinner").style.display = "none";
+                                                    //console.log(event.status);
+                                                    //console.log('result--> ', result);
+                                                    if (event.status) {
+                                                        closeSessionDetailModal();
+                                                        document.querySelector('.student-confirmation-model').classList.toggle('slds-hide');
+                                                        handleChangeCalendarDay();
+                                                    }
+                                                    
+                                                },
+                                                { escape: true }
+                                            );
+                                        }
+                                        
+                                        function handleActionOfConfirmationModal(event) {
+                                            //alert(selectedStudentsId);
+                                            if (event.name == 'Confirm') {
+                                                if (selectedStudentsId) {
+                                                    cancelStudentSession();
+                                                } else if (selectedSessionId) {
+                                                    cancelSession();
+                                                }
+                                            } else {
+                                                selectedStudentsId = '';
+                                            }
+                                            if(event.name == 'Cancel'){
+                                                toggleConfirmationModal();
+                                            }
+                                        }
+                                        
+                                        function toggleConfirmationModal(event) {
+                                            let newDate = calendarInfo.event.start;
+                                            let currentDate = new Date();
+                                            if (event == 'cancel session') {
+                                                if (currentDate.getTime() < newDate.getTime()) {
+                                                    document.querySelector('.modal-msg').textContent = 'Are you sure about to cancel this session ';
+                                                    document.querySelector('.student-confirmation-model').classList.toggle('slds-hide');
+                                                } else {
+                                                    document.querySelector('.toast-contain').innerText = "You can't cancel past sessions";
+                                                    document.querySelector('.invalid-date-toast').classList.remove('slds-hide');
+                                                    setTimeout(ele => {
+                                                        document.querySelector('.invalid-date-toast').classList.add('slds-hide');
+                                                        document.querySelector('.toast-contain').innerText = "Please select future date and time.";
+                                                    }, 2000);
+                                                    }
+                                                        //calendarInfo.revert();
+                                                    }else if (event) {
+                                                        selectedStudentsId = event.dataset.id;
+                                                        if (currentDate.getTime() < newDate.getTime()) {
+                                                        document.querySelector('.modal-msg').textContent = 'Are you sure about to cancel the student for this session';
+                                                        document.querySelector('.student-confirmation-model').classList.toggle('slds-hide');
+                                                    } else {
+                                                        document.querySelector('.toast-contain').innerText = "You can't cancel past sessions";
+                                                        document.querySelector('.invalid-date-toast').classList.remove('slds-hide');
+                                                        setTimeout(ele => {
+                                                        document.querySelector('.invalid-date-toast').classList.add('slds-hide');
+                                                        document.querySelector('.toast-contain').innerText = "Please select future date and time.";
+                                                    }, 2000);
+                                                    }
+                                                        
+                                                    } else {
+                                                        //console.log(calendarInfo);
+                                                        document.querySelector('.student-confirmation-model').classList.toggle('slds-hide');
+                                                        document.querySelector('.invalid-date-toast').classList.add('slds-hide');
+                                                    }        
+                                                    }
+                                                        
+                                                        function activeRescheduleMode(event) {
+                                                        isCalendarInRescheduleMode = true;
+                                                        rescheduleModeName = event.name;
+                                                        //commment line after discussed with Dharam And NITIN 
+                                                        /*if (event.dataset) {
+                selectedStudentsId = event.dataset.id;
+                selectedStudentClassId = event.dataset.classid;
+                selectedAccountId = event.dataset.accid;
+                oldCalendarInfoForStudent = calendarInfo;
+                //console.log('activeRescheduleMode ', calendarInfo);
+            }*/
+                                            document.querySelector('.slds-alert-date-time').classList.remove('slds-hide');
+                                            closeSessionDetailModal();
+                                        }          
+                                            </script>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-labelledby="modal-heading-01"
+             aria-modal="true" aria-describedby="modal-content-id-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <div class="slds-toast student-toast slds-hide">
+            <div class="slds-notify_container">
+                <div class="slds-notify slds-notify_toast slds-theme_warning" role="status">
+                    <span class="slds-assistive-text">warning</span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small ">Please select the student.</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slds-toast student-grade-toast slds-hide">
+            <div class="slds-notify_container">
+                <div class="slds-notify slds-notify_toast slds-theme_warning" role="status">
+                    <span class="slds-assistive-text">warning</span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small ">Please verify the student and its corresponding grade.</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Session Detail (<span Id = "sessId" />)
+                    <svg class="slds-button__icon slds-float_right custom-pointer" aria-hidden="true" onclick="closeSessionDetailModal(); return false;">
+                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                    </svg>
+                </h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium">
+                
+                <div class="slds-tabs_default">
+                    <ul class="slds-tabs_default__nav" role="tablist">
+                        <li class="slds-tabs_default__item slds-tabset slds-is-active" title="Session Detail" data-index="tab-1" role="presentation"
+                            onclick="handleChangeTab(this);">
+                            <a class="slds-tabs_default__link custom-anchor" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true"
+                               aria-controls="tab-default-1" id="tab-default-1__item">Session Details</a>
+                        </li>
+                        <li class="slds-tabs_default__item slds-tabset" title="Item Two" data-index="tab-2" role="presentation" onclick="handleChangeTab(this);">
+                            <a class="slds-tabs_default__link custom-anchor" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false"
+                               aria-controls="tab-default-2" id="tab-default-2__item">Students Detail</a>
+                        </li>
+                        <li class="slds-tabs_default__item slds-tabset" title="Item Four" data-index="tab-4" role="presentation" onclick="handleChangeTab(this);">
+                            <a class="slds-tabs_default__link custom-anchor" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false"
+                               aria-controls="tab-default-4" id="tab-default-4__item">Assessment</a>
+                        </li>
+                        <li class="slds-tabs_default__item slds-tabset" title="Item Three" data-index="tab-3" role="presentation" onclick="handleChangeTab(this);">
+                            <a class="slds-tabs_default__link custom-anchor" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false"
+                               aria-controls="tab-default-3" id="tab-default-3__item">History</a>
+                        </li>
+                    </ul>
+                    <div class="slds-tabs_default__content slds-show tab-content-1" role="tabpanel" aria-labelledby="tab-default-1__item">
+                        <hr />
+                        <div>
+                            <!--<div class="slds-button-group custm-modal-footer-btn" role="group">
+<button class="slds-button slds-button_neutral">No-show &nbsp;
+<svg class="slds-button__icon" aria-hidden="true">
+<use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+</svg>
+</button>
+<button class="slds-button slds-button_neutral">Completed &nbsp;
+<svg class="slds-button__icon" aria-hidden="true">
+<use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#check')}"></use>
+</svg>
+</button>                                      
+</div> -->
+                            
+                            <div class="slds-button-group custm-modal-footer-btn" role="group">
+                                <button class="slds-button slds-button_neutral session-detail-footer-btn" onclick="toggleConfirmationModal('cancel session');">Cancel &nbsp;
+                                    <svg class="slds-button__icon" aria-hidden="true">
+                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#clear')}"></use>
+                                    </svg>
+                                </button>
+                                <button class="slds-button slds-button_neutral session-detail-footer-btn" name="reschedule-sessions" onclick="activeRescheduleMode(this);">Reschedule &nbsp;
+                                    <svg class="slds-button__icon" aria-hidden="true">
+                                        <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#edit')}"></use>
+                                    </svg>
+                                </button>
+                            </div>
+                            <!--After discussed with Dharam and NTIIN -->
+                            <!--<div class="slds-button-group custm-modal-footer-btn" role="group">
+<button class="slds-button slds-button_neutral ">Add Make-up &nbsp;
+<svg class="slds-button__icon" aria-hidden="true">
+<use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#new')}"></use>
+</svg>
+</button>
+</div>-->
+                        </div>
+                    </div>
+                    <div class="slds-tabs_default__content slds-hide tab-content-2" role="tabpanel" aria-labelledby="tab-default-2__item">
+                        <div class="slds-button-group custm-modal-footer-btn slds-float_right slds-m-bottom_x-small" role="group">                        
+                            <button id="attended-button" class="slds-button slds-button_neutral" onclick="updateStudentStatusFromSF(this);" name="Completed">Attended &nbsp;
+                                <svg class="slds-button__icon" aria-hidden="true">
+                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#check')}"></use>
+                                </svg>
+                            </button>
+                            <button id="non-attended-button" class="slds-button slds-button_neutral" onclick="updateStudentStatusFromSF(this);" name="No-show">Not-Attended &nbsp;
+                                <svg class="slds-button__icon" aria-hidden="true">
+                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Student Assessment Session -->
+                    <div class="slds-tabs_default__content slds-hide tab-content-4" role="tabpanel" aria-labelledby="tab-default-4__item"> 
+                        <div class="slds-toast assessment-toast slds-hide">
+                            <div class="slds-notify_container">
+                                <div class="slds-notify slds-notify_toast slds-theme_success" role="status">
+                                    <span class="slds-assistive-text">Success</span>
+                                    <div class="slds-notify__content">
+                                        <h2 class="slds-text-heading_small ">Assessment records are created successfully.</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-button-group slds-float_right slds-m-bottom_x-small" role="group"> 
+                            <div class="crsAssessmentName">
+                            </div>&nbsp;&nbsp;&nbsp;
+                            <div class="slds-button-group slds-float_right slds-m-bottom_x-small custm-modal-footer-btn">
+                                <button id="assessment-button" class="slds-button slds-button_neutral" onclick="insertAssessmentRecords(this);" name="Completed"> Save </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- -->
+                    <div class="slds-tabs_default__content slds-hide tab-content-3" role="tabpanel" aria-labelledby="tab-default-3__item">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+    
+    <!--Confirmation model -->
+    <div class="student-confirmation-model slds-hide">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1"
+                 class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!--Modal Box Content Start-->
+                <div class="slds-modal__content" style="box-shadow: 0px 0px 1em 42em rgba(90, 87, 86, 0.45);}">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Confirmation</h2>
+                    </header>
+                    <center class=" slds-p-around--medium">
+                        <b class="modal-msg"></b>
+                    </center>
+                    <footer class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral custom-mini-modal-button" name="Cancel" onclick="handleActionOfConfirmationModal(this);return false;">Cancel</button>
+                        <button class="slds-button slds-button_brand  custom-mini-modal-button" name="Confirm" onclick="handleActionOfConfirmationModal(this);return false;">Confirm</button>
+                    </footer>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+    <!--<c:session_student_makeup sessionName="SES-0041" ></c:session_student_makeup>-->
+</apex:component>

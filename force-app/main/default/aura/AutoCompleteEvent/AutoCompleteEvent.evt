@@ -1,0 +1,6 @@
+<aura:event type="COMPONENT" description="Event template" >
+    <aura:attribute name="selectedOption" type="String" />
+    <aura:attribute name="inputValue" type="String" />
+    <aura:attribute name="type" type="String" />
+    <aura:attribute name="slctIndex" type="Integer" />
+</aura:event>

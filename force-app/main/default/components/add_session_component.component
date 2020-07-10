@@ -1,0 +1,188 @@
+<apex:component controller="FullCalendarDataService">
+    <script>       
+        var selectLocation;
+        var seletedTeacherId;
+        var selectedDateEvent;       
+        var newTime;
+        var currentDate;
+        var duration;
+        var endDate;
+        var repeat;
+        var description;
+
+        function openAddSessionModal(dateEvt) {
+            selectLocation = document.querySelector('.select-location').value;
+            seletedTeacherId = '';
+            let teacherName = 'All_Teachers';
+            //seletedTeacherId = dateEvt.resource != undefined ? dateEvt.resource.id : document.querySelector('.select-teacher').value != 'All_Teachers' ?  document.querySelector('.select-teacher').value : '';
+            selectedDateEvent = dateEvt;
+            if(selectedDateEvent.resource == undefined && selectedModeView == 'Teacher'){
+                seletedTeacherId = document.querySelector('.select-teacher').value != 'All_Teachers' ?  document.querySelector('.select-teacher').value : '';
+                teacherName = document.querySelector('.select-teacher').selectedOptions[0].label
+            }else if(selectedModeView == 'Teacher' ){
+                seletedTeacherId = selectedDateEvent.resource.id;
+                teacherName = selectedDateEvent.resource.title;
+            }else{
+                teacherName = document.querySelector('.select-teacher').value != 'All_Teachers' ? '' : 'All_Teachers';
+            }
+            //let teacherName = selectedDateEvent.resource != undefined ? selectedDateEvent.resource.title : document.querySelector('.select-teacher').selectedOptions[0].label;
+            if (document.querySelector('.add-new-session') != null) {
+                document.querySelector('.add-new-session').remove();
+            }
+            let modalBody = '';
+
+            modalBody += ' <div class="slds-grid slds-wrap"> <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small">  <label  class="slds-text-heading_small font-label-weight">Location :  </label> </div>';
+            modalBody += ' <div class="slds-col slds-size_4-of-12 slds-p-around_xx-small"> <span class="slds-text-heading_small custom-text-color"> ' + document.querySelector('.select-location').selectedOptions[0].label + '</span> </div> </div>';
+            modalBody += ' </span> </div>';
+            modalBody += ' <div class="slds-grid slds-wrap"> <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small">  <label class="slds-text-heading_small font-label-weight">Teacher :  </label> </div>';
+            modalBody += ' <div class="slds-col slds-size_4-of-12 slds-p-around_xx-small"> <span class="slds-text-heading_small custom-text-color"> ' + teacherName + '</span> </div> </div>';
+            modalBody += ' </span> </div> ';
+            modalBody += ' <div class="slds-grid slds-wrap"> <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Time :  </label> </div>';
+            modalBody += ' <div class="slds-col slds-size_4-of-12 slds-p-around_xx-small"> <span class="slds-text-heading_small custom-text-color"> ' + getLongDate(selectedDateEvent.date) + ' ' + timeConvert(createTimeFormat(selectedDateEvent.date)) + '</span> </div> </div>';
+            modalBody += ' </span> </div> ';
+            modalBody += ' <div class="slds-grid slds-wrap"> <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Duration :  </label> </div>';
+            modalBody += ' <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small"> <div class="slds-form-element">  <div class="slds-form-element__control">  <div class="slds-select_container">';
+            modalBody += ' <select class="slds-select new-session_duration">';
+            for (idx of cboHrs()) {
+                modalBody += ' <option value=' + idx.val + '>' + idx.txt + ' </option>';
+            }
+            modalBody += ' </select>  </div>  </div>  </div> </div>';
+            modalBody += ' </div>';
+            modalBody += ' <div class="slds-grid slds-wrap"> <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Description : </label> </div>';
+            modalBody += ' <div class="slds-col slds-size_8-of-12 slds-p-around_xx-small"> <div class="slds-form-element"> <div class="slds-form-element__control">  <textarea  class="slds-textarea new-session-desc" placeholder="Enter Descrptioin Here.."> </textarea> </div> </div> </div>';
+            modalBody += ' </div> ';
+            modalBody += ' <div class="slds-grid slds-wrap"> <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Repeat : </label> </div>';
+            modalBody += ' <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small"> <div class="slds-form-element"> <div class="slds-form-element__control"> <div class="slds-select_container">';
+            modalBody += ' <select class="slds-select new-session_repeat" onchange="showSessionDatePicker(this);">';
+
+            modalBody += ' <option value="None"> None </option>';
+            modalBody += ' <option value="Daily">Daily </option>';
+            modalBody += ' <option value="Weekly">Weekly </option>';
+
+            modalBody += ' </select> </div> </div> </div> </div>';
+            modalBody += ' </div> ';
+            modalBody += ' <div class="slds-grid slds-wrap date-picker_div slds-hide"> <div class="slds-col slds-size_2-of-12 slds-p-around_xx-small "> <label class="slds-text-heading_small font-label-weight">Ends :  </label> </div>';
+            modalBody += ' <div class="slds-col slds-size_4-of-12 slds-p-around_xx-small "> <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right custom-date-error-div" >  <input type="text" id="jqueryEndDatePicker" class="slds-input"/>  <div class="slds-form-element__help error_date slds-hide" >Please select future date</div> </div> </div>';
+            modalBody += ' </div>';
+            //console.log('modalBody', modalBody);
+
+            let modalBodyContent = document.querySelector('.add-session-modal_body');
+            let newElement = document.createElement('div');
+            newElement.className = 'add-new-session';
+            newElement.innerHTML = modalBody;
+            modalBodyContent.prepend(newElement);
+
+            $("#jqueryEndDatePicker").datepicker({
+                dateFormat: "yy-mm-dd"
+            });
+
+            document.querySelector('.add-session-modal_div').classList.remove('slds-hide');
+        }
+
+        function pad(val, max) {
+            var str = val.toString();
+            return str.length < max ? pad("0" + str, max) : str;
+        }
+
+        function cboHrs() {
+            var now = new Date();
+            var hrs = [];
+            for (var i = 1; i < 33; i++) {
+                var hr = {};
+                // add another hour every 4th iteration
+                now.setHours(0 + parseInt(i / 4));
+                // add 15 minutes every iteration, starting back at 0 on the 4th
+                now.setMinutes((i % 4) * 15);
+                hr.txt = pad(now.getHours(), 2) + ':' + pad(now.getMinutes(), 2);
+                hr.val = hr.txt;
+                hrs.push(hr);
+            }
+            return hrs;
+        }
+
+        function showSessionDatePicker(evt) {
+            console.log('evt', evt);
+            if (evt.value != 'None') {
+                document.querySelector('.date-picker_div').classList.remove('slds-hide');
+            } else if (evt.value == 'None') {
+                document.querySelector('.date-picker_div').classList.add('slds-hide');
+            }
+        }
+
+        function closeAddSessionModal() {
+            document.querySelector('.add-session-modal_div').classList.add('slds-hide');
+        }
+
+        function validateForm() {
+            let isAllValid = true;
+            let calendarDate;
+            let currentDate = new Date();
+            if (document.querySelector('.new-session_repeat').value != 'None') {
+                calendarDate = document.querySelector("#jqueryEndDatePicker").value;
+                if (calendarDate < createDateFormat(currentDate)) {
+                    isAllValid = false;
+                    document.querySelector(".custom-date-error-div").classList.add('slds-has-error');
+                    document.querySelector(".error_date").classList.remove('slds-hide');
+                } else {
+                    document.querySelector(".custom-date-error-div").classList.remove('slds-has-error');
+                    document.querySelector(".error_date").classList.add('slds-hide');
+                }
+            }            
+            if (isAllValid) {
+                getValues();
+            }
+        }
+
+        function getValues() {            
+            newTime = createTimeFormat(selectedDateEvent.date);
+            currentDate = selectedDateEvent.date;
+            duration = document.querySelector('.new-session_duration').value;
+            repeat = document.querySelector('.new-session_repeat').value;
+            endDate = document.querySelector("#jqueryEndDatePicker").value;
+            description = document.querySelector('.new-session-desc').value;
+            insertNewSessionFromSF();
+        }
+
+        function insertNewSessionFromSF() {
+            document.getElementById("spinner").style.display = "block";
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.FullCalendarDataService.insertNewSession}',
+                selectLocation, seletedTeacherId, newTime, currentDate, duration, endDate, repeat, description,
+                function (result, event) {
+                    document.getElementById("spinner").style.display = "none";
+                    console.log(event.status);
+                    console.log('result--> ', result);
+                    if (event.status) {
+                        closeAddSessionModal();
+                        handleChangeCalendarDay();
+                    }
+
+                },
+                { escape: true }
+            );
+        }
+
+    </script>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium add-session-modal" aria-labelledby="modal-heading-01"
+        aria-modal="true">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <!--  <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                     <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                         <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"> </use>
+                     </svg>
+                     <span class="slds-assistive-text">Close </span>
+                 </button> -->
+                <h2 class="slds-modal__title slds-hyphenate">Add Placeholder </h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium add-session-modal_body">
+
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick="closeAddSessionModal(); return false;">Cancel </button>
+                <button class="slds-button slds-button_brand" onclick="validateForm(); return false;">Save </button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"> </div>
+</apex:component>

@@ -1,0 +1,76 @@
+<apex:component controller="SearchCourseCmpController">
+  <!--  <apex:attribute name="locationString" description="Received varaible of data type string"  assignTo="{!locationStr}" type="String"/>
+    <apex:attribute name="searchCategory" description="Received varaible of data type string"  assignTo="{!categoryString}" type="String"/>
+    <apex:attribute name="searchLevel" description="Received varaible of data type string"     assignTo="{!levelString}" type="String"/>
+    <apex:attribute name="searchType" description="Received varaible of data type string"      assignTo="{!typeString}" type="String"/>
+    <apex:pageMessages ></apex:pageMessages>
+    <div class="slds-grid bg slds-grid_align-center" >
+        <div class="slds-large-size_8-of-12 " style="background-color: #fff; border:1px solid #c6c8ca; ">
+            <h2 class="slds-text-heading_small slds-m-bottom_small title"><img src="{!$Resource.enrolment}" style="height:23px;" alt="Enrollment" />&nbsp;&nbsp;Our Courses</h2>
+            
+            <div class="slds-p-vertical_x-large slds-p-horizontal_large">
+                <div class="course">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-large-size_5-of-12">
+                            <p class="slds-text-heading_medium"><strong>Math Course </strong> <span class="slds-text-heading_small">(Online)</span></p>
+                        </div>
+                        <div class="slds-col slds-large-size_3-of-12 slds-text-align_center">
+                            <p class="slds-text-heading_small">Duration:&nbsp;&nbsp;<strong>8 Years</strong></p>
+                        </div>
+                        <div class="slds-col slds-large-size_4-of-12 slds-text-align_right slds-vertical-align_center">
+                            <p class=""><strong style="color:red;" class="slds-text-heading_small">$250</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <p class="slds-text-size_small slds-large-size_10-of-12 slds-p-top_small">Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod. Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod.</p>
+                    
+                    <p><button class="slds-button slds-button_brand slds-m-top_small">
+                        <i class="fa fa-plus-circle slds-p-right_small"></i>Read More</button></p>
+                </div>
+                
+                <hr/>
+                
+                <div class="course">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-large-size_5-of-12">
+                            <p class="slds-text-heading_medium"><strong>Math Course </strong> <span class="slds-text-heading_small">(Online)</span></p>
+                        </div>
+                        <div class="slds-col slds-large-size_3-of-12 slds-text-align_center">
+                            <p class="slds-text-heading_small">Duration:&nbsp;&nbsp;<strong>8 Years</strong></p>
+                        </div>
+                        <div class="slds-col slds-large-size_4-of-12 slds-text-align_right slds-vertical-align_center">
+                            <p class=""><strong style="color:red;" class="slds-text-heading_small">$250</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <p class="slds-text-size_small slds-large-size_10-of-12 slds-p-top_small">Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod. Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod.</p>
+                    
+                    <p><button class="slds-button slds-button_brand slds-m-top_small">
+                        <i class="fa fa-plus-circle slds-p-right_small"></i>Read More</button></p>
+                </div>
+                
+                <hr/>
+                
+                <div class="course">
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-large-size_5-of-12">
+                            <p class="slds-text-heading_medium"><strong>Math Course </strong> <span class="slds-text-heading_small">(Online)</span></p>
+                        </div>
+                        <div class="slds-col slds-large-size_3-of-12 slds-text-align_center">
+                            
+                        </div>
+                        <div class="slds-col slds-large-size_4-of-12 slds-text-align_right slds-vertical-align_center">
+                            <p class=""><strong style="color:red;" class="slds-text-heading_small">$250</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <p class="slds-text-heading_small">Duration:&nbsp;&nbsp;<strong>8 Years</strong></p>
+                    <p class="slds-text-size_small slds-large-size_10-of-12 slds-p-top_small">Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod. Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod.</p>
+                    
+                    <p><button class="slds-button slds-button_brand slds-m-top_small">
+                        <i class="fa fa-plus-circle slds-p-right_small"></i>Read More</button></p>
+                </div>
+            </div>
+        </div>
+    </div>-->
+</apex:component>

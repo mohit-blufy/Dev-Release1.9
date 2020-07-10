@@ -1,0 +1,59 @@
+<apex:page >
+    <head>
+        <title>Getting Started with Twilio Video</title>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        
+        
+        <style type="text/css">
+        #me, #you { display:inline-block; }
+        </style>
+        
+        <script src="http://media.twiliocdn.com/sdk/js/video/releases/2.4.0/twilio-video.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            $( document ).ready(function() {
+                var token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzNkMzdhZDYwN2ZiMDc3ZjE1NTI0OTQzZjgyZGI1M2QyLTE1ODk3ODgzMjIiLCJpc3MiOiJTSzNkMzdhZDYwN2ZiMDc3ZjE1NTI0OTQzZjgyZGI1M2QyIiwic3ViIjoiQUM4OTVkNTEwNmExODYxY2EzNDY0YTFhZDFiODA5MjliNSIsImV4cCI6MTU4OTc5MTkyMiwiZ3JhbnRzIjp7ImlkZW50aXR5IjoidGVzdFRva2VuIiwidmlkZW8iOnt9fX0.4Z5TxmrHFR7h-d_ZtqFc8Pw6Ztw6y2jqIjLH1v5sCSo';
+            
+                $('#start').on('click', function() {
+                    //alert('rajsh');
+                    // First, grab the SAT token from the server
+                    $.getJSON('/'+token, {
+                        name: $('#my-name').val()
+                    }, function(data) {
+                        console.log('Token response:');
+                        console.log(data);
+    
+                        // Create the endpoint, and then initialize the main calling app
+                        var endpoint = new Twilio.Endpoint(data.token);
+                        $('#startDiv').hide();
+                        $('#callDiv').show();
+                        init(endpoint);
+                    });
+                });
+            });
+        </script>
+    </head>
+<body>
+    <h1>Getting Started with Twilio Video</h1>
+
+    <!-- Begin by specifying a name for your endpoint -->
+    <div id="startDiv">
+        <p>Enter Your Name Here:</p>
+        <input id="my-name" 
+            placeholder="your name"/>
+        <button id="start">Let's Do This!</button>
+    </div>
+
+    <!-- Here's the call UI -->
+    <div id="callDiv" style="display:none;">
+        <div id="me"></div>
+        <div id="you"></div>
+        <div>
+            <input id="other-name" placeholder="other person's name"/>
+            <button id="call">Video Call This Person</button>
+        </div>
+    </div>
+
+</body>
+</apex:page>

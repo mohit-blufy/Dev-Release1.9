@@ -1,0 +1,248 @@
+<apex:page standardStylesheets="false" controller="FullCalendarController" showHeader="false" applyHtmlTag="true" applyBodyTag="false">
+    <head>
+        <apex:slds />  
+        <div id="spinner" style="display: none">
+            <div class="slds-spinner_container" style="position:fixed">
+                <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+        </div>
+        <c:full_calendar_js selectedLocation="{!selectedLocation}"
+                            selectedTeacher="{!selectedTeacher}"
+                            TodayDate="{!TodayDate}"
+                            customMetaDataConfig="{!calendarConfigMetadataObject}"
+                            selectedCourse="{!selectedCourse}">
+        </c:full_calendar_js>           
+        <div class="session-action slds-hide">
+            <c:session_action_component customMetaDataConfig="{!calendarConfigMetadataObject}"></c:session_action_component>
+        </div>      
+    </head>     
+    <body class="slds-scope" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <apex:form >                     
+            <apex:actionFunction action="{!refreshFilters}" name="jsRefreshFilters" reRender="filters" oncomplete="refreshSession();" status="pageStatus" />
+            <!-- <apex:actionFunction action="{!refreshResources}" name="handleResourcesTypeChange" reRender="filters" status="pageStatus" oncomplete="fetchResourceDataOnType();" /> -->
+            <apex:actionFunction action="{!refreshClasses}" name="handleCourseChange" reRender="filters" status="pageStatus" oncomplete="fetchClassDataOnCourse();" />
+            <apex:actionFunction action="{!refreshCourseAndClasses}" name="jsRefreshCC" reRender="filters" status="pageStatus" oncomplete="handleTeacherChange();"/>
+            <apex:actionStatus id="pageStatus">
+                <apex:facet name="start">
+                    <div class="slds-spinner_container">
+                        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div>           
+                </apex:facet>
+            </apex:actionStatus>
+            
+            
+            
+            <!--header-->
+            <div class="slds-page-header">
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-size_3-of-12 slds-medium-size_4-of-12">
+                        <div class="slds-page-header__col-title">
+                            <div class="slds-media">      
+                                <div class="slds-form-element">
+                                    <label class="slds-form-element__label" >Vertical View</label>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-button-group" role="group">                                    
+                                            <button class="slds-button slds-button_neutral slds-button_brand filterBtn location-button" name="Location" onclick="changeFilterView(this); return false;">Location</button>
+                                            <button class="slds-button slds-button_neutral filterBtn teacher-button" name="Teacher" onclick="changeFilterView(this); return false;">Teacher</button>
+                                            <!-- commment line after discussed with Dharam And NITIN  -->
+                                            <!-- <button class="slds-button slds-button_neutral filterBtn" name="Resource" onclick="changeFilterView(this); return false;">Resource</button> -->
+                                        </div>
+                                    </div>
+                                </div>                         
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slds-col slds-size_9-of-12 slds-medium-size_8-of-12"> 
+                        <div class="slds-page-header__col-actions">
+                            <div class="slds-page-header__controls slds-float_right">                           
+                                <apex:outputPanel layout="block" styleClass="slds-grid slds-wrap" id="filters" rendered="{!isUserHaveAllAccess}">                                                       
+                                    <div class="slds-page-header__control">
+                                        <ul class="slds-button-group-list">
+                                            <li>
+                                                <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label">Location</label>
+                                                        <div class="slds-form-element__control">
+                                                            <div class="slds-select_container">
+                                                                <apex:selectList size="1" value="{!selectedLocation}" onchange="jsRefreshFilters();"  styleClass="slds-select select-location fix-width">
+                                                                    <apex:selectOptions value="{!locationList}"></apex:selectOptions>                       
+                                                                </apex:selectList>
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label" >Teacher</label>
+                                                        <div class="slds-form-element__control">
+                                                            <div class="slds-select_container">     
+                                                                <apex:selectList size="1" value="{!selectedTeacher}" onchange="jsRefreshCC();" styleClass="slds-select select-teacher fix-width">
+                                                                    <apex:selectOptions value="{!teacherList}"></apex:selectOptions>                       
+                                                                </apex:selectList>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label">Course</label>
+                                                        <div class="slds-form-element__control">
+                                                            <div class="slds-select_container">
+                                                                <apex:selectList size="1" onchange="handleCourseChange();" value="{!selectedCourse}" styleClass="slds-select select-courses fix-width">
+                                                                    <apex:selectOptions value="{!courseList}"></apex:selectOptions>                       
+                                                                </apex:selectList>
+                                                            </div>
+                                                        </div>
+                                                    </div>             
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label" >Class</label>
+                                                        <div class="slds-form-element__control">
+                                                            <div class="slds-select_container">
+                                                                <apex:selectList size="1" onchange="handleClassChange(this);" styleClass="slds-select select-class fix-width">
+                                                                    <apex:selectOptions value="{!classList}"></apex:selectOptions>                       
+                                                                </apex:selectList>
+                                                            </div>
+                                                        </div>
+                                                    </div> 
+                                                </div>
+                                            </li>
+                                            <!-- commment Code after discussed with Dharam And NITIN  -->
+                                            <!-- <li>
+                                            <div class="slds-col  slds-p-bottom_medium slds-p-right_x-small"> 
+                                            <div class="slds-form-element">
+                                            <label class="slds-form-element__label" >Resource Type</label>
+                                            <div class="slds-form-element__control">
+                                            <div class="slds-select_container">
+                                            <apex:selectList size="1" value="{!selectedResourcesType}" styleClass="slds-select select-res-type" onchange="handleResourcesTypeChange();"  >
+                                            <apex:selectOptions value="{!resourcesTypeList}"></apex:selectOptions>                   
+                                            </apex:selectList>
+                                            </div>
+                                            </div>
+                                            </div>     
+                                            </div>
+                                            </li>
+                                            <li>
+                                            <div class="slds-col  slds-p-bottom_medium slds-p-right_x-small"> 
+                                            <div class="slds-form-element">
+                                            <label class="slds-form-element__label" >Resource</label>
+                                            <div class="slds-form-element__control">
+                                            <div class="slds-select_container">
+                                            <apex:selectList size="1" styleClass="slds-select select-resource" onchange="handleResourcesChange(this);" >
+                                            <apex:selectOptions value="{!resourcesList}"></apex:selectOptions>                   
+                                            </apex:selectList>
+                                            </div>
+                                            </div>
+                                            </div>
+                                            </div>
+                                            </li> -->
+                                        </ul>                                      
+                                    </div>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!NOT(isUserHaveAllAccess)}">
+                                    <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                                        <span class="slds-assistive-text">error</span>
+                                        <span class="slds-icon_container slds-icon-utility-error slds-m-right_x-small" title="Description of icon when needed">
+                                            <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                                                <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#error')}"></use>
+                                            </svg>
+                                        </span>
+                                        <h2>You don't have permission to access the objects. Please contact to your System Administrator.                                           
+                                        </h2>
+                                        <div class="slds-notify__close">
+                                            <button class="slds-button slds-button_icon slds-button_icon-small slds-button_icon-inverse" title="Close">
+                                                <svg class="slds-button__icon" aria-hidden="true">
+                                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Close</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </apex:outputPanel>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>      
+            
+            <!--Toast-->
+            
+            <div class="slds-toast invalid-date-toast slds-hide" >
+                <div class="slds-notify_container">
+                    <div class="slds-notify slds-notify_toast slds-theme_warning" role="status">
+                        <span class="slds-assistive-text">warning</span>              
+                        <div class="slds-notify__content">
+                            <h2 class="slds-text-heading_small toast-contain">Please select future date and time.</h2>
+                        </div>               
+                    </div>
+                </div>
+            </div>
+            
+            <!--Alert-->
+            <div class="slds-alert-date-time slds-notify slds-notify_alert slds-theme_alert-texture custom-slds-alert slds-hide" role="alert">
+                <span class="slds-assistive-text">info</span>               
+                <h2>Calendar Date Time Reschedule                   
+                </h2>
+                <div class="slds-notify__close">
+                    <button class="slds-button slds-button_icon slds-button_icon-small slds-button_icon-inverse" title="Close" onclick="unactiveRescheduleMode(); return false;">
+                        <svg class="slds-button__icon" aria-hidden="true">
+                            <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!--Calendar Div-->
+            <div class="slds-m-around_x-large">                                      
+                <div class="slds-grid slds-wrap">
+                    <div id='calendar'></div>
+                </div>
+            </div>
+            
+            <!---Modal-->
+            <div class="confirmation-model slds-hide">               
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">                            
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Confirmation</h2>                      
+                        </header>
+                        
+                        <!--Modal Box Content Start-->
+                        <div class="slds-modal__content slds-p-around--medium">
+                            <center><h2 style="font-size: initial;">Would you like to apply this change to this event, or the current and future change event in the series</h2></center>
+                            <br />
+                            <center>
+                                <button class="slds-button slds-button_brand" name="this_only" onclick="closeModel(this);return false;">This Session</button>
+                                <button class="slds-button slds-button_brand" name="this_and_future" onclick="closeModel(this);return false;">This Session and The Future Series</button>
+                            </center>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button class="slds-button slds-button_neutral" name="cancel" onclick="closeModel(this);return false;">Cancel</button>
+                            <!--<button class="slds-button slds-button_brand" name="save" onclick="closeModel(this);return false;">Save</button>-->
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div>
+        </apex:form>
+    </body>
+</apex:page>

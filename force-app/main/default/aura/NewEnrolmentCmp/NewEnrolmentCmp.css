@@ -1,0 +1,117 @@
+.THIS {font-family: 'Montserrat', sans-serif; counter-reset: myIndex;}
+.THIS.slds-spinner_container {  
+  z-index: 10000;
+  position: fixed;   
+}
+.THIS .thead-dark th, .THIS .bglight {
+    color: #000;
+    background-color:#eff7ff;
+    border-color: #454d55;
+}
+.THIS .table td, .THIS .table th {
+    padding: .45rem;
+    border-top: 1px solid #dee2e6;
+}
+.THIS .table{
+    width:100%;
+    border: 1px solid #dee2e6;
+    background-color:#fff;
+}
+.THIS .slds-nubbin_top-right::before, .THIS .slds-nubbin_top-right::after{
+    left:103px;
+}
+.THIS .popover a{text-decoration:underline; margin:0 auto;}
+.THIS .popover{position:relative; display:inline-block;}
+.THIS .slds-popover{display:none; position:absolute; top:30px; left: 0px;
+    transform: translate3d(-83px, 0px, 0px);
+}
+.THIS .popover:hover .slds-popover{display:block;}
+.THIS .title{
+    background-color:#2f5597;
+	padding: 8px;
+    font-weight: bold;
+    color:#fff;
+}
+.THIS hr{margin: 5px 0px;}
+.THIS .slds-accordion__section {
+    padding: 0px;
+}
+.THIS .accordioncustom .slds-accordion__summary{
+    background-color:#eff7ff;
+    position:relative;
+    padding-left:40px;
+    margin:0px;  
+    counter-increment: myIndex;
+}
+.THIS .accordioncustom .slds-accordion__summary::before{
+    content:"+";
+    font-size:22px;
+    position:absolute;
+    right:25px;
+    line-height:36px;
+}
+
+.THIS .accordioncustom .slds-accordion__summary::after{
+    content: counter(myIndex);
+    font-size: 13px;
+    background-color:  #c2d1e1;
+    color:  #fff;
+    position: absolute;
+    left: 10px;
+    line-height: 21px;
+    border-radius: 50%;
+    top: 7px;
+    padding: 0px 6px;
+}
+.THIS .accordioncustom .slds-is-open .slds-accordion__summary::before{
+    content:"-";
+}
+.THIS .accordioncustom .slds-accordion__summary-action lightning-primitive-icon{display:none}
+.THIS .accordioncustom .slds-accordion__summary-action{display:block; padding:0.5rem;  padding-right:25px;}
+.THIS .accordioncustom .slds-accordion__summary-heading .slds-button:focus{text-decoration:none;}
+.THIS .label-hidden label{display:none;}
+.THIS .icon-large .slds-button__icon{width:30px; height:20px;}
+.THIS .text-white{color:#FFF;}
+.THIS button.slds-text-body_small{line-height:22px;}
+.THIS table tr table tr:first-child td{border-top:0px;}
+.THIS .slds-media .slds-icon-text-default {
+    fill: rgb(20, 73, 153);
+}
+.THIS .border-b-dashed{border-bottom:1px dashed #dddbda;}
+.THIS .slds-accordion__content{padding:0.5rem; padding-left:45px !important;}
+.THIS .table-custom .tableblock tr{display:none;}
+.THIS .accnew{border:1px solid #dddbda;}
+.THIS .accnew .table th{background-color:#fff; border-top:0px;}
+.THIS .accnew .table{border:0px;}
+.THIS .accnew .slds-accordion__summary-action{font-weight:bold;}
+.THIS .table-custom .myinput{display:inline-block;}
+.THIS .table.tablepay thead td{ border-top:0px;}
+.THIS .table.tablepay thead td{ padding:.25rem;}
+.THIS .table.tablepay thead tr:first-child td{background-color: #eff7ff;}
+.THIS .slds-button_brand{
+    background-color:rgb(0, 95, 178);
+    border-color:rgb(0, 95, 178);
+}
+.THIS .slds-modal__container{
+    padding:1rem 0px;
+}
+.THIS .btn-addstu .slds-button__icon_left,.THIS .btn-addstu .slds-button__icon--left{
+    margin-right:2px;
+    margin-top:-5px;
+}
+.THIS .slds-button{font-size:14px;}
+.THIS .slds-modal__content{min-height:80vh;}
+.THIS .slds-button__icon {
+    width: 20px !important;
+    height: 18px !important;
+}
+
+.THIS .border-dash{border-bottom:1.5px dashed rgb(221, 219, 218);}
+.THIS fieldset > div.border-dash:last-child{border-bottom:none !important;}
+.THIS .slds-avatar_x-small,.THIS .slds-avatar_x-small svg {
+    width: 15px;
+    height: 15px;
+}
+.THIS .modal2 .slds-form-element{
+    display: inline-block !important;
+}

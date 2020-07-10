@@ -1,0 +1,90 @@
+<apex:page controller="OnlineCoursePageCloneController">
+    <!--<apex:slds /> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <style>
+        .title {
+        background-color: #2f5597;
+        padding: 8px 15px !important;
+        font-weight: bold;
+        color: #fff;
+        }
+    </style>
+    <apex:form >
+        <apex:actionFunction name="refreshPanel" rerender="componentPanel"/>
+        
+        <apex:actionStatus id="status">
+            <apex:facet name="start">
+                <div class="slds-spinner_container">
+                    <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                        <span class="slds-assistive-text">Loading</span>
+                        <div class="slds-spinner__dot-a"></div>
+                        <div class="slds-spinner__dot-b"></div>
+                    </div>
+                </div>           
+            </apex:facet>
+        </apex:actionStatus>
+        
+        <div class="slds-grid slds-wrap">
+            <div class="slds-size_1-of-4">
+                <div class="slds-p-horizontal_small slds-p-top_small">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" >Location</label>
+                        <div class="slds-form-element__control">  
+                            <apex:selectList label="Location" value="{!location}" multiselect="false" size="1">
+                                <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                <apex:selectOptions value="{!LocationList}"/>
+                                <apex:actionSupport event="onchange" reRender="crsSearchPanel" status="status"/> 
+                            </apex:selectList>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-size_1-of-4">
+                <div class="slds-p-horizontal_small slds-p-top_small">      
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" >Category</label>
+                        <div class="slds-form-element__control">  
+                            <apex:selectList label="Category" value="{!category}" multiselect="false" size="1">
+                                <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                <apex:selectOptions value="{!CategoryList}"/>
+                                <apex:actionSupport event="onchange" reRender="crsSearchPanel" status="status"/>
+                            </apex:selectList>
+                        </div>
+                    </div>                                          
+                </div>
+            </div>
+            <div class="slds-size_1-of-4">
+                <div class="slds-p-horizontal_small slds-p-top_small">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" >Level</label>
+                        <div class="slds-form-element__control">  
+                            <apex:selectList label="Level" value="{!level}" multiselect="false" size="1">
+                                <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                <apex:selectOptions value="{!LevelList}"/>
+                                <apex:actionSupport event="onchange" reRender="crsSearchPanel"/>
+                            </apex:selectList>
+                        </div>
+                    </div>                                             
+                </div>
+            </div>
+            <div class="slds-size_1-of-4">
+                <div class="slds-p-horizontal_small slds-p-top_small">  
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label" >Type</label>
+                        <div class="slds-form-element__control">  
+                            <apex:selectList label="Type" value="{!type}" multiselect="false" size="1">
+                                <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                <apex:selectOptions value="{!TypeList}"/>
+                                <apex:actionSupport event="onchange" reRender="crsSearchPanel"/>
+                            </apex:selectList>
+                        </div>
+                    </div>                                             
+                </div>
+            </div>
+        </div>
+        <br/>
+        <apex:outputPanel id="crsSearchPanel">
+        	<c:SearchCourseCmpTest id="searchCrs"  locationString="{!location}" searchCategory="{!category}" searchLevel="{!level}" searchType="{!type}"/>
+    	</apex:outputPanel>
+    </apex:form>-->
+</apex:page>

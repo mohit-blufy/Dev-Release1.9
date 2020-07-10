@@ -1,0 +1,99 @@
+<apex:component controller="SearchClassesCompController" access="global"> 
+    <apex:attribute name="classToDisplay" description="Received class instance" assignTo="{!classObj}" type="Class__c"/>
+    <apex:attribute name="clsBtton" description="Received boolean variable" assignTo="{!showClsBtton}" type="Boolean"/>
+    <div class="highlight slds-grid slds-wrap slds-grid_vertical-align-center" style="border-top:1px dashed #ccc;">
+        <div class="slds-large-size_2-of-12" style="padding-right: .75rem;padding-left: .75rem;">
+            <p class="slds-text-heading_small slds-text-align_left"><strong>{!objClassWrpper.clsName}</strong></p>
+        </div>
+        <div class="slds-large-size_8-of-12 slds-text-align_left" style="padding-right: .75rem;padding-left: .75rem;">     
+            <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread slds-p-top_xx-small">
+                <div class="slds-col slds-medium-size_4-of-12">                                                        
+                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                        <div class="slds-media__figure"><img src="{!$Resource.date}" /></div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-body_small">Start Date</p>
+                            <p class="slds-text-heading_x-small">
+                                <strong><apex:outputText value="{0, date, MMMM d','  yyyy}">
+                                    <apex:param value="{!objClassWrpper.clsStrtDte}" /> 
+                                    </apex:outputText>
+                                </strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-medium-size_4-of-12">
+                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                        <div class="slds-media__figure"><img src="{!$Resource.date}" /></div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-body_small">End Date</p>
+                            <p class="slds-text-heading_x-small">
+                                <strong><apex:outputText value="{0, date, MMMM d','  yyyy}">
+                                    <apex:param value="{!objClassWrpper.clsEndDte}" /> 
+                                    </apex:outputText>
+                                </strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>   
+                <div class="slds-col slds-medium-size_4-of-12">                                                        
+                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                        <div class="slds-media__figure"><img src="{!$Resource.teacher1}" /></div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-body_small">Teacher</p>
+                            <p class="slds-text-heading_x-small"><strong>{!objClassWrpper.clsTeacher}</strong></p>
+                        </div>
+                    </div>
+                </div>                                                  
+            </div>
+            <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread">
+                <div class="slds-col slds-medium-size_4-of-12">                                                        
+                    <div class="slds-media slds-media_center">
+                        <div class="slds-media__figure"><img src="{!$Resource.time}" /></div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-body_small">Start Time</p>
+                            <p class="slds-text-heading_x-small">
+                                <strong><apex:outputText value="{0,time,h:mm a}"> 
+                                    <apex:param value="{!objClassWrpper.clsStrtTym+offset}"/>
+                                    </apex:outputText>
+                                </strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-medium-size_4-of-12">
+                    <div class="slds-media slds-media_center slds-p-bottom_xx-small">
+                        <div class="slds-media__figure"><img src="{!$Resource.time}" /></div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-body_small">End Time</p>
+                            <p class="slds-text-heading_x-small">
+                                <strong><apex:outputText value="{0,time,h:mm a}"> 
+                                    <apex:param value="{!objClassWrpper.clsEndTym+offset}"/>
+                                    </apex:outputText>
+                                </strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>  
+                <div class="slds-col slds-medium-size_4-of-12">
+                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                        <div class="slds-media__figure"><img src="{!$Resource.location1}" /></div>
+                        <div class="slds-media__body">
+                            <p class="slds-text-body_small">Location</p>
+                            <p class="slds-text-heading_x-small"><strong>{!objClassWrpper.clsLocation}</strong></p>
+                        </div>
+                    </div>
+                </div>                                                      
+            </div>
+        </div>
+        <div class="slds-large-size_2-of-12 slds-text-align_center" style="padding-right: .75rem;padding-left: .75rem;">
+            
+            <apex:outputPanel rendered="{!showClsBtton}">
+                <p class="slds-p-bottom_xx-small"> 
+                    <a href="/OnlineEnrollmentPage?id={!objClassWrpper.clsId}" class="slds-button slds-button_brand ">
+                        <i class="fa fa-calendar-check-o  slds-p-right_small"></i>Enrol Now
+                    </a>
+                </p>
+            </apex:outputPanel>
+        </div>
+    </div>
+</apex:component>

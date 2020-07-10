@@ -1,0 +1,74 @@
+<apex:component controller="SearchCoursesCompController" access="global">
+    <!--
+    <apex:attribute name="searchLocation" description="Received varaible of data type string"  assignTo="{!locationValue}" type="String"/>
+    <apex:attribute name="searchCategory" description="Received varaible of data type string"  assignTo="{!categoryValue}" type="String"/>
+    <apex:attribute name="searchLevel" description="Received varaible of data type string"     assignTo="{!levelValue}" type="String"/>
+    <apex:attribute name="searchType" description="Received varaible of data type string"      assignTo="{!typeValue}" type="String"/>
+    
+    <apex:repeat value="{!listWrapperClass}" var="item">
+        <div class="course2">
+            <div class="slds-grid slds-m-horizontal_xx-large">
+                <div class="slds-size_12-of-12">
+				<div class="slds-p-horizontal_large">
+				<div class="slds-grid slds-wrap slds-gutters mx-0 slds-p-top_small">
+                        <div class="slds-col slds-large-size_9-of-12  slds-p-bottom_small ">
+                           <img alt="Enrollment" src="{!$Resource.enrolment}" style="height:23px;" class="slds-p-right_small" /><strong  class="slds-text-heading_small">{!item.courseName}</strong>
+                           <p>{!item.courseDes}</p>
+                        </div>
+                        <div class="slds-col slds-large-size_3-of-12 slds-text-align_right   slds-p-bottom_small ">
+                           Fees: <strong class="slds-text-heading_small" style="color:#20bd20;">${!item.fee}</strong>    
+                        </div>
+                     </div>
+					 
+		
+                            <div class="slds-grid slds-wrap slds-gutters">
+                                <div class="slds-col slds-large-size_7-of-12 ">
+                                    <p style="color:#8c89a2;" class=""><i class="fa fa-calendar slds-p-right_small"></i><strong>{!item.courseDuration}&nbsp;{!item.courseDurType}</strong></p>
+                                </div>
+                            </div>
+							 </div>
+                    <div class="slds-text-align_right">
+                        <button class="slds-button slds-button_brand accordion  slds-m-horizontal_large" style="margin-top:-50px;" >
+                            <i class="fa fa-list slds-p-right_small"></i>View Classes</button>
+                        <div class="panel slds-text-align_lef">       
+                            <apex:repeat value="{!item.listClass}" var="cls">
+                                <c:SearchClassesComp classToDisplay="{!cls}" clsBtton="true"/>
+                            </apex:repeat>
+                        </div>
+                    </div>
+               
+                </div>
+            </div>
+        </div>
+    </apex:repeat>
+    <apex:outputPanel rendered="{!listWrapperClass.size == 0}">
+        <h3 class="slds-text-heading_small slds-align_absolute-center">
+            No Courses Found</h3>
+    </apex:outputPanel>
+    -->
+      <script>
+    /*   var acc = document.getElementsByClassName("accordion");
+    var panel = document.getElementsByClassName('panel');
+    for (var i = 0; i < acc.length; i++) {
+        console.log("for");
+        acc[i].onclick = function(x) {
+            console.log("onclick");
+            var setClasses = !this.classList.contains('active');
+            setClass(acc, 'active', 'remove');
+            setClass(panel, 'show', 'remove');
+            
+            if (setClasses) {
+                this.classList.toggle("active");
+                this.nextElementSibling.classList.toggle("show");
+            }
+            return false;
+        }
+    }
+    
+    function setClass(els, className, fnName) {
+        for (var i = 0; i < els.length; i++) {
+            els[i].classList[fnName](className);
+        }
+    }*/
+    </script>
+</apex:component>

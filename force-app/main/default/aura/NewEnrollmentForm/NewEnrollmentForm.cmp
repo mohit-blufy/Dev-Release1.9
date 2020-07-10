@@ -1,0 +1,930 @@
+<aura:component controller="NewEnrollmentFormCntrl" implements="force:appHostable,force:lightningQuickActionWithoutHeader,flexipage:availableForRecordHome,lightning:actionOverride" access="global" >
+    <ltng:require styles="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,900"/>
+    <!--<ltng:require scripts="{!$Resource.Stripe_JS}" afterScriptsLoaded="{!c.stripeSetup}"></ltng:require>
+    <aura:attribute name="stripe" type="Object" />
+    <aura:attribute name="cardNumber" type="Object" />-->
+    
+    
+    <aura:handler name = "init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:attribute name="contactDetail" type="Account" default="{'sobjectType': 'Account'}"/>
+    <aura:attribute name="showModal" type="boolean" default="false"/>
+    <aura:attribute name="discountModal" type="boolean" default="false"/>
+    
+    <!-- Student model varialbes -->
+    <aura:attribute name="maxBirthDate" type="Date" />
+    <aura:attribute name="cntryList" type="List" />
+    <aura:attribute name="genderList" type="List" />
+    <aura:attribute name="relationShipList" type="List" />
+    <aura:attribute name="clsList" type="object" />
+    <aura:attribute name="slcdCrsObject" type="object" />
+    <aura:attribute name="slcdAccId" type="String"/>
+    <aura:attribute name="slcdAccName" type="String"/>
+    <aura:attribute name="crsId" type="String"/>
+    <aura:attribute name="crsName" type="String"/>
+    <aura:attribute name="enrFeeTotAmt" type="Decimal" default="0"/>
+    <aura:attribute name="gstAmount" type="Decimal" default="0"/>
+    <aura:attribute name="grandTotAmt" type="Decimal" default=""/>
+    <aura:attribute name="stuClsWrapper" type="object"/>
+    <aura:attribute name="stuClsWrapperList" type="object[]"/>
+    <aura:attribute name="globalDisList" type="List"/>
+    
+    <aura:attribute name="paymentRefNumber" type="String"/>
+    <aura:attribute name="payModeSlcdStr" type="String" />
+    <aura:attribute name="payModeList" type="List" />
+    <aura:attribute name="dateValidationError" type="boolean" />
+    <aura:attribute name="eDateRequiredError" type="boolean" />
+    <aura:attribute name="termsCondMap" type="Map" />
+    <aura:handler name="myApplicationEvent" event="c:AutoCompleteEvent" action="{!c.handleMyApplicationEvent}"/>
+    <!-- <aura:handler event="aura:waiting" action="{!c.showSpinner}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}"/>-->
+    <aura:attribute name="toggleSpinner" type="boolean" default="false"/> 
+    <aura:if isTrue="{!v.toggleSpinner}">
+        <div class="slds-spinner_container">
+            <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>        
+    </aura:if>
+    
+    <div class="slds-grid bg slds-grid_align-center" style="margin-top:-13px;">
+        <div class="slds-large-size_8-of-12 " style="background-color: #fff; border:1px solid #c6c8ca; ">
+            <h2 class="slds-text-heading_small slds-m-bottom_small title"><img src="{!$Resource.enrolment}" style="height:23px;" alt="Enrollment" />&nbsp;&nbsp;Enrollment Form</h2>
+            <div class="slds-p-bottom_medium slds-p-horizontal_large">
+                <h2 class="slds-section_title slds-text-heading_small " ><strong>Contact Details</strong></h2>
+                <div class="slds-grid slds-gutters slds-p-top_small">
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <!--<lightning:input class="myinput" label="First Name" aura:id="conDetReqId" value="{!v.contactDetail.FirstName}" required="true" />-->
+                        <c:AutoCompleteCmp label="First Name" inputId="contactId" objectApiName="Account" type="Contact" valueFieldApiName="FirstName" extendedWhereClause="  AND Recordtype.name = 'Customer' AND Parent__c = null " placeHolder="Search Contact..." selectedOption="{!v.slcdAccId}" inputValue="{!v.slcdAccName}" required="true" requiredCls="contactId"/>
+                    	<div id="requiredContactErrorMsg" class="slds-form-element__help" style="color:rgb(194, 59, 54);display:none;">Complete this field</div>
+                    </div>
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:input class="myinput" value="{!v.contactDetail.LastName}" aura:id="conDetReqId" label="Last Name" required="true" />
+                    </div>
+                </div>
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:input class="myinput" label="Email" type="email" aura:id="conDetReqId" value="{!v.contactDetail.PersonEmail}" required="true" />                            
+                    </div>
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:input class="myinput" aura:id="conDetReqId" type="phone" value="{!v.contactDetail.Phone}" label="Phone" required="true" />
+                    </div>
+                </div>
+                <h2 class="slds-section_title slds-text-heading_small  slds-p-top_medium" ><strong>Address Details</strong></h2> 
+                
+                <div class="slds-grid slds-gutters slds-p-top_small">
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:input class="myinput" aura:id="conDetReqId" value="{!v.contactDetail.Block__c}" label="Block" required="true" />                              
+                    </div>
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:input class="myinput" aura:id="conDetReqId" value="{!v.contactDetail.Unit__c}" label="Unit" required="true" />
+                    </div>
+                </div>
+                
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:input class="myinput" aura:id="conDetReqId" label="Street" value="{!v.contactDetail.BillingStreet}" required="true" />                              
+                    </div>
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:input class="myinput" aura:id="conDetReqId" value="{!v.contactDetail.BillingPostalCode}" label="Postal Code" required="true" />
+                    </div>                    
+                </div>
+                
+                <div class="slds-grid slds-gutters">                    
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                       <lightning:input class="myinput" aura:id="conDetReqId" label="Country" value="{!v.contactDetail.BillingCountry}" required="true" />                                                          
+                    </div>                    
+                </div>
+               <!-- <div class="slds-grid slds-gutters">                    
+                    <div class="slds-col slds-medium-size_1-of-2 ">
+                        <lightning:select name="cntry" aura:id="conDetReqId" label="Country" value="{!v.contactDetail.BillingCountryCode}"  required="true">
+                            <option value="">-None-</option>
+                            <aura:iteration items="{!v.cntryList}" var="cntry">
+                                <option value="{!cntry}">{!cntry}</option>
+                            </aura:iteration>
+                        </lightning:select>                            
+                    </div>                    
+                </div>-->
+                
+            </div>
+            <h2 class="slds-text-heading_small  title"><img src="{!$Resource.stu}" style="height:23px;"  alt="Students" />&nbsp;&nbsp;Student Details</h2>
+            <div class="slds-p-vertical_small slds-p-horizontal_large" style="min-height:170px;">
+                
+                <table id='stutable' class="table slds-p-bottom_small">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Gender</th>
+                            <th>Date of Birth</th>
+                            <th>Relationship</th>
+                            <th style="width:85px;">Add Class</th>
+                            <!--<th>Edit</th>-->
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <aura:iteration items="{!v.stuClsWrapperList}" var="stuWraper" indexVar="key">
+                            <tr>
+                                <td>{!key+1}</td>
+                                <td>
+                                    <c:AutoCompleteCmp showLabel="false" type="Student" extendedWhereClause="{!v.contactDetail.Id}" valueFieldApiName="FirstName" placeHolder="Search Student.." inputId="{!key+'_student'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!stuWraper.studentDetails.Id}" inputValue="{!stuWraper.studentDetails.FirstName}" required="true" requiredCls="stuRequired"/>
+                                	<div id="{!'requiredStuErrorMsg'+key}" class="slds-form-element__help" style="color:rgb(194, 59, 54);display:none;">Complete this field</div>
+                                </td>
+                                <td><lightning:input name="inputb" aura:id="StuDetReqId" label="" variant = "label-hidden"  value="{!stuWraper.studentDetails.LastName}" required="true" /></td>
+                                <td>                        
+                                    <lightning:select name="select1" required="true" aura:id="StuDetReqId" value="{!stuWraper.studentDetails.Gender__c}" label=""  class="label-hidden"  >
+                                        <option value="">--None--</option>
+                                        <aura:iteration items="{!v.genderList}" var="c">
+                                            <option value="{!c}">{!c}</option>
+                                        </aura:iteration>
+                                    </lightning:select>  
+                                </td>
+                                <td>
+                                    <lightning:input type="date" name="input5" label=""  variant = "label-hidden"  required="true" value="{!stuWraper.studentDetails.PersonBirthdate}" max="{!v.maxBirthDate}" autocomplete="off"/>
+                                </td>
+                                <td>
+                                    <lightning:select aura:id="StuDetReqId" required="true" name="select2" value="{!stuWraper.studentDetails.Relationship_with_contact__c}" label="" class="label-hidden"  >
+                                        <option value="">--None--</option>
+                                        <aura:iteration items="{!v.relationShipList}" var="c">
+                                            <option value="{!c}">{!c}</option>
+                                        </aura:iteration>
+                                    </lightning:select>  
+                                </td>
+                                <td class="slds-text-align_center">
+                                    <div id="{!key}" onclick="{! c.mymodal }">
+                                        <lightning:buttonIcon iconName="utility:relate" variant="bare" alternativeText="Settings"  class="icon-large">
+                                        </lightning:buttonIcon>
+                                    </div>
+                                </td>
+                               <!-- <td><lightning:buttonIcon iconName="utility:edit_form" variant="bare" alternativeText="Settings" class="slds-text-color_success icon-large"/></td>-->
+                                <td>
+                                    <div id="{!key}" onclick="{! c.deleteStudent }">
+                                        <lightning:buttonIcon iconName="utility:delete" variant="bare" alternativeText="Settings"  class="slds-text-color_error icon-large">
+                                        </lightning:buttonIcon>
+                                    </div>
+                                </td>
+                            </tr>
+                        </aura:iteration>                        
+                    </tbody>
+                </table>
+                <div class="slds-text-align_right">
+                    <strong class="btn-addstu"><lightning:button label="Add Student" iconName="utility:adduser" variant="base" onclick="{! c.addStudent }"/></strong>
+                </div> 
+            </div>
+            
+            <h2 class="slds-text-heading_small slds-m-bottom_small title"><img src="{!$Resource.summary}" style="height:23px;"  alt="Students" />&nbsp;&nbsp;Enrollment Summary</h2>
+            <div class="section-enrol slds-grid  slds-grid_vertical-align-end slds-p-bottom_small slds-p-horizontal_large" style="min-height:170px;">
+                <div class="slds-col slds-size_1-of-1">
+                    <aura:iteration items="{!v.stuClsWrapperList}" var="stuWraper" indexVar="key">  
+                        <aura:if isTrue="{!not(empty(stuWraper.slctdClsDetails))}">                    
+                            <fieldset class="slds-border_bottom slds-p-top_xx-small">
+                                <aura:iteration items="{!stuWraper.slctdClsDetails}" var="cls" indexVar="j">
+                                    <div class="border-dash">
+                                        <div class="accordioncustom">
+                                            <div class="slds-grid slds-gutters enrol-name slds-grid_vertical-align-center">	
+                                                <div class="slds-col slds-medium-size_7-of-12 ">
+                                                    <aura:if isTrue="{!j==0}">
+                                                        <p class="slds-text-heading_small">
+                                                            <aura:if isTrue="{!stuWraper.studentDetails.Gender__c == 'Female'}">
+                                                                <img src="{!$Resource.lady}" alt="user" style="width:25px;"/>
+                                                                <aura:set attribute="else">
+                                                                    <img src="{!$Resource.men}" alt="user" style="width:25px;"/>
+                                                                </aura:set>
+                                                            </aura:if> 
+                                                            &nbsp;&nbsp;<strong>{!stuWraper.studentDetails.FirstName+' '+stuWraper.studentDetails.LastName}</strong></p>
+                                                    </aura:if>
+                                                </div>	
+                                                <div class="slds-col slds-medium-size_5-of-12 ">					
+                                                    <p class="slds-text-heading_x-small slds-p-vertical_small slds-text-align_right">
+                                                        <span class="">
+                                                            <div id="{!key+'_'+j}" style="display:inline-block; padding-right:12px;" onclick="{! c.deleteCls }">
+                                                                <lightning:buttonIcon iconName="utility:delete" variant="bare" alternativeText="Settings" class="slds-text-color_error "/>
+                                                            </div>
+                                                            <div id="{!key+'_'+j}" onclick="{! c.editCls }" style="display:inline-block;">
+                                                                <lightning:buttonIcon iconName="utility:edit_form" variant="bare" alternativeText="Settings" class="slds-text-color_success"  />
+                                                            </div>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="slds-grid slds-gutters  slds-grid_vertical-align-center ">
+                                                <div class="slds-col  slds-medium-size_7-of-12">
+                                                    <div class="slds-grid slds-gutters">
+                                                        <div class="slds-col slds-size_1-of-2">                                                        
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <span class="slds-avatar slds-avatar_x-small">
+                                                                        <lightning:icon iconName="utility:description" alternativeText="Approved" />
+                                                                    </span>
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Class Name</p>
+                                                                    <p class="slds-text-heading_x-small"><strong>{!cls.slcdClsWrapObj.clsName}</strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="slds-col slds-size_1-of-2">                                                        
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <span class="slds-avatar slds-avatar_x-small">
+                                                                        <lightning:icon iconName="utility:money" alternativeText="Approved" />
+                                                                    </span>
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Class Fee</p>
+                                                                    <p class="slds-text-heading_x-small"><strong><!--${!cls.slcdClsWrapObj.fees}--><lightning:formattedNumber value="{!cls.slcdClsWrapObj.fees}" style="currency" currencyCode="USD"/></strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-grid slds-gutters">
+                                                        <div class="slds-col slds-size_1-of-2">                                                        
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <span class="slds-avatar slds-avatar_x-small">
+                                                                        <lightning:icon iconName="utility:date_input" alternativeText="Approved" />
+                                                                    </span>
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Start Date</p>
+                                                                    <p class="slds-text-heading_x-small"><strong>{!cls.enrolDate}</strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="slds-col slds-size_1-of-2">
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <span class="slds-avatar slds-avatar_x-small">
+                                                                        <lightning:icon iconName="utility:date_time" alternativeText="Approved" />
+                                                                    </span>
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Enrollment Time</p>
+                                                                    <p class="slds-text-heading_x-small"><strong>{!cls.slcdClsWrapObj.stEndTime}</strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>                                                    
+                                                    </div>
+                                                    
+                                                    <div class="slds-grid slds-gutters">
+                                                        <div class="slds-col slds-size_1-of-2">
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <span class="slds-avatar slds-avatar_x-small">
+                                                                        <lightning:icon iconName="utility:resource_territory" alternativeText="Approved" />
+                                                                    </span>
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Teacher</p>
+                                                                    <p class="slds-text-heading_x-small"><strong>{!cls.slcdClsWrapObj.teacherName}</strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="slds-col slds-size_1-of-2">
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <span class="slds-avatar slds-avatar_x-small">
+                                                                        <lightning:icon iconName="utility:checkin" alternativeText="Approved" />
+                                                                    </span>
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Location</p>
+                                                                    <p class="slds-text-heading_x-small"><strong>{!cls.slcdClsWrapObj.location}</strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-col slds-medium-size_5-of-12">
+                                                    <aura:if isTrue="{!not(empty(cls.tutionFeeWrapperList))}">
+                                                        <aura:iteration items="{!cls.tutionFeeWrapperList}" var="tf" indexVar="j">
+                                                            <div class="slds-grid slds-gutters border-b-dashed">
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!tf.feeName}:</span></p>
+                                                                </div>
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong><!--${!tf.feeProratedAmount}--><lightning:formattedNumber value="{!(tf.feeProratedAmount > 0 ? tf.feeProratedAmount : tf.feeAmount)}" style="currency" currencyCode="USD"/></strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </aura:iteration>
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!not(empty(cls.feeWrapperList))}">
+                                                        <aura:iteration items="{!cls.feeWrapperList}" var="rf" indexVar="j">
+                                                            <div class="slds-grid slds-gutters border-b-dashed">
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!rf.feeName}:</span></p>
+                                                                </div>
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong><!--${!rf.feeAmount}--><lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </aura:iteration>
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!not(empty(cls.depositWrapperList))}">
+                                                        <aura:iteration items="{!cls.depositWrapperList}" var="dep" indexVar="j">
+                                                            <div class="slds-grid slds-gutters border-b-dashed">
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!dep.feeName}:</span></p>
+                                                                </div>
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong style="color:green;"><!--{!dep.feeAmount}--><lightning:formattedNumber value="{!dep.feeAmount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </aura:iteration>
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!not(empty(cls.disWrapperList))}">
+                                                        <aura:iteration items="{!cls.disWrapperList}" var="dis" indexVar="j">
+                                                            <div class="slds-grid slds-gutters border-b-dashed">
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!dis.name}:</span></p>
+                                                                </div>
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong style="color:red;"><!--{!dis.amount}--><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </aura:iteration>
+                                                    </aura:if>
+                                                    <aura:if isTrue="{!not(empty(cls.earlybirdDisWrapperList))}">
+                                                        <aura:iteration items="{!cls.earlybirdDisWrapperList}" var="dis" indexVar="j">
+                                                            <div class="slds-grid slds-gutters border-b-dashed">
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!dis.name}:</span></p>
+                                                                </div>
+                                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                    <p class="slds-text-body_small slds-text-align_right">$<strong style="color:red;"><!--{!dis.amount}--><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </aura:iteration>
+                                                    </aura:if>
+                                                    <div class="slds-grid slds-gutters" style="background-color:#f7f7f7;">
+                                                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                            <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">Total:</span></p>
+                                                        </div>
+                                                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                            <p class="slds-text-body_small slds-text-align_right"><strong><!--${!cls.totWithProratedFee}--><lightning:formattedNumber value="{!cls.totWithProratedFee}" style="currency" currencyCode="USD"/></strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </aura:iteration>
+                            </fieldset> 
+                        </aura:if>  
+                    </aura:iteration>
+                    <div class="slds-grid slds-gutters slds-p-top_xx-small slds-grid_align-end">
+                        <div class="slds-col slds-size_7-of-12 slds-p-vertical_xx-small">
+                        </div>
+                        <div class="slds-col slds-size_5-of-12 slds-p-vertical_xx-small">
+                            <div class="slds-grid slds-gutters slds-wrap ">
+                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                    <p class="slds-text-body_small slds-text-heading_small" ><strong class="">Enrollment Fee Total:</strong></p>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                    <p class="slds-text-body_small slds-text-align_right slds-text-heading_small"><strong><!--${!v.enrFeeTotAmt}-->
+                                        <lightning:formattedNumber value="{!v.enrFeeTotAmt}" style="currency" currencyCode="USD"/></strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="slds-text-heading_small title"><img src="{!$Resource.discount}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Additional Discounts</h2>
+            <div class="slds-text-align_right slds-p-horizontal_large slds-p-top_small">
+                <strong class="btn-addstu"><lightning:button label="Add Discount" iconName="utility:new" variant="base"  onclick="{! c.mydiscount }" /></strong>
+            </div>  
+            
+            <div class="slds-p-bottom_small slds-p-horizontal_large slds-grid slds-grid_vertical-align-end" style="min-height:145px;">
+                <div class="slds-col slds-size_1-of-1">
+                    <div class="slds-grid slds-gutters slds-p-top_small slds-grid_align-end">
+                        <div class="slds-col slds-size_7-of-12 slds-p-vertical_xx-small">
+                        </div>
+                        <div class="slds-col slds-size_5-of-12 slds-p-vertical_xx-small">
+                            <aura:iteration items="{!v.globalDisList}" var="globalDis" indexVar="j">
+                                <div class="slds-grid slds-gutters border-b-dashed">
+                                    <div class="slds-col slds-size_8-of-12 slds-p-bottom_xx-small">{!globalDis.name}</div>
+                                    <div class="slds-col slds-p-bottom_xx-small slds-text-align_right slds-size_4-of-12"><strong style="color:red;"><!--{!globalDis.amount}--><lightning:formattedNumber value="{!globalDis.amount}" style="currency" currencyCode="USD"/></strong></div>
+                                </div>
+                            </aura:iteration>
+                            <aura:if isTrue="{!v.gstAmount > 0}">
+                                <div class="slds-grid slds-gutters border-b-dashed">
+                                    <div class="slds-col slds-size_8-of-12 slds-p-bottom_xx-small">GST Amount</div>
+                                    <div class="slds-col slds-p-bottom_xx-small slds-text-align_right slds-size_4-of-12">
+                                        <strong class=""><!--${!v.gstAmount}-->
+                                            <lightning:formattedNumber value="{!v.gstAmount}" style="currency" currencyCode="USD"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                            </aura:if>   
+                            <div class="slds-grid slds-gutters slds-wrap ">
+                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                    <p class="slds-text-body_small slds-text-heading_small" ><strong class="">Grand Total:</strong></p>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                    <p class="slds-text-body_small slds-text-align_right slds-text-heading_small">
+                                        <strong><!--${!v.grandTotAmt}-->
+                                            <lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="USD"/>
+                                        </strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="slds-text-heading_small slds-m-bottom_small title"><img src="{!$Resource.policy}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Terms and Conditions</h2>
+            <div class="slds-p-vertical_small slds-p-horizontal_large">	
+                <div class="slds-grid slds-gutters slds-p-bottom_small">
+                    <div class="slds-col slds-p-bottom_xx-small" >
+                        <lightning:input aura:id="payReqId" required="true" type="checkbox"  name="input12" label="" variant="label-hidden"/>			 
+                    </div>
+                    <div class="slds-col slds-p-around_small" style="outline:1px solid #dddbda; height:120px; overflow-y:scroll;" >
+                        <p><strong>{!v.termsCondMap.TermsTitle}</strong></p>
+                        <p>{!v.termsCondMap.TermsDesription}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="slds-text-heading_small title"><img src="{!$Resource.pay}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Confirm and Pay &nbsp;&nbsp;<span class="slds-float_right"><!--${!v.grandTotAmt}--><lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="USD"/></span></h2>
+            <div class="slds-p-vertical_small slds-p-horizontal_large">	
+                <div class="slds-grid slds-gutters /*slds-grid_align-spread*/ slds-grid_align-end">
+                    <!--<div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small slds-p-right_large" style="border-right:1px dashed rgb(221, 219, 218);">-->
+                    <div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small slds-p-right_large">
+                        <p class="slds-p-bottom_small"><strong>Offline Payment:</strong></p>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><abbr class="slds-required">*</abbr>Payment Reference No:
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                <lightning:input name="inputb" aura:id="payReqId" label="" variant = "label-hidden"  placeholder="Reference No" value="{!v.paymentRefNumber}" required="true" />
+                            </div>
+                        </div>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><abbr class="slds-required">*</abbr>Payment Mode:
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                <!--<lightning:input name="inputb" aura:id="payReqId" label="" variant = "label-hidden"  placeholder="Payment Mode" value="" required="true" />-->
+                                <lightning:select class="label-hidden" name="payMode" aura:id="payReqId" label=""  variant = "label-hidden" value="{!v.payModeSlcdStr}"  required="true">
+                                    <option value="">--None--</option>
+                                    <aura:iteration items="{!v.payModeList}" var="payMode">
+                                        <option value="{!payMode}">{!payMode}</option>
+                                    </aura:iteration>
+                                </lightning:select>     
+                            </div>
+                        </div>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><abbr class="slds-required">*</abbr>Payment Amount:</div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                <!--<lightning:input name="inputb" aura:id="payReqId" label="" variant = "label-hidden" readonly="true"  placeholder="0" value="{!v.grandTotAmt}" required="true"  />-->
+                                <lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="USD"/>
+                            </div>
+                        </div>
+                        <div class="slds-text-align_right slds-p-vertical_small">
+                            <lightning:button label="Confirm" onclick="{! c.saveEnrolments }" iconName="action:update" variant="success" class="icon-large text-white "/>
+                        </div>
+                    </div>
+                    <!--
+                    <div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small  slds-p-right_large">
+                        <p class="slds-p-bottom_small"><strong>Online Payment:</strong></p>
+                        
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">Payment Reference No:
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><lightning:input name="inputb" label="" variant = "label-hidden"  placeholder="Referral Code" value="" /></div>
+                        </div>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">Payment Mode:
+                            </div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><lightning:input name="inputb" label="" variant = "label-hidden"  placeholder="Referral Code" value="" /></div>
+                        </div>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">Payment Amount:							</div>
+                            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><lightning:input name="inputb" label="" variant = "label-hidden"  placeholder="Referral Code" value="" /></div>
+                        </div>
+                        <div class="slds-text-align_right slds-p-vertical_small">
+                            <lightning:button label="Pay Now &amp; Confirm"  iconName="action:update" variant="success" class="icon-large text-white "/>
+                        </div>
+                    </div>-->
+                    
+                </div>
+            </div>
+            
+            <!--
+            <h2 class="slds-text-heading_small slds-m-bottom_small title"><img src="{!$Resource.pay}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Confirm and Pay &nbsp;&nbsp;<span class="slds-float_right">${!v.grandTotAmt}</span></h2>
+            <div class="slds-p-vertical_small slds-p-horizontal_large" style="min-height:170px;">	
+                <div class="slds-text-align_right slds-p-vertical_small">
+                     <lightning:button label="Pay Now &amp; Confirm" onclick="{! c.saveEnrolments }" iconName="action:update" variant="success" class="icon-large text-white "/>
+                </div>
+            </div>
+            <c:StripePayComponent />
+            -->
+        </div>
+    </div>
+    <aura:if isTrue="{!v.showModal}">
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-text-align_left slds-p-around_none">
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate title slds-text-heading_xx-small slds-p-bottom_small" ><img src="{!$Resource.enrolment}" style="width:26px; height:23px;" />&nbsp;&nbsp;Course and Class - {!v.stuClsWrapper.studentDetails.FirstName}&nbsp;{!v.stuClsWrapper.studentDetails.LastName}
+                    </h2>
+                </header>
+                
+                <div class="slds-modal__content slds-p-vertical_xx-small slds-p-horizontal_medium" id="modal-content-id-1">
+                    <h2 class="slds-section_title slds-text-heading_small slds-p-bottom_small" ><strong>Search Course</strong></h2> 
+                    <div class="slds-p-bottom_xx-small">
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-medium-size_4-of-12 s" style="position:relative;">
+                                <c:AutoCompleteCmp label="" objectApiName="Course__c" selectedOption="{!v.crsId}" inputValue="{!v.crsName}" showLabel="false" extendedWhereClause=" AND Status__c = 'Active'" />
+                            </div>
+                            <aura:if isTrue="{!v.slcdCrsObject.classWrapperList.length == 0}">
+                                <div class="slds-size_1-of-1 slds-section_title slds-text-heading_small slds-p-top_large slds-p-horizontal_large slds-p-bottom_small" style="display:block;color:#C23934">
+                                    No class found related to the mentioned course.Please contact your Administrator.
+                                </div>
+                            </aura:if>
+                            <!-- implement in phase 2-->
+                            <!-- <div class="slds-col  slds-p-top_xx-small">
+                                <lightning:input type="checkbox" text="WeekDay" value="" label="WeekDay"  aura:id="filtrChkBox" name="input2"/>
+                            </div>
+                            <div class="slds-col slds-p-top_xx-small">
+                                <lightning:input type="checkbox" text="Daytime" value="" label="Daytime" aura:id="filtrChkBox" name="input3"/>
+                            </div>
+                            <div class="slds-col slds-p-top_xx-small">
+                                <lightning:input type="checkbox" text="Classroom" value="" label="Classroom" aura:id="filtrChkBox" name="input4"/>
+                            </div>
+                            <div class="slds-col slds-p-top_xx-small btn-addstu">
+                                <lightning:button label="Advanced Search" iconName="utility:zoomin" variant="base" />
+                            </div>-->
+                        </div>
+                        <aura:if isTrue="{!not(empty(v.slcdCrsObject.classWrapperList))}">
+                            <h2 class="slds-section_title slds-text-heading_small  slds-p-top_xx-small slds-p-bottom_small" ><strong>Select Class</strong></h2> 
+                            
+                            <div style="/*overflow-y:auto; max-height:22vh;*/ border: 1px solid #dee2e6;">
+                                <table class="table table-custom">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <!---   <th>Term</th>
+                                            <th>Term Date</th>-->
+                                            <th>Days</th>
+                                            <th>Time</th>
+                                            <th>Location</th>
+                                            <th>Teacher</th>
+                                            <!--<th>Seats Available</th>-->
+                                            <th>Select</th>
+                                        </tr> 
+                                    </thead>
+                                    <tbody>
+                                        <aura:iteration items="{!v.slcdCrsObject.classWrapperList}" var="cl" indexVar="clsKey">
+                                            <tr> 
+                                                <td>{!cl.recNo}									
+                                                </td>
+                                                <td>{!cl.clsName}
+                                                    <span class="newpop_parent" style="position:relative;">
+                                                        <span style="float:right; " ><lightning:buttonIcon iconName="utility:info_alt" class="slds-p-right_small" variant="bare" alternativeText="Settings"  >
+                                                            </lightning:buttonIcon></span>
+                                                        <div class="newpop" >
+                                                            <table class="table tablepay">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td>S.No</td>
+                                                                        <td>Name</td>
+                                                                        <td>Date</td>
+                                                                    </tr>
+                                                                </thead>
+                                                                <!--<tr>
+                                                                    <td>1</td>
+                                                                    <td>Terms</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>1</td>
+                                                                    <td>Terms</td>
+                                                                </tr>-->
+                                                                <aura:iteration items="{!cl.termList}" var="term" indexVar="termKey">
+                                                                    <tr>
+                                                                        <td>{!termKey+1}</td>
+                                                                        <td>{!term.clsTermName}</td>
+                                                                        <td>{!term.stEndDate}</td>
+                                                                    </tr>
+                                                                </aura:iteration>
+                                                            </table>
+                                                        </div>
+                                                    </span>
+                                                </td>
+                                                <td>{!cl.clsType}({!cl.clsFrequency})</td>
+                                                <!--<td>{!cl.clsTermName}</td>
+                                                <td>{!cl.stEndDate}</td>-->
+                                                <td>{!cl.clsDays}</td>
+                                                <td>{!cl.stEndTime}</td>
+                                                <td>{!cl.location}</td>
+                                                <td>{!cl.teacherName}</td>
+                                                <!--<td>{!cl.seatsAlv}</td>-->
+                                                <td>
+                                                    <ui:inputCheckbox text="{!clsKey}" aura:id="clsSlcd" value="{!cl.isSelected}" change="{!c.selectClass}"/>
+                                                </td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </tbody>
+                                </table>
+                            </div>	
+                            <h2 class="slds-section_title slds-text-heading_small slds-p-vertical_small" ><strong>Select Tuition Fee</strong></h2> 
+                            <div style="overflow:auto; max-height:25vh; border: 1px solid #dee2e6;">
+                                <table class="table table-custom">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>&nbsp;</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Frequency</th>
+                                            <th class="slds-text-align_right">Amount</th>
+                                            <th class="slds-align_absolute-center">Select</th>
+                                        </tr> 
+                                     </thead>   
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.tutionFeeWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.tutionFeeWrapperList}" var="tf" indexVar="j">
+                                            <tr>
+                                                <th></th>
+                                                <td>{!tf.feeName}</td>
+                                                <td>{!tf.feeType}</td>
+                                                <td>{!tf.payFrequency}</td>
+                                                <td class="slds-text-align_right">
+                                                    <lightning:formattedNumber value="{!tf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                </td>
+                                                <td class="slds-align_absolute-center">
+                                                    <ui:inputCheckbox text="{!j}" disabled="{!!tf.isOverride}"  value="{!tf.isSelected}"  aura:id="tutionFeeChk" change="{!c.tutionFeeOnCheck}"/>
+                                                </td>
+                                            </tr>        
+                                        </aura:iteration>
+                                    </aura:if>                                    
+                                </table>
+                            </div>
+                            
+                            <h2 class="slds-section_title slds-text-heading_small slds-p-vertical_small" ><strong>Select Other Fee</strong></h2> 
+                            <div style="overflow:auto; max-height:25vh; border: 1px solid #dee2e6;">
+                                <table class="table table-custom">
+                                  <!--  <aura:if isTrue="{!not(empty(v.slcdCrsObject.tutionFeeWrapperList))}">
+                                        <thead>
+                                            <tr>
+                                                <td><strong>Tuition Fee:</strong></td>
+                                                <td colspan="2">	L2 Monthly</td>
+                                                <td>One-time</td>
+                                                <td>$280</td>
+                                                <td><ui:inputCheckbox text=""  value="" /></td>
+                                            </tr>                                                
+                                        </thead>
+                                    </aura:if>
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.feeWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.feeWrapperList}" var="rf" indexVar="j">
+                                            <tr>
+                                                <td><strong>{!rf.feeName}:</strong></td>
+                                                <td colspan="3"></td>
+                                                <td>${!rf.feeAmount}</td>										
+                                                <td><ui:inputCheckbox value="{!rf.isSelected}" disabled="{!!rf.isOverride}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/></td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </aura:if>
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.depositWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.depositWrapperList}" var="dep" indexVar="j">
+                                            <tr>
+                                                <td><strong>{!dep.feeName}:</strong></td>
+                                                <td colspan="3"></td>
+                                                <td>${!dep.feeAmount}</td>										
+                                                <td><ui:inputCheckbox  value="{!dep.isSelected}" disabled="{!!dep.isOverride}"  aura:id="depFeeFeeChk" change="{!c.feeOnCheck}"/></td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </aura:if>
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.disWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.disWrapperList}" var="dis" indexVar="j">
+                                            <tr>
+                                                <td><strong>{!dis.name}:</strong></td>
+                                                <td colspan="3"></td>
+                                                <td>${!dis.amount}</td>										
+                                                <td><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="crsDisFeeFeeChk"  change="{!c.crsDiscountOnCheck}"/></td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </aura:if>
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.earlybirdDisWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.earlybirdDisWrapperList}" var="dis" indexVar="j">
+                                            <tr>
+                                                <td><strong>{!dis.name}:</strong></td>
+                                                <td colspan="3"></td>
+                                                <td>${!dis.amount}</td>										
+                                                <td><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="disFeeFeeChk" change="{!c.discountOnCheck}"/></td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </aura:if>-->
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>&nbsp;</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Frequency</th>
+                                            <th class="slds-text-align_right">Amount</th>
+                                            <th class="slds-align_absolute-center">Select</th>
+                                        </tr> 
+                                    </thead>
+                                   <!-- <aura:if isTrue="{!not(empty(v.slcdCrsObject.tutionFeeWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.tutionFeeWrapperList}" var="tf" indexVar="j">
+                                            <tr>
+                                                <th></th>
+                                                <td>{!tf.feeName}</td>
+                                                <td>{!tf.feeType}</td>
+                                                <td>{!tf.payFrequency}</td>
+                                                <td class="slds-text-align_right">
+                                                	<lightning:formattedNumber value="{!tf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                </td>
+                                                <td class="slds-align_absolute-center">
+                                                    <ui:inputCheckbox text="{!j}" disabled="{!!tf.isOverride}"  value="{!tf.isSelected}"  aura:id="tutionFeeChk" change="{!c.tutionFeeOnCheck}"/>
+                                                </td>
+                                            </tr>        
+                                        </aura:iteration>
+                                    </aura:if>-->
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.feeWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.feeWrapperList}" var="rf" indexVar="j">
+                                            <tr>
+                                                <th></th>
+                                                <td>{!rf.feeName}</td>
+                                                <td>{!rf.feeType}</td>
+                                                <td>{!rf.payFrequency}</td>
+                                                <td class="slds-text-align_right"><!--${!rf.feeAmount}-->
+                                                	<lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                </td>
+                                                <td class="slds-align_absolute-center">
+                                                    <ui:inputCheckbox value="{!rf.isSelected}" disabled="{!!rf.isOverride}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
+                                                </td>   
+                                             </tr>
+                                        </aura:iteration>
+                                    </aura:if>
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.relatedFeeWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.relatedFeeWrapperList}" var="rf" indexVar="j">
+                                            <tr>
+                                                <th></th>
+                                                <td>{!rf.feeName}</td>
+                                                <td>{!rf.feeType}</td>
+                                                <td>{!rf.payFrequency}</td>
+                                                <td class="slds-text-align_right"><!--${!rf.feeAmount}-->
+                                                	<lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                </td>
+                                                <td class="slds-align_absolute-center">
+                                                    <ui:inputCheckbox value="{!rf.isSelected}" disabled="{!!rf.isOverride}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
+                                                </td>   
+                                             </tr>
+                                        </aura:iteration>
+                                    </aura:if>
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.depositWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.depositWrapperList}" var="dep" indexVar="j">
+                                            <tr>
+                                                <!--<td>{!j+!}</td>-->
+                                                <th></th>
+                                                <td>{!dep.feeName}</td>
+                                                <td>{!dep.feeType}</td>
+                                                <td>{!dep.payFrequency}</td>
+                                                <td class="slds-text-align_right"><!--${!dep.feeAmount}-->
+                                                	<lightning:formattedNumber value="{!dep.feeAmount}" style="currency" currencyCode="USD"/>
+                                                </td>										
+                                                <td class="slds-align_absolute-center"><ui:inputCheckbox  value="{!dep.isSelected}" disabled="{!!dep.isOverride}"  aura:id="depFeeFeeChk" change="{!c.feeOnCheck}"/></td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </aura:if>
+                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.disWrapperList))}">
+                                        <aura:iteration items="{!v.slcdCrsObject.disWrapperList}" var="dis" indexVar="j">
+                                            <tr>
+                                                <!--<td>{!j+!}</td>-->
+                                               <!-- <th></th>
+                                                <td>{!dis.feeName}</td>
+                                                <td>{!dis.feeType}</td>
+                                                <td>{!dis.payFrequency}</td>
+                                                <td class="slds-text-align_right">
+                                                	<lightning:formattedNumber value="{!dis.feeAmount}" style="currency" currencyCode="USD"/>
+                                                </td>									
+                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="disFeeFeeChk" change="{!c.discountOnCheck}"/></td>-->
+                                            	
+                                                <th></th>
+                                                <td>{!dis.name}</td>
+                                                <td>{!dis.type}</td>
+                                                <td></td>
+                                                <td class="slds-text-align_right"><!--${!dis.amount}--><strong style="color:red;"><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="USD"/></strong></td>										
+                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="crsDisFeeFeeChk"  change="{!c.crsDiscountOnCheck}"/></td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </aura:if>
+                                </table>
+                            </div>
+                            <aura:if isTrue="{!v.slcdCrsObject.totFee > 0}">
+                                <table class="table table-custom">
+                                    <tr  style="background-color:#f7f7f7;">
+                                        <td></td>
+                                        <td ><strong>Total:</strong></td>
+                                        <td colspan="2"></td>
+                                        <td class="slds-text-align_right"><!--${!v.slcdCrsObject.totFee}-->
+                                            <p><lightning:formattedNumber value="{!v.slcdCrsObject.totFee}" style="currency" currencyCode="USD"/></p>
+                                        </td>	
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </aura:if>   
+                            <br/>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input type="date" aura:id="enrIds" class="{! v.dateValidationError ? 'myinput slds-has-error' : 'myinput'}" onchange="{!c.validateEnrDate}" label="Start Date"  value="{!v.slcdCrsObject.enrolDate}" required="true"/> 
+                                    <aura:if isTrue="{!v.dateValidationError}">
+                                        <div class="slds-text-color_error slds-p-left_x-small">
+                                            Date must be in present or in future..
+                                        </div>
+                                    </aura:if>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2">
+                                    <lightning:input type="date" aura:id="enrEDate" class="{! v.eDateRequiredError ? 'myinput slds-has-error' : 'myinput'}" label="End Date"  value="{!v.slcdCrsObject.enrolEndDate}" required="{!v.eDateRequiredError}"  min="{!v.maxBirthDate}" />      
+                                	<aura:if isTrue="{!v.eDateRequiredError}">
+                                        <div class="slds-text-color_error slds-p-left_x-small">
+                                            Field is Required
+                                        </div>
+                                    </aura:if>
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col slds-size_1-of-2"><lightning:input class="myinput" aura:id="enrIds" label="Comments"  value="{!v.slcdCrsObject.comments}" required="true"/>  </div>
+                            </div>
+                        </aura:if>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer slds-p-vertical_medium">
+                    <lightning:button label="Close" variant="destructive"  title="Base action" iconName="utility:close" onclick="{! c.closemodal }" class="slds-m-right_medium" />
+                    <span id="{!key}" onclick="{! c.saveStudentCrs }" >
+                        <lightning:button label="Save" variant="brand" disabled="{!v.dateValidationError}" title="Base action" iconName="utility:download" />
+                    </span>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open "></div>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.discountModal}">
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium modal2"  aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-text-align_left slds-p-around_none">                  
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate title slds-text-heading_xx-small" ><img src="{!$Resource.discount}" style="width:26px; height:23px;" />&nbsp;&nbsp;Additional Discounts </h2>
+                </header>
+                <div class="slds-modal__content slds-p-vertical_small slds-p-horizontal_xx-large" id="modal-content-id-1" style="min-height:50vh;">
+                    <div class="slds-p-bottom_small">
+                        <div style="overflow-y:auto; /*max-height:180vh;*/">
+                            <table class="table table-custom">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Format</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Select</th>
+                                    </tr> 
+                                </thead>
+                                <tbody>
+                                    <aura:iteration items="{!v.globalDisList}" var="globalDis" indexVar="j">
+                                        <tr>
+                                            <td>{!j+1}</td>
+                                            <td>{!globalDis.name}</td>
+                                            <td>{!globalDis.format}</td>
+                                            <td>{!globalDis.type}</td>
+                                            <td>
+                                                <div class="slds-grid slds-grid_vertical-align-center">
+                                                    <div class="slds-col">
+                                                        <span class="slds-p-right_small">${!globalDis.amount}</span>
+                                                    </div>
+                                                    <div class="slds-col slds-size_9-of-12">
+                                                        <aura:if isTrue="{!globalDis.type == 'Referral'}">
+                                                            <c:AutoCompleteCmp label=""  objectApiName="Account" type="Referral" valueFieldApiName="FirstName" extendedWhereClause=" AND Recordtype.name = 'Customer' AND Parent__c = null " placeHolder="Referral by..." selectedOption="{!globalDis.referralById}" inputValue="{!globalDis.referralBy}" showLabel="false" />
+                                                        </aura:if>
+                                                        <aura:if isTrue="{!globalDis.type == 'Promo'}">
+                                                            <lightning:input variant="label-hidden" value="{!globalDis.enterCode}" name="inline-search-input slds-p-horizontal_large" label=""   placeholder="{!globalDis.type+' Code...'}"/>
+                                                        </aura:if>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <ui:inputCheckbox value="{!globalDis.isSelected}" text="{!j}" aura:id="globalDisChk" change="{!c.globalDiscountOnCheck}" class="slds-m-left_small" />
+                                            </td>
+                                        </tr>
+                                    </aura:iteration>
+                                </tbody>
+                            </table>
+                        </div>	
+                    </div>
+                </div>
+                <footer class="slds-modal__footer slds-p-vertical_medium">
+                    <lightning:button label="Close" variant="destructive" title="Base action" iconName="utility:close" onclick="{! c.closeDiscountModel }" class="slds-m-right_medium" />
+                    <span>
+                        <lightning:button label="Save" variant="brand"  title="Base action" onclick="{! c.saveGlobalDiscount }" iconName="utility:download" />
+                    </span>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open "></div>
+    </aura:if>
+</aura:component>

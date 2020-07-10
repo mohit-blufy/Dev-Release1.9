@@ -1,0 +1,2 @@
+<apex:page controller="ZoomIntegrationController" standardStylesheets="false" lightningStylesheets="true">
+</apex:page>

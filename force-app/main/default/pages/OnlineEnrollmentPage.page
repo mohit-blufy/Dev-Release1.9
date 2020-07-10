@@ -1,0 +1,540 @@
+<apex:page controller="OnlineEnrollmentPageCntrl" showHeader="false" sidebar="false" docType="html-5.0" lightningStylesheets="true" standardStylesheets="true">
+   <!-- <apex:slds />
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+        
+        <style>
+            .course2 > .slds-grid{
+            transition: all .25s cubic-bezier(.645,.045,.355,1);
+            border-radius:8px;
+            cursor:pointer;
+            /*border:1px solid #ccc;*/
+            }
+            .course2:hover > .slds-grid{
+            /*box-shadow: 0 7px 40px rgba(0,0,0,.05);*/
+            }
+            
+            .slds-media__figure {
+            width: 20px;
+            }
+            .table{margin-bottom:30px;}
+            .table {
+            border-collapse: collapse;
+            }
+            .table tr:first-child th:last-child{
+            font-size:inherit !important;
+            }
+            .table td, .table th{
+            border: 1px solid #dee2e6;
+            padding: .35rem 0.75rem;
+            vertical-align: top;
+            }
+            .table td{
+            background-color:#fff;}
+            
+            .table th{background-color:#579df6; color:#fff;}
+            .table th:nth-child(2n){
+            background-color: #236ac6 !important;
+            }
+            .table th:last-child, .table td:last-child{
+            text-align:center !important;
+            }
+            .slds-scope .slds-button_success{color:#fff;}
+            .mx-0{margin-left:0px !important; margin-right:0px !important;}
+            
+            .border-b-dashed {
+            border-bottom: 1px dashed #cacdd4;
+            }
+            .bg-light{border:1px solid #ccc; border-radius:6px; background-color:#f9f9f9; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important; overflow:hidden;}
+            
+            .enrolStu{margin-bottom:20px;}
+            .bg-light .enrolStu:last-child{margin-bottom:0px !important;}
+            .bg-white{background-color:#fff;}
+            
+        </style>
+        
+        <apex:form id="enrolFrm">
+            
+            <apex:actionStatus id="Status">
+                <apex:facet name="start">
+                    <div class="slds-spinner_container slds-is-fixed">
+                        <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div>           
+                </apex:facet>
+            </apex:actionStatus>
+            
+            <div class="slds-grid bg slds-grid_align-center" style="background-color:#fff;">
+                <div class="slds-large-size_10-of-12 slds-p-bottom_large" style="background-color: #fff; ">
+                    <p class="slds-p-top_xx-small slds-p-horizontal_large slds-m-horizontal_xx-large">
+                        <apex:image url="{!logoImageURL}" style="width:130px;"/></p>
+                    <div class="course2">
+                        <div class="slds-grid slds-m-horizontal_xx-large">
+                            <div class="slds-size_12-of-12 slds-p-around_large">
+                                <p class="slds-text-heading_medium slds-p-bottom_small"><strong>Course and Class Details</strong> </p>
+                                <div class="slds-text-align_left bg-light ">
+                                    <div class="slds-grid slds-wrap slds-gutters mx-0 slds-p-top_small">
+                                        <div class="slds-col slds-large-size_10-of-12  slds-p-bottom_small ">
+                                            <img alt="Enrollment" src="{!$Resource.enrolment}" style="height:23px;" class="slds-p-right_small" /><strong  class="slds-text-heading_small">{!crsDetailObj.crsName}</strong>
+                                            <p><strong class="slds-p-right_small">Description :</strong>{!crsDetailObj.crDescription}</p>
+                                        </div>
+                                        <div class="slds-col slds-large-size_2-of-12 slds-text-align_right   slds-p-bottom_small ">
+                                            Fees: <strong class="slds-text-heading_small" style="color:green;text-decoration: {!IF(crsDetailObj.crsefeeWithEBDisCount > 0,'line-through','none')}">${!crsDetailObj.crsefee}</strong>
+                                            <strong class="slds-text-heading_small" style="color:green;display:{!IF(crsDetailObj.crsefeeWithEBDisCount > 0,'block','none')}">${!crsDetailObj.crsefeeWithEBDisCount}</strong>
+                                        </div>
+                                    </div>
+                                    <c:SearchClassesComp classToDisplay="{!crsDetailObj.cls}"/>
+                                </div>
+                                <br/>
+                                <br/>
+                                <p class="slds-text-heading_medium slds-p-bottom_small"><strong>Contact Details</strong> </p>
+                                <div class="slds-p-around_small bg-light">
+                                    <div class="demo-only demo-only--sizing slds-grid slds-wrap slds-gutters">
+                                        <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                            <div class="{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.firstName)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                <label class="slds-form-element__label">
+                                                    First Name<abbr class="slds-required" title="Required">* </abbr></label>
+                                                <div class="slds-form-element__control">
+                                                    <apex:inputText styleclass="slds-input" value="{!cstmrObj.cstmrDetail.firstName}"/>
+                                                </div>
+                                                <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.firstName)==0), 'block', 'none')}">This field is required</div>
+                                            </div>
+                                        </div>
+                                        <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                            <div class="{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.lastName)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                <label class="slds-form-element__label">
+                                                    Last Name<abbr class="slds-required" title="Required">* </abbr></label>
+                                                <div class="slds-form-element__control">
+                                                    <apex:inputText styleclass="slds-input" value="{!cstmrObj.cstmrDetail.lastName}"/>
+                                                </div>
+                                                <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.lastName)==0), 'block', 'none')}">This field is required</div>
+                                            </div>
+                                        </div>
+                                        <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                            <div class="{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.phone)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                <label class="slds-form-element__label">
+                                                    Phone Number<abbr class="slds-required" title="Required">* </abbr></label>
+                                                <div class="slds-form-element__control">
+                                                    <apex:inputText styleclass="slds-input" value="{!cstmrObj.cstmrDetail.phone}"/>
+                                                </div>
+                                                <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.phone)==0), 'block', 'none')}">This field is required</div>
+                                            </div>
+                                        </div>
+                                        <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                            <div class="{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.email)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                <label class="slds-form-element__label">
+                                                    Email<abbr class="slds-required" title="required">* </abbr></label>
+                                                <div class="slds-form-element__control">
+                                                    <apex:inputText styleclass="slds-input" value="{!cstmrObj.cstmrDetail.email}"/>
+                                                </div>
+                                                <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlankForCourse,len(cstmrObj.cstmrDetail.email)==0), 'block', 'none')}">This field is required</div>
+                                            </div>
+                                        </div>
+                                        <apex:repeat value="{!cstmrObj.conFieldList}" var="field">
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                <div class="{!IF(field.showRequired, 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                    <label class="slds-form-element__label">
+                                                        {!field.fieldLabel}<abbr class="slds-required" title="Required" style="display:{!IF(field.fieldRequired,'inline', 'none')}">*</abbr>
+                                                    </label>
+                                                    <div class="slds-form-element__control">
+                                                        <apex:inputText styleclass="slds-input" value="{!field.fieldValue}"/>
+                                                    </div>
+                                                    <div class="slds-form-element__help" style="display:{!IF(field.showRequired, 'block', 'none')}">This field is required</div>
+                                                </div>
+                                            </div>
+                                        </apex:repeat>
+                                        <apex:outputPanel styleClass="slds-col slds-size_1-of-1 slds-p-bottom_small" rendered="{!cstmrObj.conAddFieldList.size > 0}">
+                                            <h2 class="slds-section_title slds-text-heading_small  slds-p-top_medium" ><strong>Address Details</strong></h2>     
+                                        </apex:outputPanel>
+                                        <apex:repeat value="{!cstmrObj.conAddFieldList}" var="addField">
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                <div class="{!IF(addField.showRequired, 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                    <label class="slds-form-element__label">
+                                                        {!addField.fieldLabel}
+                                                        <abbr class="slds-required" title="Required" style="display:{!IF(addField.fieldRequired,'inline', 'none')}">*</abbr>
+                                                    </label>
+                                                    <div class="slds-form-element__control">
+                                                        <apex:inputText styleclass="slds-input" value="{!addField.fieldValue}"/>
+                                                    </div>
+                                                    <div class="slds-form-element__help" style="display:{!IF(addField.showRequired, 'block', 'none')}">This field is required</div>
+                                                </div>
+                                            </div>
+                                        </apex:repeat>
+                                    </div>
+                                </div>
+                                <br/>
+                                
+                                <p class="slds-text-heading_medium slds-p-bottom_small slds-p-top_large"><strong>Student Details</strong> </p>
+                                <div class="slds-p-bottom_small bg-light">
+                                    <div style="border-radius:6px 6px 0px 0px; overflow:hidden; ">
+                                        <apex:variable value="{!0}" var="rowNum"/>
+                                        <table class="table">
+                                            <tr>
+                                                <th>Full Name</th>
+                                                <th>Gender</th>
+                                                <th>Relationship</th>
+                                                <th>Date of Birth</th>                                                
+                                                <th>Remove</th>
+                                            </tr>
+                                            <tbody>
+                                                <apex:repeat value="{!cstmrObj.stuDetail}" var="item">
+                                                    <tr>
+                                                        <td>{!item.firstName+' '+item.lastName}</td>
+                                                        <td>{!item.slcdGender}</td>
+                                                        <td>{!item.slcdRelation}</td>
+                                                        <td><apex:outputText value="{0, date, MMMM d','  yyyy}">
+                                                            <apex:param value="{!item.stuDob}" /> 
+                                                            </apex:outputText>
+                                                        </td>
+                                                        <td class="slds-text-color_error">
+                                                            <apex:commandLink styleClass="slds-text-color_error" action="{!deleteStudent}" reRender="enrolFrm" status="Status" >
+                                                                <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                                                                    <apex:param name="index" value="{!rowNum}" assignTo="{!index}"/>
+                                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                                         xlink:href="/apexpages/slds/latest/assets/icons/utility-sprite/svg/symbols.svg#delete"></use>
+                                                                </svg>
+                                                            </apex:commandLink>
+                                                        </td>
+                                                    </tr>
+                                                    <apex:variable var="rowNum" value="{!rowNum + 1}"/>
+                                                </apex:repeat>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="slds-p-horizontal_small">
+                                        <div class="demo-only demo-only--sizing slds-grid slds-wrap slds-gutters">
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                
+                                                <div class="{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.firstName)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                    <label class="slds-form-element__label" for="">
+                                                        First Name<abbr class="slds-required" title="required">* </abbr></label>
+                                                    <div class="slds-form-element__control">
+                                                        <apex:inputText styleclass="slds-input" value="{!stuDetailsToAdd.firstName}" id="stuFirstName" />
+                                                    </div> 
+                                                    <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.firstName)==0), 'block', 'none')}">This field is required</div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                <div class="{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.lastName)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                    <label class="slds-form-element__label" for="" >
+                                                        Last Name<abbr class="slds-required" title="required">* </abbr></label>
+                                                    <div class="slds-form-element__control">
+                                                        <apex:inputText styleclass="slds-input" value="{!stuDetailsToAdd.lastName}"/>
+                                                    </div>
+                                                    <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.lastName)==0), 'block', 'none')}">This field is required</div>
+                                                </div>
+                                            </div>                          
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                <div class="{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.slcdGender)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                    <label class="slds-form-element__label" for="text-input-id-1">
+                                                        Gender<abbr class="slds-required" title="required">* </abbr></label>
+                                                    <div class="slds-form-element__control">
+                                                        <div class="slds-select_container">
+                                                            <apex:selectList styleClass="slds-select requiredInput" size="1" value="{!stuDetailsToAdd.slcdGender}">
+                                                                <apex:selectOptions value="{!GenderList}"/> 
+                                                            </apex:selectList>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.slcdGender)==0), 'block', 'none')}">This field is required</div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                <div class="{!IF(AND(checkReqFieldsBlank,stuDetailsToAdd.stuDob == NULL), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                    <label class="slds-form-element__label">
+                                                        Date of Birth<abbr class="slds-required" title="required">* </abbr></label>
+                                                    <div class="slds-form-element__control">
+                                                        <apex:input styleclass="slds-input" type="date" value="{!stuDetailsToAdd.stuDob}"/>
+                                                    </div>
+                                                    <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlank,stuDetailsToAdd.stuDob == NULL), 'block', 'none')}">This field is required</div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                <div class="{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.slcdRelation)==0), 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                    <label class="slds-form-element__label" for="text-input-id-1">
+                                                        Relationship<abbr class="slds-required" title="Rquired">* </abbr></label>
+                                                    <div class="slds-form-element__control">
+                                                        <div class="slds-select_container">
+                                                            <apex:selectList styleClass="slds-select requiredInput" size="1" value="{!stuDetailsToAdd.slcdRelation}">
+                                                                <apex:selectOptions value="{!RelationList}"/> 
+                                                            </apex:selectList>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-form-element__help" style="display:{!IF(AND(checkReqFieldsBlank,len(stuDetailsToAdd.slcdRelation)==0), 'block', 'none')}">This field is required</div>
+                                                </div>
+                                            </div>
+                                            <apex:repeat value="{!stuDetailsToAdd.stuFieldList}" var="field">
+                                                <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                    <div class="{!IF(field.showRequired, 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                        <label class="slds-form-element__label">
+                                                            {!field.fieldLabel}<abbr class="slds-required" title="Required" style="display:{!IF(field.fieldRequired,'inline', 'none')}">*</abbr>
+                                                        </label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:input styleclass="slds-input" value="{!field.fieldValue}"/>
+                                                        </div>
+                                                        <div class="slds-form-element__help" style="display:{!IF(field.showRequired, 'block', 'none')}">This field is required</div>
+                                                    </div>
+                                                </div>
+                                            </apex:repeat>
+                                            <h2 class="slds-col slds-size_1-of-1 slds-p-bottom_small slds-section_title slds-text-heading_small  slds-p-top_medium" ><strong>Enrollment Details</strong></h2>
+                                            <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                <div class="slds-form-element">
+                                                    <label class="slds-form-element__label">
+                                                        Enrollment Date<abbr class="slds-required" title="required">* </abbr></label>
+                                                    <div class="slds-form-element__control">
+                                                        <apex:input styleclass="slds-input" type="date" value="{!stuDetailsToAdd.enrolDetails.enrolDate}"/>
+                                                    </div>                            
+                                                </div>
+                                            </div>
+                                            <apex:repeat value="{!stuDetailsToAdd.enrolDetails.listEnrolFields}" var="enrolField">
+                                                <div class="slds-col slds-size_6-of-12 slds-p-bottom_small">
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label">
+                                                            {!enrolField.fieldLabel}
+                                                        </label>
+                                                        <div class="slds-form-element__control">
+                                                            <apex:input styleclass="slds-input" value="{!enrolField.fieldValue}"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </apex:repeat>
+                                        </div>
+                                        <p class="slds-p-vertical_small slds-text-align_right">
+                                            <button class="slds-button slds-button_brand ">
+                                                <apex:commandLink action="{!addNewStudent}" reRender="enrolFrm" status="Status">
+                                                    <svg class="slds-button__icon slds-button__icon_left slds-icon_small" aria-hidden="true">
+                                                        <use  xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                             xlink:href="/apexpages/slds/latest/assets/icons/action-sprite/svg/symbols.svg#join_group"></use>
+                                                    </svg>Add New Student
+                                                </apex:commandLink></button>    
+                                        </p>
+                                    </div>
+                                </div>
+                                <br/>
+                                <br/>
+                                
+                                <p class="slds-text-heading_medium slds-p-bottom_small"><strong>Enrollment Summary</strong> </p>
+                                <div class="bg-light slds-p-horizontal_small slds-p-bottom_small">
+                                    
+                                    <div class="slds-grid  slds-wrap slds-gutters slds-grid_vertical-align-center  bg-white slds-border_bottom">
+                                        <div class="slds-col slds-large-size_3-of-12  ">
+                                            <p>Class Name</p>
+                                            <p class="slds-text-heading_small"><strong>{!crsDetailObj.clsName} </strong> <span class="slds-text-heading_small"></span></p>
+                                        </div>
+                                        <div class="slds-col  slds-large-size_9-of-12 slds-text-align_left" style=" border-left:1px dashed #ccc;">
+                                            <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread slds-p-top_xx-small">
+                                                <div class="slds-col slds-medium-size_4-of-12">
+                                                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                                                        <div class="slds-media__figure">
+                                                            <img src="{!$Resource.date}" />
+                                                        </div>
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-text-body_small">Start Date</p>
+                                                            <p class="slds-text-heading_x-small"><strong>
+                                                                <apex:outputText value="{0, date, MMMM d','  yyyy}">
+                                                                    <apex:param value="{!crsDetailObj.strtDate}" /> 
+                                                                </apex:outputText>
+                                                                </strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-col slds-medium-size_4-of-12">
+                                                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                                                        <div class="slds-media__figure">
+                                                            <img src="{!$Resource.date}" />
+                                                        </div>
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-text-body_small">End Date</p>
+                                                            <p class="slds-text-heading_x-small"><strong>
+                                                                <apex:outputText value="{0, date, MMMM d','  yyyy}">
+                                                                    <apex:param value="{!crsDetailObj.endDate}" /> 
+                                                                </apex:outputText>
+                                                                </strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-col slds-medium-size_4-of-12">
+                                                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                                                        <div class="slds-media__figure"><img src="{!$Resource.teacher1}" /></div>
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-text-body_small">Teacher</p>
+                                                            <p class="slds-text-heading_x-small"><strong>{!crsDetailObj.tchrName}</strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread">
+                                                <div class="slds-col slds-medium-size_4-of-12">
+                                                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                                                        <div class="slds-media__figure"><img src="{!$Resource.time}" /></div>
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-text-body_small">Start Time</p>
+                                                            <p class="slds-text-heading_x-small"><strong>
+                                                                <apex:outputText value="{0,time,h:mm a}"> 
+                                                                    <apex:param value="{!crsDetailObj.stTime+offset}"/>
+                                                                </apex:outputText>
+                                                                </strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-col slds-medium-size_4-of-12">
+                                                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                                                        <div class="slds-media__figure"><img src="{!$Resource.time}" /></div>
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-text-body_small">End Time</p>
+                                                            <p class="slds-text-heading_x-small"><strong>
+                                                                <apex:outputText value="{0,time,h:mm a}"> 
+                                                                    <apex:param value="{!crsDetailObj.endTime+offset}"/>
+                                                                </apex:outputText>
+                                                                </strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-col slds-medium-size_4-of-12">
+                                                    <div class="slds-media slds-media_center  slds-p-bottom_xx-small">
+                                                        <div class="slds-media__figure">
+                                                            <img src="{!$Resource.location1}" />
+                                                        </div>
+                                                        <div class="slds-media__body">
+                                                            <p class="slds-text-body_small">Location</p>
+                                                            <p class="slds-text-heading_x-small"><strong>{!crsDetailObj.location}</strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> 
+                                    <div style="min-height: 120px;max-height:284px;overflow-y:auto;">    
+                                        <apex:repeat value="{!cstmrObj.stuDetail}" var="stu">
+                                            <div class="slds-grid slds-gutters enrolStu mx-0">
+                                                <div class="slds-col  slds-medium-size_6-of-12 slds-p-top_small">
+                                                    <p class="slds-p-horizontal_small"> 
+                                                        <img src="{!IF(stu.slcdGender == 'Male',$Resource.men,$Resource.lady)}" alt="user" style="width:30px;"/> &nbsp;&nbsp; 
+                                                        <strong>{!stu.FirstName+' '+stu.LastName}</strong>
+                                                    </p>
+                                                    <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread slds-p-top_small">
+                                                        <div class="slds-col slds-medium-size_6-of-12">
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <img src="{!$Resource.date}" />
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Enrollment Date</p>
+                                                                    <p class="slds-text-heading_x-small"><strong>
+                                                                        <apex:outputText value="{0, date, MMMM d','  yyyy}">
+                                                                            <apex:param value="{!crsDetailObj.enrolDate}" /> 
+                                                                        </apex:outputText>
+                                                                        </strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="slds-col slds-medium-size_6-of-12">
+                                                            <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                                <div class="slds-media__figure">
+                                                                    <img src="{!$Resource.time}" />
+                                                                </div>
+                                                                <div class="slds-media__body">
+                                                                    <p class="slds-text-body_small">Enrollment Time</p>
+                                                                    <p class="slds-text-heading_x-small"><strong>11 AM </strong></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                    
+                                                </div>
+                                                <div class="slds-col slds-medium-size_6-of-12 slds-p-top_small">
+                                                    <apex:repeat value="{!stu.listStuCrseFeeWrpper}" var="fee">
+                                                        <div class="slds-grid slds-gutters border-b-dashed mx-0">
+                                                            <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!fee.feeName}</span></p>
+                                                            </div>
+                                                            <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                                <p class="slds-text-body_small slds-text-align_right"><strong>$
+                                                                    <apex:outputText value="{!fee.feeAmount}" rendered="{!fee.feeType != 'Tuition Fee'}" />
+                                                                    <apex:outputText value="{!fee.feeProratedAmount}" rendered="{!fee.feeType == 'Tuition Fee'}" />
+                                                                    </strong>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </apex:repeat>
+                                                    <div class="slds-grid slds-gutters mx-0" style="background-color:#ebecee;">
+                                                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                            <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">Total:</span></p>
+                                                        </div>
+                                                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                            <p class="slds-text-body_small slds-text-align_right"><strong>${!stu.totalFeeAmt}</strong></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>  
+                                        </apex:repeat>
+                                    </div>
+                                    <div class="slds-grid slds-gutters slds-grid_align-end mx-0">
+                                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_xx-small">
+                                            <div class="slds-grid slds-gutters slds-wrap " >
+                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                    <p class="slds-text-body_small slds-text-heading_small" ><span class="slds-text-heading_small slds-p-right_small"><strong>Enrollment Fee Total:</strong></span></p>
+                                                </div>
+                                                <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                                                    <p class="slds-text-body_small slds-text-align_right slds-text-heading_small"><strong>${!cstmrObj.totalEnrlFee}</strong></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/>
+                                <br/>
+                                <p class="slds-text-heading_medium slds-p-bottom_small"><strong>Terms and Conditions</strong></p>
+                                <div class="slds-p-around_small bg-light ">
+                                    <div class="slds-grid slds-gutters slds-p-bottom_small">
+                                        <div class="slds-col slds-p-bottom_xx-small">                
+                                            <div class="{!IF(termsnCon, 'slds-form-element slds-has-error', 'slds-form-element')}">
+                                                <label class="slds-form-element__label"></label>
+                                                <div class="slds-form-element__control">
+                                                    <apex:inputCheckbox value="{!termsnCon}"/>
+                                                </div>
+                                                <div class="slds-form-element__help" style="display:{!IF(termsnCon, 'block', 'none')}">This field is required</div>
+                                            </div>
+                                        </div>
+                                        <div class="slds-col" style="height:120px; overflow-y:scroll;" >
+                                            <p><strong>AGREEMENT BETWEEN CUSTOMER ABC Institute</strong></p>
+                                            <p>In addition to, and without limiting any of Seller’s other representations and warranties, express or implied, Seller expressly represents and warrants to NYU that: (a) all Goods and/or Services conform and will continue to conform to the highest applicable industry standards and to any description, sample, specifications or other documentation related to the Goods and/or Services that is included in this Purchase Order or otherwise requested or approved by NYU, and that any Services will be provided in a diligent and highly professional manner by appropriately qualified and trained individuals; (b) the Goods and/or necessary...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/>
+                                <br/>
+                                <p class="slds-text-heading_medium slds-p-bottom_small"><strong>Confirm &amp; Pay</strong> </p>
+                                <div class="slds-p-around_small bg-light">
+                                    <div class="slds-grid slds-gutters slds-grid_align-end" >
+                                        <div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small slds-p-top_small slds-p-right_large" >
+                                            <p class="slds-p-bottom_small"><strong >Online Payment:</strong></p>
+                                            <img src="https://blufydev-dev-ed--c.documentforce.com/servlet/servlet.ImageServer?id=0152v00000HLYXD&oid=00D2v000002i6Vi&lastMod=1590040693000" alt="Payment" />
+                                            <br/>
+                                            <br/>
+                                            <div class="slds-grid slds-gutters">
+                                                <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small" >
+                                                    <input type="text" id="text-input-id-1" placeholder="Card No" required="" class="slds-input" />
+                                                </div>
+                                            </div>
+                                            <div class="slds-text-align_right slds-p-vertical_small slds-m-top_large">
+                                                <apex:commandLink action="{!completeEnrollment}" reRender="enrolFrm" status="Status" oncomplete="shToast('{!checkReqFieldsBlankForCourse}');">
+                                                    <button class="slds-button slds-button_success">
+                                                        <svg class="slds-button__icon slds-button__icon_left slds-icon_small" aria-hidden="true">
+                                                            <use  xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                                 xlink:href="/apexpages/slds/latest/assets/icons/action-sprite/svg/symbols.svg#update"></use>
+                                                        </svg>Confirm </button>
+                                                </apex:commandLink>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </apex:form>
+    </html>-->
+</apex:page>

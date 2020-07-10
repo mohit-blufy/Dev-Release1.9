@@ -1,0 +1,101 @@
+<aura:component controller="AutoCompleteCmpController" implements="force:appHostable,flexipage:availableForAllPageTypes" access="global">
+    <!-- attributes to be received from parent component-->
+    <aura:attribute name="label" type="String" />
+    <aura:attribute name="showLabel" type="Boolean" default="true"/>
+    <aura:attribute name="slcdIndex" type="Integer" default="0"/>
+    <aura:attribute name="objectApiName" type="String" default="Account"/>
+    <aura:attribute name="idFieldApiName" type="String" default="Id"/>
+    <aura:attribute name="valueFieldApiName" type="String"  default="Name"/>
+    <aura:attribute name="extendedWhereClause" type="String" />
+    <aura:attribute name="maxRecords" type="Integer" default="10"/>
+    <aura:attribute name="placeHolder" type="String" default="Search Courses..."/>
+    <aura:attribute name="type" type="String" default="Course"/>
+    <aura:attribute name="inputId" type="String" default="combobox-id-21"/>
+    <aura:attribute name="borderColor" type="String" default=""/>
+    <aura:attribute name="stuList" type="object[]"/>
+    <aura:attribute name="required" type="Boolean" default="false"/>
+    <aura:attribute name="requiredCls" type="String" default=""/>
+
+    <!-- Attributes specific to component-->
+    <aura:attribute name="results" type="List" />
+    <aura:attribute name="openDropDown" type="Boolean" default="false" />
+    <aura:attribute name="selectedOption" type="String" />
+    <aura:attribute name="selectedOptions" type="List" />
+    <aura:attribute name="inputValue" type="String" />
+    <aura:attribute name="inputSearchFunction" type="Object" />
+	
+    <aura:attribute name="plsWait" type="String" />
+    <!-- Sage products -->
+    <aura:attribute name="SageProductItems" type="object"/>
+    
+    <aura:registerEvent name="myApplicationEvent" type="c:AutoCompleteEvent"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:attribute name="isShowSpinner" type="boolean" default="false"/> 
+    <!--<aura:handler event="aura:waiting" action="{!c.showSpinner}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}"/>-->
+    <aura:if isTrue="{!v.isShowSpinner}">
+        <div class="slds-spinner_container">
+            <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>        
+    </aura:if>
+    <div class="slds-form-element">
+        <aura:if isTrue="{!v.showLabel}">
+            <label class="slds-form-element__label" for="combobox-id-21"
+                   style="{! empty(v.label) ? 'display:hidden;' : 'display:block;'}">{!v.label} <span style="{! v.required ? 'display:block;color:red;float: left;' : 'display:hidden;'}">*&nbsp;</span></label>
+        </aura:if>     
+        <div class="slds-form-element__control">
+            <div class="slds-combobox_container">
+                <div class="{! v.openDropDown ? 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open' : 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click'}"
+                    aria-expanded="true" aria-haspopup="listbox" role="combobox">
+                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                        <input type="text" style="{!'border-color:'+v.borderColor}"
+                            class="{!'slds-input slds-combobox__input slds-has-focus slds-combobox__input-value '+v.requiredCls}"
+                            id="{!v.inputId}" aria-autocomplete="list" aria-controls="listbox-id-11"
+                            autoComplete="off" onkeyup="{!c.searchHandler}" role="textbox" placeholder="{!v.placeHolder}"
+                            value="{!v.inputValue}" onblur="{!c.checkOnFocusOut}"/>
+                        <span>{!v.plsWait}</span>
+                        <aura:if isTrue="{! empty(v.selectedOption)}">
+                            <span
+                                class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right">
+                                <lightning:icon iconName="utility:search" size="x-small" />
+                            </span>
+                            <aura:set attribute="else">
+                                <button class="slds-button slds-button_icon slds-input__icon slds-input__icon_right"
+                                    title="Clear the text input" onclick="{!c.clearOption}">
+                                    <lightning:icon iconName="utility:clear" size="x-small" />
+                                </button>
+                            </aura:set>
+                        </aura:if>
+                    </div>
+                    <div id="listbox-id-11" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid"
+                        role="listbox">
+                        <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                            <aura:iteration items="{!v.results}" var="result">
+                                <li role="presentation" class="slds-listbox__item" data-id="{!result.id}"
+                                    data-value="{!result.value}" onclick="{!c.optionClickHandler}">
+                                    <div id="{!result.id}"
+                                        class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
+                                        role="option">
+                                        <span class="slds-media__figure slds-listbox__option-icon"></span>
+                                        <span class="slds-media__body">
+                                            <span class="slds-truncate" title="All Opportunities">
+                                                <span>{!result.value}</span>
+                                            </span>
+                                        </span>
+                                    </div>
+                                </li>
+                            </aura:iteration>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</aura:component>

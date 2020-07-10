@@ -1,0 +1,92 @@
+<aura:component controller="SessionScheduleCmpController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickActionWithoutHeader" access="global" >
+    <aura:html tag="style">
+        .cuf-scroller-content{
+        background:#fff;
+        }
+        .slds-modal__container { 
+        max-width: 100%; 
+        width: 100%;
+        }
+    </aura:html>
+    <aura:attribute name="showSpinner" type="Boolean" default="false" />
+    <!--<aura:handler name = "init" value="{!this}" action="{!c.doInit}"/>-->
+    <aura:handler name="myApplicationEvent" event="c:AutoCompleteEvent" action="{!c.handleMyApplicationEvent}"/>
+    <aura:attribute name="sessionList" type="object[]"/>
+    <aura:attribute name="sessStrtTimeList" type="List" />
+    <aura:attribute name="showBackButton" type="Boolean" default="false" />
+    <aura:attribute name="termRecord" type="Object"/>
+    <aura:attribute name="recordLoadError" type="String"/>
+    
+    <force:recordData aura:id="recordLoader"
+                      layoutType = "FULL"
+                      recordId="{!v.recordId}"
+                      fields="Class__c"
+                      targetFields="{!v.termRecord}"
+                      targetError="{!v.recordLoadError}"
+                      recordUpdated="{!c.doInit}"
+                      />
+    
+    <!-- Use the Apex model and controller to fetch server side data -->
+    
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium modal2"  aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+        <div class="slds-modal__container" style="min-width:1050px;">
+            <header class="slds-modal__header slds-text-align_left slds-p-around_small">                  
+                <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate title slds-text-heading_xx-small" >Schedule Sessions </h2>
+            </header>
+            <aura:if isTrue="{!v.showSpinner}">
+                <lightning:card>
+                    <lightning:spinner name="mySpinner" variant="brand" size="medium" style="min-height:65vh;min-width:950px;"/>
+                </lightning:card>
+            </aura:if>
+            <div class="slds-modal__content slds-p-vertical_small slds-p-horizontal_large  slds-scrollable" id="modal-content-id-1" style="min-height:50vh;min-width:1050px;">
+                <table class="slds-table slds-table_cell-buffer  slds-table_bordered">
+                    <thead>          
+                        <tr class="slds-text-heading--small"> 
+                            <th scope="col"><span class="slds-truncate">Sr No.</span></th>
+                            <th scope="col"><span class="slds-truncate">Session Date</span></th>
+                            <th scope="col"><span class="slds-truncate">Session Day</span></th>
+                            <th scope="col"><span class="slds-truncate">Start Time</span></th>
+                            <th scope="col"><span class="slds-truncate">End Time</span></th>
+                            <!-- <th scope="col"><span class="slds-truncate">Module</span></th>
+                                <th scope="col"><span class="slds-truncate">Lesson</span></th>-->
+                            <th scope="col"><span class="slds-truncate">Teacher</span></th>
+                            <th scope="col"><span class="slds-truncate">Remarks</span></th>
+                        </tr>            
+                    </thead>
+                    <tbody>
+                        <aura:iteration items="{!v.sessionList}" var="sess" indexVar="key">
+                            <tr>                   
+                                <th scope="row">{!sess.seqNo}</th>                      
+                                <td>{!sess.stDate}</td>
+                                <td>{!sess.sessDay}</td>
+                                <td><lightning:formattedDateTime value="{!sess.stTime}" hour="2-digit" minute="2-digit" second="2-digit" hour12="true" timeZone="UTC" /></td>
+                                <td><lightning:formattedDateTime value="{!sess.edTime}" hour="2-digit" minute="2-digit" second="2-digit" hour12="true" timeZone="UTC" /></td>
+                                <!--<td>{!sess.module}</td>
+                                    <td>{!sess.lesson}</td>-->
+                                <td>
+                                    <!--<c:AutoCompleteCmp Label="" inputId="tchrId" slcdIndex="{!key}" objectApiName="Account" borderColor="{!sess.isOnLeave ? 'red': ''}" type="Teacher" valueFieldApiName="Name" extendedWhereClause=" AND Recordtype.name = 'Teacher' " placeHolder="Search Teacher..." selectedOption="{!sess.tchrId}" inputValue="{!sess.tchrName}"/>-->
+                                    <!--  <c:AutoCompleteCmp showLabel="false" type="Student" extendedWhereClause="{!v.contactDetail.Id}" valueFieldApiName="FirstName" placeHolder="Search Student.." inputId="{!key+'_student'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!stuWraper.studentDetails.Id}" inputValue="{!stuWraper.studentDetails.FirstName}"/>-->
+                                    <!--<c:AutoCompleteCmp showLabel="false" type="Teacher" borderColor="{!sess.isOnLeave ? 'red': ''}" extendedWhereClause=" AND Recordtype.name = 'Teacher' " valueFieldApiName="Name" placeHolder="Search Teacher.." inputId="{!key+'_tchrId'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!sess.tchrId}" inputValue="{!sess.tchrName}"/>-->
+                                    <c:AutoCompleteCmp showLabel="false" type="Teacher" borderColor="{!sess.isShowMessageOnRemarks ? 'red': ''}" extendedWhereClause=" AND Recordtype.name = 'Teacher' " valueFieldApiName="Name" placeHolder="Search Teacher.." inputId="{!key+'_tchrId'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!sess.tchrId}" inputValue="{!sess.tchrName}"/>
+                                    <aura:if isTrue="{!sess.isShowMessageOnRemarks}">
+                                        <div Class="slds-text-color_error">Teacher is not available</div>
+                                    </aura:if>
+                                </td>
+                                <td><!--<lightning:input variant = "label-hidden" value="{!sess.remarks}" name="isOnLeave"/>-->
+                                    <lightning:textarea variant = "label-hidden" value="{!sess.remarks}" name="isOnLeave" />
+                                </td>
+                            </tr>
+                        </aura:iteration>
+                    </tbody>
+                </table>
+            </div>
+            <footer class="slds-modal__footer slds-p-vertical_medium">
+                <lightning:button label="Close" onclick="{!c.closeQuickActionModel}" variant="destructive" title="Base action" iconName="utility:close"  class="slds-m-right_medium" />
+                <span>
+                        <lightning:button label="Save" onclick="{!c.saveQuickActionModel}" variant="brand"  title="Base action" iconName="utility:download" />
+                </span>                   
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open "></div>            
+</aura:component>

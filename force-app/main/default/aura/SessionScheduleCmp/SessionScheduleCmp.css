@@ -1,0 +1,7 @@
+.THIS .border{   
+  outline: solid; 
+  outline-color: red;
+}
+.THIS .pqr{
+    box-shadow: 0 7px 6px 0 rgba(0, 0, 0, 0.3);
+}

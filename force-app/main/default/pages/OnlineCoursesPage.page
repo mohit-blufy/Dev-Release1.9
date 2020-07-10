@@ -1,0 +1,134 @@
+<apex:page controller="OnlineCoursesPageController" lightningStylesheets="true" docType="html-5.0" sidebar="false" showHeader="false">
+   <!-- <apex:slds />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <style>
+        .title {
+        background-color: #2f5597;
+        padding: 8px 15px !important;
+        font-weight: bold;
+        color: #fff;
+        }
+        .slds-media__figure{
+        width:20px;
+        }
+        .course2{margin-bottom:20px; }
+        .course2 > .slds-grid{
+        transition: all .25s cubic-bezier(.645,.045,.355,1);
+        border-radius:8px;
+        cursor:pointer;
+        overflow:hidden;
+        border:1px solid #ccc;
+        }
+        .course2:hover > .slds-grid{
+        box-shadow: 0 7px 40px rgba(0,0,0,.05);
+        }
+        div.panel {
+        display: none;
+        }
+        .panel > span > .slds-grid{
+        border-top: 1px solid #ccc ;
+        }
+    
+        
+        div.panel.show {
+        display: block !important;
+        }
+        .highlight{
+        background:#f9f9f9;
+        }
+        .filters .slds-form-element__label {padding-top:0px !important;}
+    </style>
+    
+    <apex:form id="crsSearch">
+        <apex:pageMessages ></apex:pageMessages>
+        <apex:actionStatus id="Status">
+            <apex:facet name="start">
+                <div class="slds-spinner_container slds-is-fixed">
+                    <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                        <span class="slds-assistive-text">Loading</span>
+                        <div class="slds-spinner__dot-a"></div>
+                        <div class="slds-spinner__dot-b"></div>
+                    </div>
+                </div>           
+            </apex:facet>
+        </apex:actionStatus>
+        <div class="slds-grid bg slds-grid_align-center slds-p-bottom_xx-large" >
+            <div class="slds-large-size_10-of-12 " style="background-color: #fff; ">
+                <p class="slds-p-top_xx-small slds-p-left_small slds-m-horizontal_xx-large">
+                    <img style="width:130px;" src="https://blufydev-dev-ed--c.documentforce.com/servlet/servlet.ImageServer?id=0152v00000HLYX8&oid=00D2v000002i6Vi&lastMod=1590035357000" /></p>
+                <br/>
+                <br/>   
+                <p class="slds-text-heading_small  slds-m-horizontal_xx-large slds-p-left_small slds-p-bottom_small" style="font-weight:bold;">Filters Options</p>
+                <div class="highlight filters slds-m-horizontal_xx-large" style="border-radius:6px; border:1px solid #ccc;">
+                <apex:outputPanel layout="block" styleClass="slds-grid slds-wrap slds-gutters slds-m-horizontal_large slds-p-vertical_small" id="filters" style="">
+                    <apex:outputPanel styleClass="slds-size_1-of-{!countFilter}" rendered="{!listLocation.size > 0}">
+                        <div class="slds-p-horizontal_small">
+                            <div class="slds-form-element">
+                                <span class="slds-form-element__addon" id="fixed-text-addon-pre"><i class="fa fa-map-marker "></i></span>
+                                <apex:outputLabel styleClass="slds-form-element__label " rendered="{!listLocation.size > 0}">Location</apex:outputLabel>    
+                                <div class="slds-form-element__control slds-input-has-fixed-addon">  
+                                    <apex:selectList styleClass="slds-input" style="width:90%" value="{!location}" multiselect="false" size="1" rendered="{!listLocation.size > 0}">
+                                        <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                        <apex:selectOptions value="{!listLocation}"/>
+                                        <apex:actionSupport event="onchange" reRender="crsSearch" status="Status"/>
+                                    </apex:selectList>
+                                </div>
+                            </div>
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel styleClass="slds-size_1-of-{!countFilter}" rendered="{!listCategory.size > 0}">
+                        <div class="slds-p-horizontal_small">      
+                            <div class="slds-form-element">
+                                <span class="slds-form-element__addon" id="fixed-text-addon-pre"><i class="fa fa-list "></i></span>
+                                <apex:outputLabel styleClass="slds-form-element__label" rendered="{!listCategory.size > 0}">Category</apex:outputLabel>
+                                <div class="slds-form-element__control slds-input-has-fixed-addon">  
+                                    <apex:selectList styleClass="slds-input" style="width:90%" label="Category" value="{!category}" multiselect="false" size="1" rendered="{!listCategory.size > 0}">
+                                        <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                        <apex:selectOptions value="{!listCategory}"/>
+                                        <apex:actionSupport event="onchange" reRender="crsSearch" status="Status"/>
+                                    </apex:selectList>
+                                </div>
+                            </div>                                          
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel styleClass="slds-size_1-of-{!countFilter}" rendered="{!listLevel.size > 0}">
+                        <div class="slds-p-horizontal_small">
+                            <div class="slds-form-element">
+                                <span class="slds-form-element__addon" id="fixed-text-addon-pre"> <i class="fa fa-bar-chart"></i></span>
+                                <apex:outputLabel styleClass="slds-form-element__label" rendered="{!listLevel.size > 0}">Level</apex:outputLabel>      
+                                <div class="slds-form-element__control slds-input-has-fixed-addon">  
+                                    <apex:selectList style="width:90%" styleClass="slds-input" label="Level" value="{!level}" multiselect="false" size="1" rendered="{!listLevel.size > 0}">
+                                        <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                        <apex:selectOptions value="{!listLevel}"/>
+                                        <apex:actionSupport event="onchange" reRender="crsSearch" status="Status"/>
+                                    </apex:selectList>
+                                </div>
+                            </div>                                             
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel styleClass="slds-size_1-of-{!countFilter}" rendered="{!listType.size > 0}">
+                        <div class="slds-p-horizontal_small">  
+                            <div class="slds-form-element">
+                                <span class="slds-form-element__addon" id="fixed-text-addon-pre"> <i class="fa fa-child"></i></span>
+                                <apex:outputLabel styleClass="slds-form-element__label" rendered="{!listType.size > 0}">Type</apex:outputLabel>
+                                <div class="slds-form-element__control slds-input-has-fixed-addon">  
+                                    <apex:selectList style="width:90%" styleClass="slds-input" label="Type" value="{!type}" multiselect="false" size="1" rendered="{!listType.size > 0}">
+                                        <apex:selectOption itemLabel="--None--" itemvalue="" />
+                                        <apex:selectOptions value="{!listType}"/>
+                                        <apex:actionSupport event="onchange" reRender="crsSearch" status="Status"/>
+                                    </apex:selectList>
+                                </div>
+                            </div>                                             
+                        </div>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+                </div>
+                <br/><br/>
+                <apex:outputPanel >
+                    <c:SearchCoursesComp searchLocation="{!location}" searchCategory="{!category}" searchLevel="{!level}" searchType="{!type}"/>
+                </apex:outputPanel>
+            </div>
+        </div>
+    </apex:form>
+    -->
+</apex:page>

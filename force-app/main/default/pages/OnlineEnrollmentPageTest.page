@@ -1,0 +1,551 @@
+<apex:page standardStylesheets="true"  docType="html-5.0" >
+   <apex:slds />
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+   <style>
+      .title {
+      background-color: #2f5597;
+      padding: 8px 15px !important;
+      font-weight: bold;
+      color: #fff;
+      }
+      .slds-media__figure{
+width:25px;
+}
+      .course2{margin-bottom:20px;}
+      .course2 > .slds-grid{
+      transition: all .25s cubic-bezier(.645,.045,.355,1);
+      border-radius:8px;
+      cursor:pointer;
+      border:1px solid #ccc;
+      }
+      .course2:hover > .slds-grid{
+      box-shadow: 0 7px 40px rgba(0,0,0,.05);
+      }
+      div.panel {
+    display: none;
+    }
+    .panel > .slds-grid{
+    border: 1px solid #ccc;
+    border-bottom: 0px ;
+    }
+     .panel > .slds-grid:nth-last-child{
+    border-bottom: 1px !important;
+    }
+    .panel > .slds-grid:nth-child(2n){
+  background:#f4f4f4;
+}
+
+        div.panel.show {
+            display: block !important;
+            border-bottom: 1px solid #ccc;
+        }
+   </style>
+  
+   <div class="slds-grid bg slds-grid_align-center slds-p-bottom_xx-large" >
+      <div class="slds-large-size_10-of-12 " style="background-color: #fff; ">
+         <br/>
+         <br/>   
+         <p class="slds-text-heading_small  slds-m-horizontal_xx-large slds-p-left_small" style="font-weight:bold;">Filters Options</p>
+         <div class="slds-grid slds-wrap slds-gutters slds-m-horizontal_xx-large slds-p-vertical_small" style="background-color:light-gray;  ">
+            <div class="slds-col" >
+               <div class="slds-form-element">
+                  <div class="slds-form-element__control slds-input-has-fixed-addon">
+                     <span class="slds-form-element__addon" id="fixed-text-addon-pre"><i class="fa  fa-map-marker "></i></span>
+                     <input type="text" id="text-input-id-1" placeholder="Location" aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input" />
+                  </div>
+               </div>
+            </div>
+            <div class="slds-col" >
+               <div class="slds-form-element">
+                  <div class="slds-form-element__control slds-input-has-fixed-addon">
+                     <span class="slds-form-element__addon" id="fixed-text-addon-pre"><i class="fa   fa-list "></i></span>
+                     <input type="text" id="text-input-id-1" placeholder="Category" aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input" />
+                  </div>
+               </div>
+            </div>
+            <div class="slds-col" >
+               <div class="slds-form-element">
+                  <div class="slds-form-element__control slds-input-has-fixed-addon">
+                     <span class="slds-form-element__addon" id="fixed-text-addon-pre"> <i class="fa   fa-bar-chart"></i></span>
+                     <input type="text" id="text-input-id-1" placeholder="Level" aria-labelledby="fixed-text-label fixed-text-addon-pre fixed-text-addon-post" class="slds-input" />
+                  </div>
+               </div>
+            </div>
+         </div>
+         
+         <!-- End Filters -->
+         
+         
+         <div class="course2">
+            <div class="slds-grid slds-m-horizontal_xx-large">
+             <div class="slds-size_12-of-12">
+             <div class="slds-grid slds-gutters slds-wrap  slds-grid_align-center  ">
+               <div class="slds-col slds-large-size_2-of-12 slds-p-top_medium">
+                  <img src="{!$Resource.eng}"  alt="English" style="border:1px solid #ccc; border-radius:50%; " class="slds-m-left_small" />
+               </div>
+               <div class="slds-col slds-large-size_10-of-12  slds-p-horizontal_medium slds-p-top_medium">
+                  <div class="slds-grid slds-wrap">
+                     <div class="slds-large-size_7-of-12">
+                        <p class="slds-text-heading_medium"><strong>English Course </strong> <span class="slds-text-heading_small">(8 Yrs)</span></p>
+                     </div>
+                     <div class="slds-large-size_5-of-12 slds-text-align_right">
+                     </div>
+                  </div>
+                  <p class="slds-text-size_small slds-p-top_small">Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Donec pellentesque efficitur turpis, vitae dictum dolor tristique in. Mauris tristique id urna at cursus. </p>
+                  <div class="slds-grid slds-wrap">
+                     <div class="slds-large-size_7-of-12">
+                        <p style="color:#8c89a2;" class="slds-p-top_small"><i class="fa fa-calendar slds-p-right_small"></i><strong>26 April, 2020</strong> &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <i class="fa fa-clock-o slds-p-right_small"></i><strong>11 AM</strong></p>
+                     </div>
+                     <!--<div class="slds-large-size_5-of-12 slds-text-align_right ">
+                        <button class="slds-button slds-button_brand accordion" onclick="accordion();">
+                        <i class="fa fa-list slds-p-right_small"></i>Course Details</button>
+                     </div>-->
+                  </div>
+                  </div>
+                  </div>
+                  <div class="slds-text-align_right slds-p-horizontal_medium">
+                  <button class="slds-button slds-button_brand accordion" style="margin-top:-100px;" >
+                        <i class="fa fa-list slds-p-right_small"></i>Course Details</button>
+                  <div class="panel slds-text-align_left slds-m-vertical_small">
+                    
+            
+<div class="slds-grid  slds-wrap slds-grid_vertical-align-center" style="" >
+    <div class="slds-large-size_3-of-12  " style="    padding-right: .75rem;
+    padding-left: .75rem;">
+    Fees: <strong class="slds-text-heading_small" style="color:green;">$250</strong>
+    <p class="slds-text-heading_small"><strong>English Course </strong> <span class="slds-text-heading_small">(8 Yrs)</span></p>
+
+<p class="slds-p-top_small"> <button class="slds-button slds-button_brand ">
+<i class="fa fa-calendar-check-o  slds-p-right_small"></i>Class Schedule</button></p></div>
+<div class="slds-large-size_9-of-12 slds-text-align_left" style=" border-left:1px dashed #ccc;   padding-right: .75rem;
+    padding-left: .75rem;">     
+<div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread slds-p-top_small">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 6th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 26th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.teacher1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Teacher</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Tracey Chen</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                  
+                                                </div>
+                                                <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>9:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>11:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>  
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.location1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Location</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Paya Labor</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                      
+                                                </div>
+                                                </div>
+                                                
+           
+    </div>
+    
+    
+    <div class="slds-grid  slds-wrap slds-grid_vertical-align-center" style="" >
+    <div class="slds-large-size_3-of-12  " style="    padding-right: .75rem;
+    padding-left: .75rem;">
+    Fees: <strong class="slds-text-heading_small" style="color:green;">$250</strong>
+    <p class="slds-text-heading_small"><strong>English Course </strong> <span class="slds-text-heading_small">(8 Yrs)</span></p>
+
+<p class="slds-p-top_small"> <button class="slds-button slds-button_brand ">
+<i class="fa fa-calendar-check-o  slds-p-right_small"></i>Class Schedule</button></p></div>
+<div class="slds-large-size_9-of-12 slds-text-align_left" style=" border-left:1px dashed #ccc;   padding-right: .75rem;
+    padding-left: .75rem;">     
+<div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread slds-p-top_small">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 6th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 26th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.teacher1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Teacher</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Tracey Chen</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                  
+                                                </div>
+                                                <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>9:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>11:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>  
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.location1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Location</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Paya Labor</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                      
+                                                </div>
+                                                </div>
+                                                
+           
+    </div>
+    
+    
+    
+    
+    <div class="slds-grid  slds-wrap slds-grid_vertical-align-center" style="" >
+    <div class="slds-large-size_3-of-12  " style="    padding-right: .75rem;
+    padding-left: .75rem;">
+    Fees: <strong class="slds-text-heading_small" style="color:green;">$250</strong>
+    <p class="slds-text-heading_small"><strong>English Course </strong> <span class="slds-text-heading_small">(8 Yrs)</span></p>
+
+<p class="slds-p-top_small"> <button class="slds-button slds-button_brand ">
+<i class="fa fa-calendar-check-o  slds-p-right_small"></i>Class Schedule</button></p></div>
+<div class="slds-large-size_9-of-12 slds-text-align_left" style=" border-left:1px dashed #ccc;   padding-right: .75rem;
+    padding-left: .75rem;">     
+<div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread slds-p-top_small">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 6th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 26th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.teacher1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Teacher</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Tracey Chen</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                  
+                                                </div>
+                                                <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>9:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>11:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>  
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.location1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Location</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Paya Labor</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                      
+                                                </div>
+                                                </div>
+                                                
+           
+    </div>
+
+            </div>
+            
+
+
+
+
+
+
+
+
+
+
+
+
+               </div>
+               </div>
+            </div>
+         </div>
+         
+    
+
+ <div class="course2">
+            <div class="slds-grid slds-m-horizontal_xx-large">
+             <div class="slds-size_12-of-12">
+             <div class="slds-grid slds-gutters slds-wrap  slds-grid_align-center  ">
+               <div class="slds-col slds-large-size_2-of-12 slds-p-top_medium">
+                  <img src="{!$Resource.eng}"  alt="English" style="border:1px solid #ccc; border-radius:50%; " class="slds-m-left_small" />
+               </div>
+               <div class="slds-col slds-large-size_10-of-12  slds-p-horizontal_medium slds-p-top_medium">
+                  <div class="slds-grid slds-wrap">
+                     <div class="slds-large-size_7-of-12">
+                        <p class="slds-text-heading_medium"><strong>English Course </strong> <span class="slds-text-heading_small">(8 Yrs)</span></p>
+                     </div>
+                     <div class="slds-large-size_5-of-12 slds-text-align_right">
+                     </div>
+                  </div>
+                  <p class="slds-text-size_small slds-p-top_small">Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Donec pellentesque efficitur turpis, vitae dictum dolor tristique in. Mauris tristique id urna at cursus. </p>
+                  <div class="slds-grid slds-wrap">
+                     <div class="slds-large-size_7-of-12">
+                        <p style="color:#8c89a2;" class="slds-p-top_small"><i class="fa fa-calendar slds-p-right_small"></i><strong>26 April, 2020</strong> &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; <i class="fa fa-clock-o slds-p-right_small"></i><strong>11 AM</strong></p>
+                     </div>
+                     <!--<div class="slds-large-size_5-of-12 slds-text-align_right ">
+                        <button class="slds-button slds-button_brand accordion" onclick="accordion();">
+                        <i class="fa fa-list slds-p-right_small"></i>Course Details</button>
+                     </div>-->
+                  </div>
+                  </div>
+                  </div>
+                  <div class="slds-text-align_right slds-p-horizontal_medium">
+                  <button class="slds-button slds-button_brand accordion" style="margin-top:-100px;" >
+                        <i class="fa fa-list slds-p-right_small"></i>Course Details</button>
+                  <div class="panel slds-text-align_left slds-m-vertical_small">
+                    
+            
+<div class="slds-grid  slds-wrap slds-grid_vertical-align-center" style="" >
+    <div class="slds-large-size_3-of-12  " style="    padding-right: .75rem;
+    padding-left: .75rem;">
+    Fees: <strong class="slds-text-heading_small" style="color:green;">$250</strong>
+    <p class="slds-text-heading_small"><strong>English Course </strong> <span class="slds-text-heading_small">(8 Yrs)</span></p>
+
+<p class="slds-p-top_small"> <button class="slds-button slds-button_brand ">
+<i class="fa fa-calendar-check-o  slds-p-right_small"></i>Class Schedule</button></p></div>
+<div class="slds-large-size_9-of-12 slds-text-align_left" style=" border-left:1px dashed #ccc;   padding-right: .75rem;
+    padding-left: .75rem;">     
+<div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread slds-p-top_small">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 6th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.date}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Date</p>
+                                                                <p class="slds-text-heading_x-small"><strong>April 26th </strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.teacher1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Teacher</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Tracey Chen</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                  
+                                                </div>
+                                                <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-grid_align-spread">
+                                                    <div class="slds-col slds-medium-size_4-of-12">                                                        
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                                <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Start Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>9:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.time}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">End Time</p>
+                                                                <p class="slds-text-heading_x-small"><strong>11:00 AM</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>  
+                                                    <div class="slds-col slds-medium-size_4-of-12">
+                                                        <div class="slds-media slds-media_center  slds-p-bottom_medium">
+                                                            <div class="slds-media__figure">
+                                                               <img src="{!$Resource.location1}" />
+                                                            </div>
+                                                            <div class="slds-media__body">
+                                                                <p class="slds-text-body_small">Location</p>
+                                                                <p class="slds-text-heading_x-small"><strong>Paya Labor</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                      
+                                                </div>
+                                                </div>
+                                                
+                                            
+            
+    </div>
+            </div>
+            
+
+               </div>
+               </div>
+            </div>
+         </div> 
+         
+         
+
+         <br/>
+         <br/>
+      </div>
+   </div>
+   
+    <script>
+    
+var acc = document.getElementsByClassName("accordion");
+var panel = document.getElementsByClassName('panel');
+
+for (var i = 0; i < acc.length; i++) {
+console.log("for");
+    acc[i].onclick = function(x) {
+    console.log("onclick");
+        var setClasses = !this.classList.contains('active');
+        setClass(acc, 'active', 'remove');
+        setClass(panel, 'show', 'remove');
+        
+        if(setClasses){
+            this.classList.toggle("active");
+            this.nextElementSibling.classList.toggle("show");
+        }
+    }
+}
+
+function setClass(els, className, fnName) {
+    for (var i = 0; i < els.length; i++) {
+        els[i].classList[fnName](className);
+    }
+}
+   </script>
+</apex:page>

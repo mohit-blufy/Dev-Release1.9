@@ -1,0 +1,191 @@
+<apex:component controller="SessionActionController">
+   <apex:attribute name="sessionName" type="String" description="for Session Name" />
+    <style>
+        .custom-name {
+            font-size: 15px;
+            line-height: 1.5rem;            
+        }
+
+        .custom-email-phone {
+            font-size: small;
+            padding: 0px 0px 2px 4px;
+        }
+    </style>
+    <script>
+        var keywordToSearch = '';
+        var timer = '';
+        var isOnTheList = false;
+
+        function getStudentRecordsFomSF() {
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.SessionActionController.getStudentRecords}',
+                keywordToSearch,
+                function (result, event) {
+                    document.getElementById("spinner").style.display = "none";
+                    console.log(event.status);
+                    console.log('result--> ', result);
+                    document.querySelector('.ul-list').innerText = '';
+                    if (result) {
+                        let listOfSearchData = '';
+                        result.forEach(ele => {
+                            console.log('ele ->', ele);
+                            let newListElement = document.createElement('li');
+                            newListElement.classList.add('slds-listbox__item');
+                            //listOfSearchData += '<li role="presentation" class="slds-listbox__item">';
+                            listOfSearchData = '<div  class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option">';
+                            listOfSearchData += '<span class="slds-media__figure slds-listbox__option-icon"></span>';
+                            listOfSearchData += '<span class="slds-media__body">';
+                            listOfSearchData += '<span class="slds-truncate custom-name " >' + ele.Name + '</span>';
+
+                            if (ele.PersonEmail) {
+                                listOfSearchData += '<span class="slds-listbox__option-meta custom-email-phone">';
+                                listOfSearchData += '<span class="slds-media__figure slds-listbox__option-icon">';
+                                listOfSearchData += '<span class="slds-icon_container slds-icon-utility-anchor slds-current-color">';
+                                listOfSearchData += '<svg class="slds-icon slds-icon_x-small" aria-hidden="true">';
+                                listOfSearchData += "<use xlink:href=" + "{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#email')}" + "></use>";
+                                listOfSearchData += ' </svg>';
+                                listOfSearchData += '</span>';
+                                listOfSearchData += '</span>' + ele.PersonEmail + '</span>';
+                            }
+                            if (ele.Phone) {
+                                listOfSearchData += '<span class="slds-listbox__option-meta custom-email-phone">';
+                                listOfSearchData += '<span class="slds-media__figure slds-listbox__option-icon">';
+                                listOfSearchData += '<span class="slds-icon_container slds-icon-utility-anchor slds-current-color">';
+                                listOfSearchData += '<svg class="slds-icon slds-icon_x-small" aria-hidden="true">';
+                                listOfSearchData += "<use xlink:href=" + "{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#call')}" + "></use>";
+                                listOfSearchData += ' </svg>';
+                                listOfSearchData += '</span>';
+                                listOfSearchData += '</span>' + ele.Phone + '</span>';
+                            }
+
+                            listOfSearchData += '</span>';
+                            listOfSearchData += '</div>';
+                            //listOfSearchData += '</li>';
+                            newListElement.innerHTML = listOfSearchData;
+                            let ulContent = document.querySelector('.ul-list');
+                            ulContent.append(newListElement);
+                            console.log('12');
+                        });
+                    } else {
+                        let newListElement = document.createElement('li');
+                        newListElement.classList.add('slds-listbox__item');
+                        listOfSearchData = '<div id="option1" class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option">';
+                        listOfSearchData += '<span class="slds-media__figure slds-listbox__option-icon"></span>';
+                        listOfSearchData += '<span class="slds-media__body">';
+                        listOfSearchData += '<span class="slds-truncate"><b>Not Records Found</b></span>';
+                        listOfSearchData += '</span>';
+                        listOfSearchData += '</div>';
+                        newListElement.innerHTML = listOfSearchData;
+                        let ulContent = document.querySelector('.ul-list');
+                        ulContent.append(newListElement);
+                    }
+                },
+                { escape: true }
+            );
+        }
+
+        function showStudentList(event) {
+            console.log(event);
+            if (event) {
+                document.querySelector('.student-search-combobox').classList.add('slds-is-open');
+                keywordToSearch = event.value;
+
+                clearTimeout(timer);
+                let timeItnveral = setTimeout(function () {
+                    getStudentRecordsFomSF();
+                    clearTimeout(timer);
+                    time = null;
+                }, 500);
+
+                timer = timeItnveral;
+
+            } else if (document.querySelector('.student-search-combobox').className.includes('slds-is-open')) {
+                document.querySelector('.student-search-combobox').classList.remove('slds-is-open');
+            } else {
+                getStudentRecordsFomSF()
+                document.querySelector('.student-search-combobox').classList.add('slds-is-open');
+            }
+        }
+
+        function handleMouseIn() {
+            isOnTheList = true;
+        }
+
+        function handleMouseOut() {
+            isOnTheList = false;
+        }
+
+        function handleOnblur() {
+            if (isOnTheList == false) {
+                document.querySelector('.student-search-combobox').classList.remove('slds-is-open');
+            }
+        }
+    </script>
+
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-labelledby="modal-heading-01"
+        aria-modal="true" aria-describedby="modal-content-id-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                </button>
+                <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Add Make-up</h2>
+            </header>
+            <!--Modal Box Content Start-->
+            <div class="slds-modal__content" style="min-height: 300px;">
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_6-of-12">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-combobox_container">
+                                    <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click student-search-combobox" aria-expanded="false"
+                                        aria-haspopup="listbox" role="combobox">
+                                        <div class="slds-combobox__form-element slds-m-top_xx-small slds-p-left_small" role="none">
+                                            <input type="text" class="slds-input slds-combobox__input" aria-controls="listbox-id-1" onblur="handleOnblur();" autoComplete="off"
+                                                role="textbox" onclick="showStudentList();" onkeypress="showStudentList(this);"
+                                                placeholder='Enter the Student Name' />
+                                        </div>
+                                        <div id="listbox-id-2" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid slds-m-left_small" role="listbox"
+                                            onmouseover="handleMouseIn()" onmouseout="handleMouseOut()">
+                                            <ul class="slds-listbox slds-listbox_verticaln ul-list" role="presentation">
+
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_6-of-12">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <div class="slds-combobox_container slds-has-selection">
+                                    <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" aria-expanded="false" aria-haspopup="listbox"
+                                        role="combobox">
+                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left-right slds-m-top_xx-small slds-p-right_small"
+                                            role="none">
+                                            <span class="slds-icon_container slds-icon-standard-account slds-combobox__input-entity-icon" title="Account">
+                                                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                    <use xlink:href="{!URLFOR($Asset.SLDS, '/assets/icons/custom-sprite/svg/symbols.svg#custom27')}"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Session</span>
+                                            </span>
+                                            <input type="text" class="slds-input slds-combobox__input slds-combobox__input-value" id="combobox-id-5" aria-controls="listbox-id-5"
+                                                autoComplete="off" role="textbox" placeholder="Select an Option" readonly="true" 
+                                                value="{!sessionName}" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral custom-mini-modal-button" name="Cancel">Cancel</button>
+                <button class="slds-button slds-button_brand  custom-mini-modal-button" name="Save">Save</button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+
+</apex:component>
