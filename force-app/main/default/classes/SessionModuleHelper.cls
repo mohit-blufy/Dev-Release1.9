@@ -1,5 +1,16 @@
+/**
+Name        :   SessionModuleHelper
+Date        :   
+Description :   This class is use for to align the session module records with module lesson
+*/
 public class SessionModuleHelper {
     
+     /**
+    Name        :  insertSessionModule
+    Date        :  
+    Description :  This function is use for to align module lesson and insert session module records
+    Dev         :  Asif
+    */
     public static void insertSessionModule(List<Session__c> sessionLst){
         if(sessionLst.size() > 0){
             Map<Id,List<Session__c>> sessionMap = new Map<Id,List<Session__c>>();
@@ -72,7 +83,7 @@ public class SessionModuleHelper {
                             //getting module lesson records based on module ids
                             if(newModuleIds.size() > 0){
                                 for(Module_Lesson__c moduleObj : moduleLessonList){
-                                    if(newModuleIds.contains(moduleObj.Module__c) && moduleObj.Sequence__c <= clsObj.Current_Course_Module__r.Sequence__c){
+                                    if(newModuleIds.contains(moduleObj.Module__c) && moduleObj.Sequence__c >= clsObj.Current_Course_Module__r.Sequence__c){
                                         mdList.add(moduleObj);
                                     }
                                 }
