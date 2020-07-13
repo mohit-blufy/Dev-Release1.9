@@ -18,10 +18,10 @@ public class SessionModuleHelper {
             Set<id> courseIds = new Set<id>();
             Set<Id> moduleIds = new Set<Id>();
 
-            ClasData clsDataObj = new ClasData();
-            ModuleLessonData modLessonDataObj = new ModuleLessonData();
-            CourseModuleData courseModDataObj = new CourseModuleData();
-            SessionModuleData sModObj = new SessionModuleData();
+            ClassService clsDataObj = new ClassService();
+            ModuleLessonService modLessonDataObj = new ModuleLessonService();
+            CourseModuleService courseModDataObj = new CourseModuleService();
+            SessionModuleService sModObj = new SessionModuleService();
 
            // Set<Integer> classCurrentModuleSequence = new set<Integer>();
             List<Session_Module__c> sessionModList = new List<Session_Module__c>();

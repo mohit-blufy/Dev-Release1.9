@@ -3,15 +3,14 @@ Name        :   ClassService
 Date        :   11 JULY 2020
 Description :   This class is use for to perform DML operation on Class Object
 */
-public  class ClassService extends Entity{   
+public  class ClassService{   
     
     /**
     Name        :  getClassData
     Date        :  10-07-20
     Description :  This function is use for to get the class data based on class set Ids
     Dev         :  Asif
-    */
-	//Added by Asif on 
+    */	
 	public List<Class__c> getClassData(Set<id> classId){
         if(!classid.isEmpty()){
             try {
