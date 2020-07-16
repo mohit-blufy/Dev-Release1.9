@@ -11,7 +11,7 @@ public class CourseModuleService {
     Description :  This function is use for to get the Course_Module__c data based on courseId set Ids
     Dev         :  Asif
     */	
-    public List<Course_Module__c> getCourseModule(Set<Id> courseId){
+    public static List<Course_Module__c> getCourseModule(Set<Id> courseId){
         try{
             if(!courseId.isEmpty()){
                 List<Course_Module__c> courseModList = new List<Course_Module__c>();

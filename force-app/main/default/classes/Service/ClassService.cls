@@ -11,7 +11,7 @@ public  class ClassService{
     Description :  This function is use for to get the class data based on class set Ids
     Dev         :  Asif
     */	
-	public List<Class__c> getClassData(Set<id> classId){
+	public static List<Class__c> getClassData(Set<id> classId){
         if(!classid.isEmpty()){
             try {
                 List<Class__c> clasList = new List<Class__c>();

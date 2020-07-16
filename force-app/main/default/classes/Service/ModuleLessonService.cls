@@ -11,7 +11,7 @@ public class ModuleLessonService {
     Description :  This function is use for to get the Module_Lesson__c data based on moduleIds set Ids
     Dev         :  Asif
     */	
-    public list<Module_Lesson__c> getModuleLessons(Set<Id> moduleIds){
+    public static list<Module_Lesson__c> getModuleLessons(Set<Id> moduleIds){
         try{
             if(!moduleIds.isEmpty()){
                 list<Module_Lesson__c	> modLessonList = new list<Module_Lesson__c	>();

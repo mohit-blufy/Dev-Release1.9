@@ -1,6 +1,17 @@
+/**
+Name        :   AccountTriggerHelper
+Date        :   08-07-20
+Description :   This class is a helper of account trigger
+Dev         :   Asif
+*/
 public  class AccountTriggerHelper {
-   
-    public void createTeacherWorkingHours(List<Account> accList){
+   /**
+    Name        :   createTeacherWorkingHours
+    Date        :   08-07-20
+    Description :   insert teaacher working hours
+    Dev         :   Asif
+    */
+    public static void createTeacherWorkingHours(List<Account> accList){
         if(accList.size() > 0){          
             Map<Id,List<Location_Working_Hours__c>> locationHoursMap = new Map<Id,List<Location_Working_Hours__c>>();
             List<Teacher_Working_Hours__c> teacherWorkingHoursList = new List<Teacher_Working_Hours__c>();
@@ -15,8 +26,8 @@ public  class AccountTriggerHelper {
             }
             
             if(accIds.size() > 0){
-                LocationWorkingHoursService locationClsObj = new LocationWorkingHoursService();
-                List<Location_Working_Hours__c> locationList = locationClsObj.getLocationWorkingHoursRecords(accIds);
+                // LocationWorkingHoursService locationClsObj = new LocationWorkingHoursService();
+                List<Location_Working_Hours__c> locationList = LocationWorkingHoursService.getLocationWorkingHoursRecords(accIds);
                 if(locationList.size() > 0){
                     for(Location_Working_Hours__c locationObj : locationList){
                         List<Location_Working_Hours__c> hoursList = new List<Location_Working_Hours__c>();
@@ -47,8 +58,8 @@ public  class AccountTriggerHelper {
                         }
                     }
                     if(teacherWorkingHoursList.size() > 0){
-                        TeacherWorkingHoursService teacherWorkingHourObj = new TeacherWorkingHoursService();
-                        teacherWorkingHourObj.insertTeacherWorkingHours(teacherWorkingHoursList);                        
+                        // TeacherWorkingHoursService teacherWorkingHourObj = new TeacherWorkingHoursService();
+                        TeacherWorkingHoursService.insertTeacherWorkingHours(teacherWorkingHoursList);                        
                     }
                 }            
             }
