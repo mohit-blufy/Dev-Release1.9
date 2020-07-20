@@ -57,7 +57,7 @@
                         <aura:iteration items="{!v.sessionList}" var="sess" indexVar="key">
                             <tr>                   
                                 <th scope="row">{!sess.seqNo}</th>                      
-                                <td>{!sess.stDate}</td>
+                                <td><ui:outputDate aura:id="oDate" value="{!sess.stDate}" format="{!$Label.c.Components_Date_Format}"/></td>
                                 <td>{!sess.sessDay}</td>
                                 <td><lightning:formattedDateTime value="{!sess.stTime}" hour="2-digit" minute="2-digit" second="2-digit" hour12="true" timeZone="UTC" /></td>
                                 <td><lightning:formattedDateTime value="{!sess.edTime}" hour="2-digit" minute="2-digit" second="2-digit" hour12="true" timeZone="UTC" /></td>

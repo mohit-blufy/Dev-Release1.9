@@ -237,7 +237,7 @@
                                                                 </div>
                                                                 <div class="slds-media__body">
                                                                     <p class="slds-text-body_small">Class Fee</p>
-                                                                    <p class="slds-text-heading_x-small"><strong><!--${!cls.slcdClsWrapObj.fees}--><lightning:formattedNumber value="{!cls.slcdClsWrapObj.fees}" style="currency" currencyCode="USD"/></strong></p>
+                                                                    <p class="slds-text-heading_x-small"><strong><!--${!cls.slcdClsWrapObj.fees}--><lightning:formattedNumber value="{!cls.slcdClsWrapObj.fees}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -252,7 +252,7 @@
                                                                 </div>
                                                                 <div class="slds-media__body">
                                                                     <p class="slds-text-body_small">Start Date</p>
-                                                                    <p class="slds-text-heading_x-small"><strong>{!cls.enrolDate}</strong></p>
+                                                                    <p class="slds-text-heading_x-small"><strong><ui:outputDate aura:id="oDate" value="{!cls.enrolDate}" format="{!$Label.c.Components_Date_Format}"/></strong></p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -308,7 +308,7 @@
                                                                     <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!tf.feeName}:</span></p>
                                                                 </div>
                                                                 <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
-                                                                    <p class="slds-text-body_small slds-text-align_right"><strong><!--${!tf.feeProratedAmount}--><lightning:formattedNumber value="{!(tf.feeProratedAmount > 0 ? tf.feeProratedAmount : tf.feeAmount)}" style="currency" currencyCode="USD"/></strong></p>
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong><!--${!tf.feeProratedAmount}--><lightning:formattedNumber value="{!(tf.feeProratedAmount > 0 ? tf.feeProratedAmount : tf.feeAmount)}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                                                 </div>
                                                             </div>
                                                         </aura:iteration>
@@ -320,7 +320,7 @@
                                                                     <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!rf.feeName}:</span></p>
                                                                 </div>
                                                                 <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
-                                                                    <p class="slds-text-body_small slds-text-align_right"><strong><!--${!rf.feeAmount}--><lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong><!--${!rf.feeAmount}--><lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                                                 </div>
                                                             </div>
                                                         </aura:iteration>
@@ -332,7 +332,7 @@
                                                                     <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!dep.feeName}:</span></p>
                                                                 </div>
                                                                 <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
-                                                                    <p class="slds-text-body_small slds-text-align_right"><strong style="color:green;"><!--{!dep.feeAmount}--><lightning:formattedNumber value="{!dep.feeAmount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong style="color:green;"><!--{!dep.feeAmount}--><lightning:formattedNumber value="{!dep.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                                                 </div>
                                                             </div>
                                                         </aura:iteration>
@@ -344,7 +344,7 @@
                                                                     <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!dis.name}:</span></p>
                                                                 </div>
                                                                 <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
-                                                                    <p class="slds-text-body_small slds-text-align_right"><strong style="color:red;"><!--{!dis.amount}--><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                    <p class="slds-text-body_small slds-text-align_right"><strong style="color:red;"><!--{!dis.amount}--><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                                                 </div>
                                                             </div>
                                                         </aura:iteration>
@@ -356,7 +356,7 @@
                                                                     <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">{!dis.name}:</span></p>
                                                                 </div>
                                                                 <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
-                                                                    <p class="slds-text-body_small slds-text-align_right">$<strong style="color:red;"><!--{!dis.amount}--><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="USD"/></strong></p>
+                                                                    <p class="slds-text-body_small slds-text-align_right">$<strong style="color:red;"><!--{!dis.amount}--><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                                                 </div>
                                                             </div>
                                                         </aura:iteration>
@@ -366,7 +366,7 @@
                                                             <p class="slds-text-body_small"><span class="slds-text-body_small slds-p-right_small">Total:</span></p>
                                                         </div>
                                                         <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
-                                                            <p class="slds-text-body_small slds-text-align_right"><strong><!--${!cls.totWithProratedFee}--><lightning:formattedNumber value="{!cls.totWithProratedFee}" style="currency" currencyCode="USD"/></strong></p>
+                                                            <p class="slds-text-body_small slds-text-align_right"><strong><!--${!cls.totWithProratedFee}--><lightning:formattedNumber value="{!cls.totWithProratedFee}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -386,8 +386,8 @@
                                     <p class="slds-text-body_small slds-text-heading_small" ><strong class="">Enrollment Fee Total:</strong></p>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
-                                    <p class="slds-text-body_small slds-text-align_right slds-text-heading_small"><strong><!--${!v.enrFeeTotAmt}-->
-                                        <lightning:formattedNumber value="{!v.enrFeeTotAmt}" style="currency" currencyCode="USD"/></strong></p>
+                                    <p class="slds-text-body_small slds-text-align_right slds-text-heading_small"><strong><!--${!v.enrFeeTotAmt}-->                               
+                                        <lightning:formattedNumber value="{!v.enrFeeTotAmt}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></p>
                                 </div>
                             </div>
                         </div>
@@ -409,7 +409,7 @@
                             <aura:iteration items="{!v.globalDisList}" var="globalDis" indexVar="j">
                                 <div class="slds-grid slds-gutters border-b-dashed">
                                     <div class="slds-col slds-size_8-of-12 slds-p-bottom_xx-small">{!globalDis.name}</div>
-                                    <div class="slds-col slds-p-bottom_xx-small slds-text-align_right slds-size_4-of-12"><strong style="color:red;"><!--{!globalDis.amount}--><lightning:formattedNumber value="{!globalDis.amount}" style="currency" currencyCode="USD"/></strong></div>
+                                    <div class="slds-col slds-p-bottom_xx-small slds-text-align_right slds-size_4-of-12"><strong style="color:red;"><!--{!globalDis.amount}--><lightning:formattedNumber value="{!globalDis.amount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></div>
                                 </div>
                             </aura:iteration>
                             <aura:if isTrue="{!v.gstAmount > 0}">
@@ -417,7 +417,7 @@
                                     <div class="slds-col slds-size_8-of-12 slds-p-bottom_xx-small">GST Amount</div>
                                     <div class="slds-col slds-p-bottom_xx-small slds-text-align_right slds-size_4-of-12">
                                         <strong class=""><!--${!v.gstAmount}-->
-                                            <lightning:formattedNumber value="{!v.gstAmount}" style="currency" currencyCode="USD"/>
+                                            <lightning:formattedNumber value="{!v.gstAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                         </strong>
                                     </div>
                                 </div>
@@ -429,7 +429,7 @@
                                 <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
                                     <p class="slds-text-body_small slds-text-align_right slds-text-heading_small">
                                         <strong><!--${!v.grandTotAmt}-->
-                                            <lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="USD"/>
+                                            <lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                         </strong>
                                     </p>
                                 </div>
@@ -452,7 +452,7 @@
                 </div>
             </div>
             
-            <h2 class="slds-text-heading_small title"><img src="{!$Resource.pay}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Confirm and Pay &nbsp;&nbsp;<span class="slds-float_right"><!--${!v.grandTotAmt}--><lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="USD"/></span></h2>
+            <h2 class="slds-text-heading_small title"><img src="{!$Resource.pay}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Confirm and Pay &nbsp;&nbsp;<span class="slds-float_right"><!--${!v.grandTotAmt}--><lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></span></h2>
             <div class="slds-p-vertical_small slds-p-horizontal_large">	
                 <div class="slds-grid slds-gutters /*slds-grid_align-spread*/ slds-grid_align-end">
                     <!--<div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small slds-p-right_large" style="border-right:1px dashed rgb(221, 219, 218);">-->
@@ -482,7 +482,7 @@
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><abbr class="slds-required">*</abbr>Payment Amount:</div>
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
                                 <!--<lightning:input name="inputb" aura:id="payReqId" label="" variant = "label-hidden" readonly="true"  placeholder="0" value="{!v.grandTotAmt}" required="true"  />-->
-                                <lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="USD"/>
+                                <lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                             </div>
                         </div>
                         <div class="slds-text-align_right slds-p-vertical_small">
@@ -654,10 +654,10 @@
                                                 <td>{!tf.feeType}</td>
                                                 <td>{!tf.payFrequency}</td>
                                                 <td class="slds-text-align_right">
-                                                    <lightning:formattedNumber value="{!tf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                    <lightning:formattedNumber value="{!tf.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>
                                                 <td class="slds-align_absolute-center">
-                                                    <ui:inputCheckbox text="{!j}" disabled="{!!tf.isOverride}"  value="{!tf.isSelected}"  aura:id="tutionFeeChk" change="{!c.tutionFeeOnCheck}"/>
+                                                    <ui:inputCheckbox text="{!j}" value="{!tf.isSelected}"  aura:id="tutionFeeChk" change="{!c.tutionFeeOnCheck}"/>
                                                 </td>
                                             </tr>        
                                         </aura:iteration>
@@ -685,7 +685,7 @@
                                                 <td><strong>{!rf.feeName}:</strong></td>
                                                 <td colspan="3"></td>
                                                 <td>${!rf.feeAmount}</td>										
-                                                <td><ui:inputCheckbox value="{!rf.isSelected}" disabled="{!!rf.isOverride}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/></td>
+                                                <td><ui:inputCheckbox value="{!rf.isSelected}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/></td>
                                             </tr>
                                         </aura:iteration>
                                     </aura:if>
@@ -695,7 +695,7 @@
                                                 <td><strong>{!dep.feeName}:</strong></td>
                                                 <td colspan="3"></td>
                                                 <td>${!dep.feeAmount}</td>										
-                                                <td><ui:inputCheckbox  value="{!dep.isSelected}" disabled="{!!dep.isOverride}"  aura:id="depFeeFeeChk" change="{!c.feeOnCheck}"/></td>
+                                                <td><ui:inputCheckbox  value="{!dep.isSelected}"  aura:id="depFeeFeeChk" change="{!c.feeOnCheck}"/></td>
                                             </tr>
                                         </aura:iteration>
                                     </aura:if>
@@ -705,7 +705,7 @@
                                                 <td><strong>{!dis.name}:</strong></td>
                                                 <td colspan="3"></td>
                                                 <td>${!dis.amount}</td>										
-                                                <td><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="crsDisFeeFeeChk"  change="{!c.crsDiscountOnCheck}"/></td>
+                                                <td><ui:inputCheckbox value="{!dis.isSelected}" text="{!j}" aura:id="crsDisFeeFeeChk"  change="{!c.crsDiscountOnCheck}"/></td>
                                             </tr>
                                         </aura:iteration>
                                     </aura:if>
@@ -715,7 +715,7 @@
                                                 <td><strong>{!dis.name}:</strong></td>
                                                 <td colspan="3"></td>
                                                 <td>${!dis.amount}</td>										
-                                                <td><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="disFeeFeeChk" change="{!c.discountOnCheck}"/></td>
+                                                <td><ui:inputCheckbox value="{!dis.isSelected}" text="{!j}" aura:id="disFeeFeeChk" change="{!c.discountOnCheck}"/></td>
                                             </tr>
                                         </aura:iteration>
                                     </aura:if>-->
@@ -737,10 +737,10 @@
                                                 <td>{!tf.feeType}</td>
                                                 <td>{!tf.payFrequency}</td>
                                                 <td class="slds-text-align_right">
-                                                	<lightning:formattedNumber value="{!tf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                	<lightning:formattedNumber value="{!tf.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>
                                                 <td class="slds-align_absolute-center">
-                                                    <ui:inputCheckbox text="{!j}" disabled="{!!tf.isOverride}"  value="{!tf.isSelected}"  aura:id="tutionFeeChk" change="{!c.tutionFeeOnCheck}"/>
+                                                    <ui:inputCheckbox text="{!j}" value="{!tf.isSelected}"  aura:id="tutionFeeChk" change="{!c.tutionFeeOnCheck}"/>
                                                 </td>
                                             </tr>        
                                         </aura:iteration>
@@ -753,10 +753,10 @@
                                                 <td>{!rf.feeType}</td>
                                                 <td>{!rf.payFrequency}</td>
                                                 <td class="slds-text-align_right"><!--${!rf.feeAmount}-->
-                                                	<lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                	<lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>
                                                 <td class="slds-align_absolute-center">
-                                                    <ui:inputCheckbox value="{!rf.isSelected}" disabled="{!!rf.isOverride}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
+                                                    <ui:inputCheckbox value="{!rf.isSelected}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
                                                 </td>   
                                              </tr>
                                         </aura:iteration>
@@ -769,10 +769,10 @@
                                                 <td>{!rf.feeType}</td>
                                                 <td>{!rf.payFrequency}</td>
                                                 <td class="slds-text-align_right"><!--${!rf.feeAmount}-->
-                                                	<lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="USD"/>
+                                                	<lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>
                                                 <td class="slds-align_absolute-center">
-                                                    <ui:inputCheckbox value="{!rf.isSelected}" disabled="{!!rf.isOverride}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
+                                                    <ui:inputCheckbox value="{!rf.isSelected}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
                                                 </td>   
                                              </tr>
                                         </aura:iteration>
@@ -786,9 +786,9 @@
                                                 <td>{!dep.feeType}</td>
                                                 <td>{!dep.payFrequency}</td>
                                                 <td class="slds-text-align_right"><!--${!dep.feeAmount}-->
-                                                	<lightning:formattedNumber value="{!dep.feeAmount}" style="currency" currencyCode="USD"/>
+                                                	<lightning:formattedNumber value="{!dep.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>										
-                                                <td class="slds-align_absolute-center"><ui:inputCheckbox  value="{!dep.isSelected}" disabled="{!!dep.isOverride}"  aura:id="depFeeFeeChk" change="{!c.feeOnCheck}"/></td>
+                                                <td class="slds-align_absolute-center"><ui:inputCheckbox  value="{!dep.isSelected}" aura:id="depFeeFeeChk" change="{!c.feeOnCheck}"/></td>
                                             </tr>
                                         </aura:iteration>
                                     </aura:if>
@@ -801,16 +801,16 @@
                                                 <td>{!dis.feeType}</td>
                                                 <td>{!dis.payFrequency}</td>
                                                 <td class="slds-text-align_right">
-                                                	<lightning:formattedNumber value="{!dis.feeAmount}" style="currency" currencyCode="USD"/>
+                                                	<lightning:formattedNumber value="{!dis.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>									
-                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="disFeeFeeChk" change="{!c.discountOnCheck}"/></td>-->
+                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" text="{!j}" aura:id="disFeeFeeChk" change="{!c.discountOnCheck}"/></td>-->
                                             	
                                                 <th></th>
                                                 <td>{!dis.name}</td>
                                                 <td>{!dis.type}</td>
                                                 <td></td>
-                                                <td class="slds-text-align_right"><!--${!dis.amount}--><strong style="color:red;"><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="USD"/></strong></td>										
-                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" disabled="{!!dis.isOverride}" text="{!j}" aura:id="crsDisFeeFeeChk"  change="{!c.crsDiscountOnCheck}"/></td>
+                                                <td class="slds-text-align_right"><!--${!dis.amount}--><strong style="color:red;"><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></td>										
+                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" text="{!j}" aura:id="crsDisFeeFeeChk"  change="{!c.crsDiscountOnCheck}"/></td>
                                             </tr>
                                         </aura:iteration>
                                     </aura:if>
@@ -823,7 +823,7 @@
                                         <td ><strong>Total:</strong></td>
                                         <td colspan="2"></td>
                                         <td class="slds-text-align_right"><!--${!v.slcdCrsObject.totFee}-->
-                                            <p><lightning:formattedNumber value="{!v.slcdCrsObject.totFee}" style="currency" currencyCode="USD"/></p>
+                                            <p><lightning:formattedNumber value="{!v.slcdCrsObject.totFee}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></p>
                                         </td>	
                                         <td></td>
                                     </tr>

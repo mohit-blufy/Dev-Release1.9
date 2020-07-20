@@ -1,52 +1,6 @@
 public class UtilityClass {
     //Its used to fill session records
-    /*public static List<Session__c> createSessionRecords(Class__c classRec,Date startDate,Date endDate,Integer sessionNum){
-        /*, List<Course_Module__c> crsModLst, Map<Id,Module__c> moduleLessonMap
-Map<Integer,Module_Lesson__c> crsModuleSeqMap = new Map<Integer,Module_Lesson__c>();
-Integer sessCount = 1;
-for(Course_Module__c crsMod : crsModLst){
-if(moduleLessonMap.containsKey(crsMod.Module__c) && moduleLessonMap.get(crsMod.Module__c).Module_Lessons__r.size() > 0){
-for(Module_Lesson__c modLess: moduleLessonMap.get(crsMod.Module__c).Module_Lessons__r){
-Decimal modLessDuration = modLess.Lesson__r.Duration__c;
-While(modLessDuration > 0){
-// if(sessCount <= classRec.Sessions__c){
-crsModuleSeqMap.put(sessCount,modLess);
-sessCount++;
-// }
-modLessDuration = modLessDuration - classRec.Duration__c;
-}
-}
-}
-}*/
-        
-/*        List<Session__c> listSession = new List<Session__c>();
-        while(startDate <= endDate){
-            if(classRec.Days_of_Week__c.contains(DateTime.newInstance(startDate.year(), startDate.month(), startDate.day()).format('EEE'))){
-                Session__c sess       = new Session__c();
-                sess.put('Sequence__c',sessionNum + 1);
-                sess.put('Class__c',classRec.Id);
-                sess.put('Teacher__c',classRec.Teacher__c);
-                sess.put('Session_Date__c',startDate);
-                sess.put('Start_Time__c',classRec.Start_Time__c);
-                sess.put('Status__c',ConstantClass.ScheduledStatus);
-                //  sess.put('educato_Duration_Unit__c',classRec.Duration_Unit__c);
-                sess.put('Duration__c',classRec.Duration__c);
-                sess.put('Location__c',classRec.Location__c);
-                sess.put('Type__c',ConstantClass.sessionStandardType);
-                
-                
-                //if(crsModuleSeqMap.get(sessionNum + 1) != null)
-                //  sess.put('Module_Lesson__c',crsModuleSeqMap.get(sessionNum + 1).Id);
-                
-                listSession.add(sess);
-                sessionNum += 1;
-            }
-            startDate = startDate.addDays(1);
-        }
-        return listSession;
-    }
-    */
-    public static List<Session__c> createSessions(Class__c classRec,Date startDate,Date endDate,Decimal sessionNum,
+    public static List<Session__c> createSessions(Class__c classRec,Date startDate,Date endDate,Decimal sessionNum,String classTermId,
                                                   List<Class_Session__c> listClassSession,Decimal sessCounTotal){
                                                       List<Session__c> listSession = new List<Session__c>();
                                                       Integer i = 1;
@@ -62,12 +16,8 @@ modLessDuration = modLessDuration - classRec.Duration__c;
                                                                   sess.put('Duration__c',clsSession.Duration__c);// class session duration
                                                                   sess.put('Status__c',ConstantClass.ScheduledStatus);
                                                                   sess.put('Location__c',classRec.Location__c);
-                                                                  sess.put('Type__c',ConstantClass.sessionStandardType);
-                                                                /*  if(String.isNotBlank(clsTerm.Id))
-                                                                      sess.put('Class_Term__c',clsTerm.Id);
-                                                                  else
-                                                                      sess.Class_Term__r =  clsTerm;
-                                                                  */
+                                                                  sess.put('Type__c',ConstantClass.sessionStandardType);   
+                                                                  sess.put('Class_Term__c',classTermId);
                                                                   if(sessCounTotal != NULL && i <= sessCounTotal){
                                                                       listSession.add(sess);
                                                                       sessionNum += 1;
@@ -100,7 +50,6 @@ modLessDuration = modLessDuration - classRec.Duration__c;
             studentSession.put('Status__c',ConstantClass.ScheduledStatus);
             studentSession.put('Session__c',sess.Id);
         }
-        system.debug('studentSession-->'+studentSession);
         return studentSession;
     }
     
@@ -215,42 +164,58 @@ modLessDuration = modLessDuration - classRec.Duration__c;
     }   
     
     public static Map<String,List<Teacher_Leave__c>> getTeacherLeaves(Set<String> setTeacherId){
-        Map<String,List<Teacher_Leave__c>> mapTeacherIdToTeacherLeave = new Map<String,List<Teacher_Leave__c>>();
-        for(Teacher_Leave__c tchrLv: [SELECT Id, Name, Status__c, Start_Date__c, End_Date__c,Teacher__c 
-                                      FROM Teacher_Leave__c WHERE Teacher__c IN: setTeacherId AND 
-                                      Start_Date__c != null AND End_Date__c != null AND Status__c != 'Rejected']){
-                                          for(Date stDt=tchrLv.Start_Date__c; stDt<=tchrLv.End_Date__c; stDt=stDt.addDays(1)){
-                                              List<Teacher_Leave__c> listTeacherleave = new List<Teacher_Leave__c>();
-                                              if(mapTeacherIdToTeacherLeave.containsKey(tchrLv.Teacher__c))
-                                                  listTeacherleave = mapTeacherIdToTeacherLeave.get(tchrLv.Teacher__c);
-                                              listTeacherleave.add(tchrLv);
-                                              mapTeacherIdToTeacherLeave.put(tchrLv.Teacher__c,listTeacherleave);
-                                          }                                          
-                                      }
-        return mapTeacherIdToTeacherLeave;
+        try{
+            Map<String,List<Teacher_Leave__c>> mapTeacherIdToTeacherLeave = new Map<String,List<Teacher_Leave__c>>();
+            for(Teacher_Leave__c tchrLv: [SELECT Id, Name, Status__c, Start_Date__c, End_Date__c,Teacher__c 
+                                          FROM Teacher_Leave__c WHERE Teacher__c IN: setTeacherId AND 
+                                          Start_Date__c != null AND End_Date__c != null AND Status__c != 'Rejected'
+                                          WITH SECURITY_ENFORCED]){
+                                              for(Date stDt=tchrLv.Start_Date__c; stDt<=tchrLv.End_Date__c; stDt=stDt.addDays(1)){
+                                                  List<Teacher_Leave__c> listTeacherleave = new List<Teacher_Leave__c>();
+                                                  if(mapTeacherIdToTeacherLeave.containsKey(tchrLv.Teacher__c))
+                                                      listTeacherleave = mapTeacherIdToTeacherLeave.get(tchrLv.Teacher__c);
+                                                  listTeacherleave.add(tchrLv);
+                                                  mapTeacherIdToTeacherLeave.put(tchrLv.Teacher__c,listTeacherleave);
+                                              }                                          
+                                          }
+            return mapTeacherIdToTeacherLeave;
+        }catch(System.QueryException e){
+            System.debug('UtilityClass Teacher Leave Method-->'+e.getMessage());
+        }
+        return null;
     }
     
     public static Map<String,List<Teacher_Working_Hours__c>> getTeacherWorkingHour(Set<String> setTeacherId){
-        Map<String,List<Teacher_Working_Hours__c>> mapTeacherIdToTechrWrkHour = new Map<String,List<Teacher_Working_Hours__c>>();
-        for(Teacher_Working_Hours__c techWrkHour : [SELECT Id,Day__c,End_Time__c,Start_Time__c,Active__c,Teacher__c
-                                                    FROM Teacher_Working_Hours__c WHERE Active__c = true AND
-                                                    Teacher__c IN: setTeacherId]){
-                                                        List<Teacher_Working_Hours__c> listTechrWrkHr = new List<Teacher_Working_Hours__c>();
-                                                        if(mapTeacherIdToTechrWrkHour.containsKey(techWrkHour.Teacher__c))
-                                                            listTechrWrkHr = mapTeacherIdToTechrWrkHour.get(techWrkHour.Teacher__c);
-                                                        listTechrWrkHr.add(techWrkHour);
-                                                        mapTeacherIdToTechrWrkHour.put(techWrkHour.Teacher__c,listTechrWrkHr);
-                                                    }
-        return mapTeacherIdToTechrWrkHour;
+        try{
+            Map<String,List<Teacher_Working_Hours__c>> mapTeacherIdToTechrWrkHour = new Map<String,List<Teacher_Working_Hours__c>>();
+            for(Teacher_Working_Hours__c techWrkHour : [SELECT Id,Day__c,End_Time__c,Start_Time__c,Active__c,Teacher__c
+                                                        FROM Teacher_Working_Hours__c WHERE Active__c = true AND
+                                                        Teacher__c IN: setTeacherId WITH SECURITY_ENFORCED]){
+                                                            List<Teacher_Working_Hours__c> listTechrWrkHr = new List<Teacher_Working_Hours__c>();
+                                                            if(mapTeacherIdToTechrWrkHour.containsKey(techWrkHour.Teacher__c))
+                                                                listTechrWrkHr = mapTeacherIdToTechrWrkHour.get(techWrkHour.Teacher__c);
+                                                            listTechrWrkHr.add(techWrkHour);
+                                                            mapTeacherIdToTechrWrkHour.put(techWrkHour.Teacher__c,listTechrWrkHr);
+                                                        }
+            return mapTeacherIdToTechrWrkHour;
+        }catch(System.QueryException e){
+            System.debug('UtilityClass Teacher Working Hour Method-->'+e.getMessage());
+        }
+        return null;
     }
     
     public static List<Holiday__c> getHolidays(){
-        List<Holiday__c> listOfHolidays = new List<Holiday__c>();
-        for (Holiday__c holidays : [Select Id,Start_Date__c,End_Date__c,Start_Time__c,End_Time__c from Holiday__c 
-                                    WHERE Start_Date__c != null]){
-                                        listOfHolidays.add(holidays);
-                                    }
-        return listOfHolidays;
+        try{
+            List<Holiday__c> listOfHolidays = new List<Holiday__c>();
+            for (Holiday__c holidays : [Select Id,Start_Date__c,End_Date__c,Start_Time__c,End_Time__c from Holiday__c 
+                                        WHERE Start_Date__c != null WITH SECURITY_ENFORCED]){
+                                            listOfHolidays.add(holidays);
+                                        }
+            return listOfHolidays;   
+        }catch(System.QueryException e){
+            System.debug('UtilityClass Holiday Method-->'+e.getMessage());
+        }
+        return null;
     }
     
     public static List<Session__c> getUpdatedSessions(Integer sequnNum,Boolean excludePublicHolidays,List<Session__c> sessList,Map<String,List<Teacher_Leave__c>> mapTeacherIdToTeacherLeave,
@@ -285,27 +250,31 @@ modLessDuration = modLessDuration - classRec.Duration__c;
                         }
                     }
                 }
-                List<String> listTeachrId = new List<String>();
+                
                 if(mapTeacherIdToTechrWrkHour.keySet().size() > 0){
                     if(mapTeacherIdToTechrWrkHour.containsKey(sess.Teacher__c)){
                         if(mapTeacherIdToTechrWrkHour.get(sess.Teacher__c) != NULL){
+                            List<String> listTeachrId = new List<String>();
+                            Time sessETime = sess.Start_Time__c.addMinutes(Integer.valueOf(sess.Duration__c));
                             List<Teacher_Working_Hours__c> listTchrWrkHr = mapTeacherIdToTechrWrkHour.get(sess.Teacher__c);
                             for(Teacher_Working_Hours__c techrWrkHr : listTchrWrkHr){
-                                if(sess.Start_Time__c >= techrWrkHr.Start_Time__c && sess.End_Time__c < techrWrkHr.End_Time__c){
+                                if(sess.Start_Time__c >= techrWrkHr.Start_Time__c && sessETime <= techrWrkHr.End_Time__c){
                                     if(techrWrkHr.Day__c.contains(DateTime.newInstance(sess.Session_Date__c.year(),sess.Session_Date__c.month(),sess.Session_Date__c.day()).format('EEE'))){
                                         listTeachrId.add(techrWrkHr.Teacher__c);
                                     }
                                 }
                             }
+                            
+                            if(!listTeachrId.contains(sess.Teacher__c)){         
+                                if(String.isBlank(sess.Notes__c))
+                                    sess.Notes__c = 'Teacher is not available';
+                                else
+                                    sess.Notes__c += ' Teacher is not available';
+                            }
                         }
                     }
                 }
-                if(!listTeachrId.contains(sess.Teacher__c)){         
-                    if(String.isBlank(sess.Notes__c))
-                        sess.Notes__c = 'Teacher is not available';
-                    else
-                        sess.Notes__c += ' Teacher is not available';
-                }
+                
                 
                 if(listOfHolidays.size() > 0){
                     Time sessETime = sess.Start_Time__c.addMinutes(Integer.valueOf(sess.Duration__c));

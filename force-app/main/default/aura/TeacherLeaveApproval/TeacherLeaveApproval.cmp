@@ -84,7 +84,7 @@
                                     <div class="slds-truncate" title="{!item.status}">{!item.status}</div>
                                 </th>
                                 <th data-label="Session Date">
-                                    <div class="slds-truncate" title="{!item.stDate}">{!item.stDate}</div>
+                                    <div class="slds-truncate" title="{!item.stDate}"><ui:outputDate aura:id="oDate" value="{!item.stDate}" format="{!$Label.c.Components_Date_Format}"/></div>
                                 </th>                                                                    
                                 <th data-label="Session Day">
                                     <div class="slds-truncate" title="{!item.sessDay}">{!item.sessDay}

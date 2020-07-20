@@ -26,7 +26,7 @@ public class NewEnrollmentFormCntrl {
         'PersonBirthdate','Relationship_with_contact__c'},false);
     static Boolean isBlufyConfigAccessible = FieldPremissionCrudUtility.checkReadPermission('Blufy_Config__mdt',new Set<String>{'Id','MasterLabel', 
         'Monthly_Invoice_Cycle__c', 'Overlap_Holiday_For_Monthly_Session__c', 'Terms_and_Conditions_Description__c','Terms_and_Conditions_Title__c'},false);
-    static CourseFeeData crsFeeData = new CourseFeeData();
+    //static CourseFeeData crsFeeData = new CourseFeeData();
     
     //Its used for fetch active course records
     @auraEnabled
@@ -118,30 +118,32 @@ crsFeeWrap.totWithProratedFee += fw.feeAmount;
 }                      
 }*/
             //CourseFeeData crsFeeData = new CourseFeeData();
-            List<CourseFee> crFeeLs  = crsFeeData.getByCourseId(crId);
-            if(crFeeLs != null){
-                for(CourseFee crFee: crFeeLs){
+            //List<CourseFee> crFeeLs  = crsFeeData.getByCourseId(crId);
+            List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdWithSharing(crId);
+            //if(crFeeLs != null){
+            if(listCourseFee != null && listCourseFee.size() > 0){
+                for(Course_Fee__c crFee: listCourseFee){
                     FeeWrapper fw = new FeeWrapper();
-                    fw.feeId      = crFee.FeeId;
-                    fw.feeName    = crFee.Fee.Name;
-                    fw.feeType    = crFee.Fee.Type;
-                    fw.payFrequency = crFee.Fee.Frequency;  
-                    fw.feeAmount   = crFee.Fee.Amount;
-                    fw.feeSchType  = crFee.Fee.Schedule;  
-                    fw.noOfUnit    = crFee.Fee.Units != null ? Integer.valueOf(crFee.Fee.Units):0;
-                    fw.isGSTApplicable = crFee.Fee.GSTApplicable;
+                    fw.feeId      = crFee.Fee__c;
+                    fw.feeName    = crFee.Fee__r.Name;
+                    fw.feeType    = crFee.Fee__r.Type__c;
+                    fw.payFrequency = crFee.Fee__r.Frequency__c;  
+                    fw.feeAmount   = crFee.Fee__r.Amount__c;
+                    fw.feeSchType  = crFee.Fee__r.Schedule__c;  
+                    fw.noOfUnit    = crFee.Fee__r.Units__c != null ? Integer.valueOf(crFee.Fee__r.Units__c):0;
+                    fw.isGSTApplicable = crFee.Fee__r.GST_Applicable__c;
                     
-                    if(crFee.Fee.Type == ConstantClass.depositFeeType){
-                        fw.isSelected = crFee.Fee.Required;
-                        fw.isOverride = crFee.Fee.Overrid;
+                    if(crFee.Fee__r.Type__c == ConstantClass.depositFeeType){
+                        fw.isSelected = crFee.Fee__r.Required__c;
+                        fw.isOverride = crFee.Fee__r.Override__c;
                         crsFeeWrap.depositWrapperList.add(fw);
                         if(fw.isSelected){
                             crsFeeWrap.totFee += fw.feeAmount; 
                             crsFeeWrap.totWithProratedFee += fw.feeAmount;
                         }
-                    }else if(crFee.Fee.Type != ConstantClass.tutionFeeType){
-                        fw.isSelected = crFee.Fee.Required;
-                        fw.isOverride = crFee.Fee.Overrid;
+                    }else if(crFee.Fee__r.Type__c != ConstantClass.tutionFeeType){
+                        fw.isSelected = crFee.Fee__r.Required__c;
+                        fw.isOverride = crFee.Fee__r.Override__c;
                         crsFeeWrap.feeWrapperList.add(fw);
                         if(fw.isSelected){
                             crsFeeWrap.totFee += fw.feeAmount; 
@@ -294,21 +296,23 @@ fw.noOfUnit    = crFee.Fee__r.Units__c != null ? Integer.valueOf(crFee.Fee__r.Un
 tutionFeeWrapperList.add(fw);                        
 }*/
                 //CourseFeeData crsFeeData = new CourseFeeData();
-                List<CourseFee> crFeeLs  = crsFeeData.getByCourseIdOrType(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
-                if(crFeeLs != null){
-                    for(CourseFee crFee: crFeeLs){
+               // List<CourseFee> crFeeLs  = crsFeeData.getByCourseIdOrType(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
+                List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdOrTypeWithSharing(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
+                //if(crFeeLs != null){
+                    if(listCourseFee != NULL && listCourseFee.size() > 0){
+                    for(Course_Fee__c crFee: listCourseFee){
                         FeeWrapper fw = new FeeWrapper();
-                        fw.feeId      = crFee.FeeId;
-                        fw.feeName    = crFee.Fee.Name;
-                        fw.feeType    = crFee.Fee.Type;
-                        fw.payFrequency = crFee.Fee.Frequency;  
-                        fw.feeAmount = crFee.Fee.Amount;
-                        fw.tutionFeeUnitPrice = crFee.Fee.UnitPrice;
+                        fw.feeId      = crFee.Fee__c;
+                        fw.feeName    = crFee.Fee__r.Name;
+                        fw.feeType    = crFee.Fee__r.Type__c;
+                        fw.payFrequency = crFee.Fee__r.Frequency__c;  
+                        fw.feeAmount = crFee.Fee__r.Amount__c;
+                        fw.tutionFeeUnitPrice = crFee.Fee__r.Units__c;
                         // fw.isSelected = crFee.Fee.Required;
-                        fw.isOverride = crFee.Fee.Overrid;                                                   
-                        fw.feeSchType  = crFee.Fee.Schedule;  
-                        fw.noOfUnit    = crFee.Fee.Units != null ? Integer.valueOf(crFee.Fee.Units):0;  
-                        fw.isGSTApplicable = crFee.Fee.GSTApplicable;
+                        fw.isOverride = crFee.Fee__r.Override__c;                                                   
+                        fw.feeSchType  = crFee.Fee__r.Schedule__c;  
+                        fw.noOfUnit    = crFee.Fee__r.Units__c != null ? Integer.valueOf(crFee.Fee__r.Units__c):0;  
+                        fw.isGSTApplicable = crFee.Fee__r.GST_Applicable__c;
                         tutionFeeWrapperList.add(fw);  
                     }
                 }
@@ -373,36 +377,37 @@ crsFeeWrap.feeWrapperList.add(fw);
 }   
 }*/
                     //  CourseFeeData crsFeeData = new CourseFeeData();
-                    List<CourseFee> crFeeLs  = crsFeeData.getByCourseId(crId);
-                    if(crFeeLs != null){
-                        for(CourseFee crFee: crFeeLs){
+                    //List<CourseFee> crFeeLs  = crsFeeData.getByCourseId(crId);
+                    List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdWithSharing(crId);
+                    //if(crFeeLs != null){
+                    if(listCourseFee != NULL && listCourseFee.size() > 0){
+                        for(Course_Fee__c crFee: listCourseFee){
                             FeeWrapper fw = new FeeWrapper();
-                            fw.feeId      = crFee.FeeId;                         
-                            fw.feeName    = crFee.Fee.Name;
-                            fw.feeType    = crFee.Fee.Type;
-                            fw.payFrequency = crFee.Fee.Frequency;  
-                            fw.feeAmount  = crFee.Fee.Amount;
-                            fw.isSelected = crFee.Fee.Required;
-                            fw.isOverride = crFee.Fee.Overrid;
-                            fw.isGSTApplicable = crFee.Fee.GSTApplicable;
+                            fw.feeId      = crFee.Fee__c;                         
+                            fw.feeName    = crFee.Fee__r.Name;
+                            fw.feeType    = crFee.Fee__r.Type__c;
+                            fw.payFrequency = crFee.Fee__r.Frequency__c;  
+                            fw.feeAmount  = crFee.Fee__r.Amount__c;
+                            fw.isSelected = crFee.Fee__r.Required__c;
+                            fw.isOverride = crFee.Fee__r.Override__c;
+                            fw.isGSTApplicable = crFee.Fee__r.GST_Applicable__c;
                             //  fw.tutionFeeUnitPrice = crFee.Fee__r.Unit_Price__c;
-                            fw.feeSchType = crFee.Fee.Schedule;  
-                            fw.noOfUnit   = crFee.Fee.Units != null ? Integer.valueOf(crFee.Fee.Units):0;   
+                            fw.feeSchType = crFee.Fee__r.Schedule__c;  
+                            fw.noOfUnit   = crFee.Fee__r.Units__c != null ? Integer.valueOf(crFee.Fee__r.Units__c):0;   
                             
-                            if(crFee.Fee.Type == ConstantClass.tutionFeeType){
+                            if(crFee.Fee__r.Type__c == ConstantClass.tutionFeeType){
                                 fw.isSelected = false;
-                                if(!slcdFee.contains(crFee.FeeId) &&  crFee.Fee.Frequency==clsList.get(0).Frequency__c)
+                                if(!slcdFee.contains(crFee.Fee__c) &&  crFee.Fee__r.Frequency__c ==clsList.get(0).Frequency__c)
                                     crsFeeWrap.tutionFeeWrapperList.add(fw);
-                            }else if(crFee.Fee.Type == ConstantClass.depositFeeType){                       
-                                if(!slcdFee.contains(crFee.FeeId))
+                            }else if(crFee.Fee__r.Type__c == ConstantClass.depositFeeType){                       
+                                if(!slcdFee.contains(crFee.Fee__c))
                                     crsFeeWrap.depositWrapperList.add(fw);
                             }else{
-                                if(!slcdFee.contains(crFee.FeeId))
+                                if(!slcdFee.contains(crFee.Fee__c))
                                     crsFeeWrap.feeWrapperList.add(fw);
                             }   
                         }
                     }
-                    
                     
                     Integer counter = 0;      
                     for(Class__c cls:[SELECT Id, Name, Start_Date__c, End_Date__c, Start_Time__c, End_Time__c, Location__c, Location__r.Name, 
