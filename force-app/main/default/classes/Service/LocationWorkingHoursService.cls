@@ -11,7 +11,7 @@ public class LocationWorkingHoursService {
     Description :  This function is use for to get the Location_Working_Hours__c records based on location Ids
     Dev         :  Asif
     */
-    public List<Location_Working_Hours__c> getLocationWorkingHoursRecords(set<Id> accIds){
+    public static List<Location_Working_Hours__c> getLocationWorkingHoursRecords(set<Id> accIds){
         if(accIds.size() > 0){
             try{
                 List<Location_Working_Hours__c> locationList = [SELECT Id,Location__c, Start_Time__c, 

@@ -10,7 +10,7 @@ public class TeacherWorkingHoursService {
     Description :  This function is use for to insert Teacher_Working_Hours__c records
     Dev         :  Asif
     */
-    public void insertTeacherWorkingHours(List<Teacher_Working_Hours__c> teacherWorkingHoursList){
+    public static void insertTeacherWorkingHours(List<Teacher_Working_Hours__c> teacherWorkingHoursList){
         if(teacherWorkingHoursList.size() > 0){
             SObjectAccessDecision securityDecision = Security.stripInaccessible(
                                                     AccessType.CREATABLE, teacherWorkingHoursList, true);
