@@ -156,7 +156,7 @@ Developer   :
     Developer   :   
     */
     @RemoteAction
-    global static void changeStudentStatus(String sessionStudentsId,String status){ 
+    global static void changeStudentStatus(String sessionStudentsId,String status, String sessionId){ 
         List<Student_Session__c> studentList = new List<Student_Session__c>();
         fieldsApiName = new Set<String>{'Status__c'};
             isStudentSessionAccessible = FieldPremissionCrudUtility.checkReadPermission('Student_Session__c', fieldsApiName, true);
@@ -176,6 +176,12 @@ Developer   :
                 if(studentList.size() > 0){
                     try{
                         update studentList;
+                        if(String.isNotBlank(sessionId) && status == 'Completed'){
+                            session__c sessObj = new session__c(id = sessionId);
+                            sessObj.Attendance_Update__c = true;
+                            update sessObj;
+                            
+                        }
                     }catch(Exception ex){
                         system.debug('Error -> '+ex.getMessage());                   
                     }
