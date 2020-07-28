@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>Components_Date_Format</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Components_Date_Format</shortDescription>
+        <value>dd-MM-YYYY</value>
+    </labels>
+    <labels>
+        <fullName>Days_Before_Term_End</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Days Before Term End</shortDescription>
+        <value>5</value>
+    </labels>
+    <labels>
+        <fullName>Default_Currency</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Default Currency</shortDescription>
+        <value>USD</value>
+    </labels>
+    <labels>
+        <fullName>EnrollCancelNoticeTime</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>EnrollCancelNoticeTime</shortDescription>
+        <value>30</value>
+    </labels>
+    <labels>
+        <fullName>GST_Rate</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>GST Rate</shortDescription>
+        <value>7</value>
+    </labels>
+    <labels>
+        <fullName>LogoDocumentName</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>LogoDocumentName</shortDescription>
+        <value>Blufy Logo</value>
+    </labels>
+    <labels>
+        <fullName>Namespace</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Namespace</shortDescription>
+        <value>educato__</value>
+    </labels>
+</CustomLabels>

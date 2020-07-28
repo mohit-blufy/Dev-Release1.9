@@ -30,6 +30,9 @@
                             if(!perEmail)
                                 perEmail = '';
                             var showTitle = element['FirstName'] +' '+perEmail;
+                            
+                            if(!element['FirstName'])
+                               showTitle = element['Name'] +' '+perEmail;
                              
                             var type = component.get("v.type"); 
                             if(type == 'Teacher')

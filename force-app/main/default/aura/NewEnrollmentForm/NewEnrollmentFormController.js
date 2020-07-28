@@ -30,11 +30,13 @@
     addStudent : function(component, event, helper) {
         //Parent first name
         var firstdName = document.getElementById("contactId").value;
-        
-        var allValid = component.find('conDetReqId').reduce(function (validSoFar, inputCmp) {
-            inputCmp.showHelpMessageIfInvalid();
-            return validSoFar && !inputCmp.get('v.validity').valueMissing;
-        }, true);
+        var allValid  = true;
+        if(!component.get("v.isCorporateAccount")){
+            allValid = component.find('conDetReqId').reduce(function (validSoFar, inputCmp) {
+                inputCmp.showHelpMessageIfInvalid();
+                return validSoFar && !inputCmp.get('v.validity').valueMissing;
+            }, true);
+        }
         
         var parFirstName = document.getElementById("contactId").value;
         var noFirstCsmtIssue = true;
@@ -55,6 +57,10 @@
             action.setCallback(this,function(result){
                 var res = result.getReturnValue();
                 // console.log('@@@@@ add student res   '+JSON.stringify(res));
+                if(component.get("v.isSameAsParent")){
+                    res.studentDetails.FirstName = parFirstName;
+                    res.studentDetails.LastName  = component.get("v.contactDetail.LastName");   
+                }
                 slctdCrsList.push(res);
                 component.set("v.stuClsWrapperList",slctdCrsList);
                 // console.log('@@@@@  add student stuClsWrapperList   '+ JSON.stringify(component.get("v.stuClsWrapperList")));
@@ -289,6 +295,10 @@
     
     mydiscount:function(component, event) {
         var action = component.get("c.fetchOtherDiscount");
+        action.setParams({
+            "totalFee" : component.get("v.enrFeeTotAmt")
+        });
+        
         action.setCallback(this,function(result){
             var res = result.getReturnValue();
             component.set("v.globalDisList", res);
@@ -574,16 +584,18 @@
                 }
             });            
             $A.enqueueAction(action);
-        }else if(type == 'Contact'){
+        }else if(type == 'Contact' || type == 'Corporate'){
             var action = component.get("c.getchSlcdAccDetails");
             action.setParams({
-                "accId" : valueId
+                "accId" : valueId,
+                "isCorporateAccount" : component.get("v.isCorporateAccount")
             });
             action.setCallback(this,function(result){
                 if(result.getState() == "SUCCESS"){
                     var res = result.getReturnValue();
                     if(res){
                         component.set("v.contactDetail",res);
+                        //alert(JSON.stringify(component.get("v.contactDetail")))
                     }
                 }
             });            
@@ -592,7 +604,8 @@
             var indx = event.getParam("slctIndex");
             var action = component.get("c.getchSlcdAccDetails");
             action.setParams({
-                "accId" : valueId
+                "accId" : valueId,
+                "isCorporateAccount" : component.get("v.isCorporateAccount")
             });
             action.setCallback(this,function(result){
                 if(result.getState() == "SUCCESS"){
@@ -1037,11 +1050,13 @@
     },
     
     saveEnrolments:function(component,event,helper){
-        var allValid1 = component.find('conDetReqId').reduce(function (validSoFar, inputCmp) {
-            inputCmp.showHelpMessageIfInvalid();
-            return validSoFar && !inputCmp.get('v.validity').valueMissing;
-        }, true);
-        
+        var allValid1 = true;
+        if(!component.get("v.isCorporateAccount")){
+            allValid1 = component.find('conDetReqId').reduce(function (validSoFar, inputCmp) {
+                inputCmp.showHelpMessageIfInvalid();
+                return validSoFar && !inputCmp.get('v.validity').valueMissing;
+            }, true);
+        }
         var parFirstName = document.getElementById("contactId").value;
         var noFirstCsmtIssue = true;
         var checkEmail = true;
@@ -1060,10 +1075,12 @@
                 checkEmail = true;
             } 
         }
-        var allValid = component.find('payReqId').reduce(function (validSoFar, inputCmp) {
-            inputCmp.showHelpMessageIfInvalid();
-            return validSoFar && !inputCmp.get('v.validity').valueMissing;
-        }, true);
+
+        var allValid = true;
+        if(!component.get("v.confrmMessage")){
+            component.find('confrmmsg').showHelpMessageIfInvalid();
+            allValid = false;
+        }
         
         var checkStudent = false;
         var checkClass = false;
@@ -1105,7 +1122,7 @@
             var slcdCrs	   = component.get("v.stuClsWrapperList");
             
             var parFirstName = document.getElementById("contactId").value;
-            contactDet.FirstName = parFirstName;
+            //contactDet.FirstName = parFirstName;
             
             console.log(slcdCrs.length);
             /*  var slcdClass = false;
@@ -1158,4 +1175,13 @@
     hideSpinner : function(component,event,helper){
         component.set("v.toggleSpinner", false);
     },        
+    
+    handleChange :  function(component,event,helper){
+        component.set("v.stuClsWrapperList",null);
+        document.getElementById("contactId").value = null;
+    },   
+    
+    sameAsParent : function(component,event,helper){
+       
+    }
 })

@@ -1,5 +1,5 @@
-<aura:component implements="force:hasRecordId,force:lightningQuickActionWithoutHeader" controller="TeacherLeaveCmpApexController" access="global" >
-    <aura:html tag="style">
+<aura:component implements="force:hasRecordId,force:lightningQuickActionWithoutHeader" controller="UpdateClassSessionsCompApex" access="global" >
+	<aura:html tag="style">
         .cuf-scroller-content{
         background:#fff;
         }
@@ -12,14 +12,14 @@
         min-height: 500px !important; 
         }
     </aura:html>
+    
     <aura:attribute name="showSpinner" type="Boolean" default="false" />
     <aura:attribute name="shwError" type="Boolean" default="true" />
-    <aura:attribute name="sessionList" type="object[]"/>
-    <aura:attribute name="record" type="Object"/>
+    <aura:attribute name="sessionList" type="list"/>
     <aura:attribute name="simpleRecord" type="Object"/>
     <aura:attribute name="recordError" type="String"/>
     
-    <aura:handler name="myApplicationEvent" event="c:AutoCompleteEvent" action="{!c.handleMyApplicationEvent}"/>        
+    <aura:handler name="myApplicationEvent" event="c:AutoCompleteEvent" action="{!c.handleMyApplicationEvent}"/>
     
     <force:recordData aura:id="recordLoader"
                       recordId="{!v.recordId}"
@@ -30,17 +30,16 @@
                       recordUpdated="{!c.doInit}" 
                       />
     
-    <lightning:card title="" >
+    <lightning:card title="">
         <aura:if isTrue="{!v.showSpinner}">
-            <lightning:spinner variant="brand" size="medium" />
+            <lightning:spinner style="margin:200px"  variant="brand" size="medium" />
         </aura:if>
         <aura:set attribute="title">
             <div class="slds-modal__footer slds-modal__header" style="background-color: #2F5597;height:50px">
-                <div class="slds-m-left_x-small slds-float_left" style="font-size:20px;color:white">Leave Approval</div>	
+                <div class="slds-m-left_x-small slds-float_left" style="font-size:20px;color:white">Update Sessions</div>	
             </div> 	
         </aura:set>
-        
-        <div class="slds-p-horizontal_large slds-p-right_large slds-p-top_small">
+        <div class="slds-p-horizontal_medium slds-p-right_large slds-p-top_small">
             <aura:if isTrue="{!v.sessionList.length != 0}">
                 <table class="slds-table slds-table--bordered slds-table--cell-buffer slds-max-medium-table--stacked-horizontal"  >
                     <thead>
@@ -49,25 +48,16 @@
                                 <div class="slds-truncate" title="S.No.">S.No.</div>
                             </th>
                             <th scope="col">
-                                <div class="slds-truncate" title="Name">Name</div>
-                            </th>
-                            <th scope="col">
-                                <div class="slds-truncate" title="Status">Status</div>
-                            </th>
-                            <th scope="col">
                                 <div class="slds-truncate" title="Date">Session Date</div>
-                            </th>
-                            <th scope="col">
-                                <div class="slds-truncate" title="Day">Day</div>
                             </th>
                             <th scope="col">
                                 <div class="slds-truncate" title="Start Time">Start Time</div>
                             </th>
                             <th scope="col">
-                                <div class="slds-truncate" title="End Time">End Time</div>
+                                <div class="slds-truncate" title="Teacher">Teacher</div>
                             </th>
                             <th scope="col">
-                                <div class="slds-truncate" title="Teacher">Teacher</div>
+                                <div class="slds-truncate" title="Teacher">Room</div>
                             </th>
                         </tr>
                     </thead>                
@@ -75,33 +65,25 @@
                         <aura:iteration items="{!v.sessionList}" var="item" indexVar="key" >
                             <tr style="height:50px">                                
                                 <th data-label="S.No.">
-                                    <div class="slds-truncate" title="{!key+1}">{!key + 1}</div>
-                                </th>                               
-                                <th data-label="Name">
-                                    <div class="slds-truncate" title="{!item.sessName}">{!item.sessName}</div>
-                                </th>
-                                <th data-label="Status">
-                                    <div class="slds-truncate" title="{!item.status}">{!item.status}</div>
-                                </th>
-                                <th data-label="Session Date">
-                                    <div class="slds-truncate" title="{!item.stDate}"><ui:outputDate aura:id="oDate" value="{!item.stDate}" format="{!$Label.c.Components_Date_Format}"/></div>
-                                </th>                                                                    
-                                <th data-label="Session Day">
-                                    <div class="slds-truncate" title="{!item.sessDay}">{!item.sessDay}
+                                    <div class="slds-truncate" title="{!item.sessSequence}">
+                                        <lightning:input name="seqnce" value="{!item.sessSequence}"/>
                                     </div>
-                                </th>
+                                </th>                               
+                                <th data-label="Session Date">
+                                    <div class="slds-truncate" title="{!item.stDate}">
+                                        <lightning:input type="date" name="sessDate" label="" value="{!item.stDate}" />
+                                    </div>
+                                </th>                                                                    
                                 <th data-label="Start Time">
                                     <div class="slds-truncate" title="{!item.stTime}">
-                                        <lightning:formattedDateTime value="{!item.stTime}" hour="2-digit" minute="2-digit" second="2-digit" hour12="true" timeZone="UTC" />
-                                    </div>
-                                </th>
-                                <th data-label="End Time">
-                                    <div class="slds-truncate" title="{!item.endTime}">
-                                        <lightning:formattedDateTime value="{!item.endTime}" hour="2-digit" minute="2-digit" second="2-digit" hour12="true" timeZone="UTC" />
+                                        <lightning:input style="width:160px;" type="time" name="stTime" value="{!item.stTime}" />
                                     </div>
                                 </th>
                                 <th data-label="Teacher">
                                     <c:AutoCompleteCmp showLabel="false" type="Teacher" borderColor="" extendedWhereClause=" AND Recordtype.name = 'Teacher' " valueFieldApiName="Name" placeHolder="Search Teacher.." inputId="{!key+'_tchrId'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!item.tchrId}" inputValue="{!item.tchrName}"/>
+                                </th>
+                                <th data-label="Room">
+                                    <c:AutoCompleteCmp showLabel="false" type="Room" borderColor="" extendedWhereClause="" valueFieldApiName="Name" placeHolder="Search Room..." inputId="{!key+'_roomId'}" slcdIndex="{!key}"  label="" objectApiName="Room__c" selectedOption="{!item.roomId}" inputValue="{!item.roomName}"/>
                                 </th>
                             </tr> 
                         </aura:iteration>
@@ -111,10 +93,10 @@
                 <footer class="slds-modal__footer slds-p-top_small">
                     <lightning:button label="Cancel" onclick="{!c.doCancel}" variant="destructive" title="Base action" iconName="utility:close"  class="slds-m-right_medium" />
                     <span>
-                        <lightning:button label="Approve &amp; Save" onclick="{!c.doSave}" variant="brand"  title="Base action" iconName="utility:download" />
+                        <lightning:button label="Save" onclick="{!c.doSave}" variant="brand"  title="Base action" iconName="utility:download" />
                     </span>                   
                 </footer>
             </aura:if>
         </div> 
-    </lightning:card>
+        </lightning:card>
 </aura:component>

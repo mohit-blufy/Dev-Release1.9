@@ -47,14 +47,14 @@
                     <div class="slds-p-horizontal_small slds-p-top_small">                    
                         <!--<lightning:input label="Enrollment End Date" value="{}" disabled="true" /> -->  
                         <div >Enrollment End Date</div>
-                        <ui:outputDate value="{!v.wrpCls.enrolEndDate}" format="dd/MM/yyyy"/>
+                        <ui:outputDate value="{!v.wrpCls.enrolEndDate}" format="{!$Label.c.Components_Date_Format}"/>
                     </div>
                 </div>
                 <div class="slds-size_1-of-2">
                     <div class="slds-p-horizontal_small slds-p-top_small">                    
                         <!--<lightning:input label="Cancellation Date" value="{!v.enrollment.Cancellation_Date__c}" disabled="true" /> -->
                         <div>Cancellation Date</div>
-                        <ui:outputDate value="{!v.wrpCls.enrolCanDate}" format="dd/MM/yyyy"/>
+                        <ui:outputDate value="{!v.wrpCls.enrolCanDate}" format="{!$Label.c.Components_Date_Format}"/>
                     </div>
                 </div>
                 <div class="slds-size_1-of-2">
