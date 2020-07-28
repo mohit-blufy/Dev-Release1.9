@@ -1,7 +1,7 @@
 public class ClassTermService {
-		
+    
     //Insertion of Class Term Records
-    public static List<Class_Term__c> insertClassTermRecordsWithSharing(List<Class_Term__c> listClassTerm){
+    public static List<Class_Term__c> insertClassTermRecords(List<Class_Term__c> listClassTerm){
         try{
             if(listClassTerm.size() > 0){
                 SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.CREATABLE, listClassTerm,true);
@@ -21,7 +21,7 @@ public class ClassTermService {
     }
     
     //Updation of Class Term Records
-    public static List<Class_Term__c> updateClassTermRecordsWithSharing(List<Class_Term__c> listClassTerm){
+    public static List<Class_Term__c> updateClassTermRecords(List<Class_Term__c> listClassTerm){
         try{
             if(listClassTerm.size() > 0){
                 SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.UPDATABLE, listClassTerm,true);

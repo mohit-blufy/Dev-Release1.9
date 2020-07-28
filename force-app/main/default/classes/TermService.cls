@@ -1,6 +1,6 @@
 public class TermService {
     
-    public static List<Term__c> getAllTermsWithSharing(){  
+    public static List<Term__c> getAllTerms(){  
         try{
             List<Term__c> listTerm = [SELECT Id,Name,Sessions__c,Start_Date__c,End_Date__c,Sequence__c 
                                         FROM Term__c 

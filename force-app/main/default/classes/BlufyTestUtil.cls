@@ -9,9 +9,14 @@ public class BlufyTestUtil {
         Account locationObj = BlufyTestUtil.createLocationRec('New Harbor');
         insert locationObj;
         system.debug('locationObj -> '+locationObj);
+        
+        Location_Working_Hours__c lwhObj = BlufyTestUtil.createLocationWorkingHours(locationObj.Id, Time.newInstance(10, 00, 00, 00), Time.newInstance(23, 00, 00, 00),'Mon;Tue;Wed;Thu;Fri');
+        insert lwhObj;
+        
         Account teacherObj = BlufyTestUtil.createTeacherRec('Jonas', locationObj.Id);
         insert teacherObj;
         system.debug('teacherObj ->'+teacherObj);
+        
         Account studentObj = BlufyTestUtil.createStudentRec('Gates','test1@gmail.com');
         insert studentObj;
         system.debug('studentObj ->'+studentObj);
@@ -35,7 +40,7 @@ public class BlufyTestUtil {
         Term__c termObj = BlufyTestUtil.createTermRec('Term 1', '2020', 'Open',Date.today().addDays(1),Date.today().addMonths(6),12,1 );
         insert termObj;
         
-        Class__c classObj = BlufyTestUtil.createClassRec('Name', courseObj.Id, 'Classroom', 'Open', teacherObj.Id, 20, 'Fixed', 24, Date.today().addDays(1), Time.newInstance(10, 00, 00, 00), 'Minutes', 120,'One-time');
+        Class__c classObj = BlufyTestUtil.createClassRec('Name', courseObj.Id, 'Classroom', 'Open', teacherObj.Id, 20, 'Fixed', 24, Date.today().addDays(1), Time.newInstance(10, 00, 00, 00), 'Minutes', 120,'One-time', cModule.Id);
         classObj.Advance_Billing__c = 2;
         classObj.End_Date__c = Date.today().addMonths(6);
         insert classObj;
@@ -47,11 +52,12 @@ public class BlufyTestUtil {
         
         Class_Term__c classTermObj1 = BlufyTestUtil.createClassTerms('Term 1',classObj.id,10,Date.today().addMonths(7),Date.today().addMonths(8),2, 'Draft',termObj.id);
         classTerms.add(classTermObj1);
+       	insert classTerms;
         
+        Room__c roomObj = BlufyTestUtil.createRoom(locationObj.Id, 'Room1', 'Group', 35);
+        insert roomObj;
         
-        insert classTerms;
-        
-        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id , teacherObj.Id, classObj.Id, Date.today().addMonths(1), Time.newInstance(10, 00, 00, 00), 'Scheduled', 'Hours', 2, 'Standard');
+        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id , teacherObj.Id, classObj.Id, Date.today().addMonths(1), Time.newInstance(10, 00, 00, 00), 'Scheduled', 'Hours', 2, 'Standard', roomObj.id);
         insert sessionObj;
         
         Class_Session__c clsSess = BlufyTestUtil.createClassSessionRec(classObj.Id,Time.newInstance(10,30,00,00),120);
@@ -131,17 +137,17 @@ public class BlufyTestUtil {
         return new Term__c(Name = termName, Year__c = year, status__c = status, Start_Date__c = startDate, End_Date__c= endDate,Sessions__c = session,Sequence__c = seq);
     }
     
-    public static Class__c createClassRec(String className, String courseId, String format, String status, String teacherId, Integer capacity ,String type, Integer sessions, date startDate, time startTime, String durationUnit, Integer duration, String frequency){
+    public static Class__c createClassRec(String className, String courseId, String format, String status, String teacherId, Integer capacity ,String type, Integer sessions, date startDate, time startTime, String durationUnit, Integer duration, String frequency, String currentCourseModuleId){
         //return new Class__c(Name = className, Course__c = courseId, Format__c = format, Status__c = status, Teacher__c = teacherId, Capacity__c = capacity, Type__c = type, Sessions__c = sessions, Start_Date__c = startDate, Start_Time__c = startTime,End_Date__c = Date.newInstance(2020,03,27), Duration_Unit__c = durationUnit, Duration__c = duration, Frequency__c = frequency);
-        return new Class__c(Name = className, Course__c = courseId, Format__c = format, Status__c = status, Teacher__c = teacherId, Capacity__c = capacity, Type__c = type, Sessions__c = sessions, Start_Date__c = startDate, Start_Time__c = startTime, Duration__c = duration, Frequency__c = frequency);
+        return new Class__c(Name = className, Course__c = courseId, Format__c = format, Status__c = status, Teacher__c = teacherId, Capacity__c = capacity, Type__c = type, Sessions__c = sessions, Start_Date__c = startDate, Start_Time__c = startTime, Duration__c = duration, Frequency__c = frequency, Current_Course_Module__c = currentCourseModuleId);
     }
     
     public static Class_Term__c createClassTerms(String name, String classId,Double session, Date startDate, Date endDate, Double seq, String status, String termId){
         return new Class_Term__c(Name = name, Class__c = classId, Sessions__c = session ,Start_Date__c = startDate, End_Date__c = endDate, Sequence__c = seq, Status__c = status, Term__c = termId, Exclude_Public_Holidays__c = true);  
     } 
-    public static Session__c createSessionRec(String locationId, String teacherId, String classId, date sessionDate, time startTime, String status, String durationUnit, Integer duration, String sessionType){
+    public static Session__c createSessionRec(String locationId, String teacherId, String classId, date sessionDate, time startTime, String status, String durationUnit, Integer duration, String sessionType, String roomId){
        // return new Session__c(Location__c = locationId, Teacher__c = teacherId, Class__c = classId, Session_Date__c = sessionDate, Start_Time__c = startTime, Status__c = status, Duration_Unit__c = durationUnit, Duration__c = duration, type__c = sessionType);
-        return new Session__c(Location__c = locationId, Teacher__c = teacherId, Class__c = classId, Session_Date__c = sessionDate, Start_Time__c = startTime, Status__c = status, Duration__c = duration, type__c = sessionType);
+        return new Session__c(Location__c = locationId, Teacher__c = teacherId, Class__c = classId, Session_Date__c = sessionDate, Start_Time__c = startTime, Status__c = status, Duration__c = duration, type__c = sessionType, room__c = roomId);
     }
     
     public static Enrollment__c createEnrollment(String classId, date enrollDate, String locationId, String StudentId, String status, boolean termsAndConditions, date startDate, String parentStudent){
@@ -219,5 +225,11 @@ public class BlufyTestUtil {
     
     public static Module_Lesson__c createModuleLesson(String name,Decimal sequence,Decimal duration,String moduleId,String lessonId){
         return new Module_Lesson__c(Name = name,Sequence__c = sequence,Duration__c = duration,Module__c = moduleId,Lesson__c = lessonId);
+    }
+    public static Location_Working_Hours__c createLocationWorkingHours(String locationId, time startTime, time endTime, String dow){
+        return new Location_Working_Hours__c(Location__c = locationId, Start_Time__c =startTime,End_Time__c = endTime,Day__c = dow, Active__c = true);                                                                
+    }
+    public static Room__c createRoom(String locationId, String name, String roomType, Integer capacity){
+        return new room__c(Name = name, Type__c = roomType, Location__c = locationId, Capacity__c = capacity);
     }
 }

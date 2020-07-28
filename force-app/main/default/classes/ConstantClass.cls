@@ -1,7 +1,8 @@
 public class ConstantClass {
-    public ConstantClass() {}
+    
     
     public static String customerRecTypeId     	 = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Customer').getRecordTypeId();
+    public static String corporateRecTypeId      = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName().get('Business_Account').getRecordTypeId();
     public static String teacherRecType     	 = 'Teacher';
     
     public static String activeStatus         	 = 'Active';
@@ -32,7 +33,7 @@ public class ConstantClass {
     public static String paidStatus          	 = 'Paid';
     
     public static String enrolledStatus     	 = 'Enrolled';
-    public static String cancelledStatus           = 'Cancelled';
+    public static String cancelledStatus         = 'Cancelled';
     public static String ongoingClsType      	 = 'Ongoing';
     public static String monthClsType       	 = 'Month';
     public static String issuedStatus       	 = 'Issued';
@@ -56,6 +57,13 @@ public class ConstantClass {
     
     public static String classType               = 'Online'; 
     
+    public static String holidayComment          = 'It is a Holiday';
+    public static String teacherNotAvailableComment = 'Teacher is not available';
+    public static String teacherOnLeaveComment	 = 'Teacher is on Leave';
+    public static String teacherRequestLeaveComment	 = 'Teacher has requested a leave';
+    public static String teacherOccupiedComment = 'Teacher is already occupied';
+    public static String roomOccupiedComment = 'Room is already occupied';
+    
     public static String locationRecordsTypeId   = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Location').getRecordTypeId();
     public static String teacherRecordTypeId     = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Teacher').getRecordTypeId();
     public static String stuCustomerRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Customer').getRecordTypeId();
@@ -65,7 +73,7 @@ public class ConstantClass {
     public static String sessionCancel           = 'Canceled';
     
     public static String sessionStandardType     = 'Standard';
-    public static String sessionExceptionType    = 'Exception';
+    public static String sessionExceptionType    = 'Exception'; 
     
     public static String termOpenStatus = 'Open';
     

@@ -9,14 +9,22 @@
         var indx = event.getParam("slctIndex");
         
         var sessionList= component.get("v.sessionList");
-        sessionList[indx].tchrId = valueId;
-        sessionList[indx].tchrName = value;
+        if(type == 'Room'){
+            sessionList[indx].roomId = valueId;
+            sessionList[indx].roomName = value;        
+        }
+        else if(type == 'Teacher'){
+            sessionList[indx].tchrId = valueId;
+            sessionList[indx].tchrName = value;
+        }
         console.log(JSON.stringify(sessionList));
         component.set("v.sessionList",sessionList);
     },
+    
     closeQuickActionModel : function(component,event,helper){
         $A.get("e.force:closeQuickAction").fire();
-    },    
+    },
+    
     saveQuickActionModel : function(component,event,helper){
         component.set("v.showSpinner",true);
         var res=component.get("v.sessionList");

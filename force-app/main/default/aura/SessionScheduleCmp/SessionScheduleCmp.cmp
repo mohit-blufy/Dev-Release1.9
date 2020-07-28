@@ -17,13 +17,13 @@
     <aura:attribute name="termRecord" type="Object"/>
     <aura:attribute name="recordLoadError" type="String"/>
     
-    <force:recordData aura:id="recordLoader"
+    <force:recordData aura:id = "recordLoader"
                       layoutType = "FULL"
-                      recordId="{!v.recordId}"
-                      fields="Class__c"
-                      targetFields="{!v.termRecord}"
-                      targetError="{!v.recordLoadError}"
-                      recordUpdated="{!c.doInit}"
+                      recordId = "{!v.recordId}"
+                      fields = "Class__c"
+                      targetFields = "{!v.termRecord}"
+                      targetError = "{!v.recordLoadError}"
+                      recordUpdated = "{!c.doInit}"
                       />
     
     <!-- Use the Apex model and controller to fetch server side data -->
@@ -50,6 +50,7 @@
                             <!-- <th scope="col"><span class="slds-truncate">Module</span></th>
                                 <th scope="col"><span class="slds-truncate">Lesson</span></th>-->
                             <th scope="col"><span class="slds-truncate">Teacher</span></th>
+                            <th scope="col"><span class="slds-truncate">Room</span></th>
                             <th scope="col"><span class="slds-truncate">Remarks</span></th>
                         </tr>            
                     </thead>
@@ -72,6 +73,12 @@
                                         <div Class="slds-text-color_error">Teacher is not available</div>
                                     </aura:if>
                                 </td>
+                                <td>
+                                    <c:AutoCompleteCmp showLabel="false" type="Room" borderColor="{!sess.isShowMessageOnRoom ? 'red': ''}" extendedWhereClause="" valueFieldApiName="Name" placeHolder="Search Room.." inputId="{!key+'_roomId'}" slcdIndex="{!key}"  label="" objectApiName="Room__c" selectedOption="{!sess.roomId}" inputValue="{!sess.roomName}"/>
+                                	<aura:if isTrue="{!sess.isShowMessageOnRoom}">
+                                        <div Class="slds-text-color_error">Room is not available</div>
+                                    </aura:if>
+                                </td>
                                 <td><!--<lightning:input variant = "label-hidden" value="{!sess.remarks}" name="isOnLeave"/>-->
                                     <lightning:textarea variant = "label-hidden" value="{!sess.remarks}" name="isOnLeave" />
                                 </td>
@@ -83,7 +90,7 @@
             <footer class="slds-modal__footer slds-p-vertical_medium">
                 <lightning:button label="Close" onclick="{!c.closeQuickActionModel}" variant="destructive" title="Base action" iconName="utility:close"  class="slds-m-right_medium" />
                 <span>
-                        <lightning:button label="Save" onclick="{!c.saveQuickActionModel}" variant="brand"  title="Base action" iconName="utility:download" />
+                    <lightning:button label="Save" onclick="{!c.saveQuickActionModel}" variant="brand"  title="Base action" iconName="utility:download" />
                 </span>                   
             </footer>
         </div>

@@ -59,12 +59,20 @@ public class NewEnrollmentFormCntrl {
     
     //This function is used to get selected contact details when user select existing customer
     @auraEnabled
-    public static Account getchSlcdAccDetails(String accId){
+    public static Account getchSlcdAccDetails(String accId,Boolean isCorporateAccount){
         Account acc = new Account();
         if(isAccountAccessible){
-            List<Account> accList = [SELECT Id, FirstName, LastName, PersonEmail, Phone, Block__c, Unit__c, BillingStreet,
-                                     BillingPostalCode, BillingCountry, Gender__c, PersonBirthDate, Relationship_with_contact__c
-                                     FROM Account WHERE Id=:accId LIMIT 1];
+            List<Account> accList = new List<Account>();
+            if(isCorporateAccount){
+                accList = [SELECT Id, Name, PersonEmail FROM Account WHERE Id=:accId LIMIT 1];
+                
+            }
+            else{
+                accList = [SELECT Id,FirstName, LastName, PersonEmail, Phone, Block__c, Unit__c, BillingStreet,
+                           BillingPostalCode, BillingCountry, Gender__c, PersonBirthDate, Relationship_with_contact__c
+                           FROM Account WHERE Id=:accId LIMIT 1];
+                
+            }
             if(accList.size() > 0){
                 acc= accList.get(0);
                 /*
@@ -77,6 +85,7 @@ if(String.isNotBlank(acc.BillingCountryCode) && pickLstTempMap.containsKey(acc.B
 acc.BillingCountryCode = pickLstTempMap.get(acc.BillingCountryCode);*/
             }
         }
+        System.debug('acc-->'+acc);
         return acc;
     }
     
@@ -296,10 +305,10 @@ fw.noOfUnit    = crFee.Fee__r.Units__c != null ? Integer.valueOf(crFee.Fee__r.Un
 tutionFeeWrapperList.add(fw);                        
 }*/
                 //CourseFeeData crsFeeData = new CourseFeeData();
-               // List<CourseFee> crFeeLs  = crsFeeData.getByCourseIdOrType(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
+                // List<CourseFee> crFeeLs  = crsFeeData.getByCourseIdOrType(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
                 List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdOrTypeWithSharing(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
                 //if(crFeeLs != null){
-                    if(listCourseFee != NULL && listCourseFee.size() > 0){
+                if(listCourseFee != NULL && listCourseFee.size() > 0){
                     for(Course_Fee__c crFee: listCourseFee){
                         FeeWrapper fw = new FeeWrapper();
                         fw.feeId      = crFee.Fee__c;
@@ -672,7 +681,7 @@ return crsFeeWrap;
     
     //This function is used to fetch other discount which configured globally
     @auraEnabled
-    public static List<DisWrapper> fetchOtherDiscount(){ 
+    public static List<DisWrapper> fetchOtherDiscount(Decimal totalFee){ 
         List<DisWrapper> disWrapList = new List<DisWrapper>();
         
         List<DisWrapper> refDisWrapList  = new List<DisWrapper>();
@@ -685,16 +694,14 @@ return crsFeeWrap;
                                   WHERE Format__c != null AND Active__c = True AND Value__c != null AND 
                                   Global__c = true AND (Start_Date__c <= Today AND  End_Date__c >= Today)]){
                                       DisWrapper dw = new DisWrapper();
-                                      Decimal amtVal = 0;
                                       if(dis.Format__c.equalsIgnoreCase(ConstantClass.amountFormat)){
-                                          amtVal = dis.Value__c;
+                                          dw.amount = dis.Value__c;
                                       }else if(dis.Format__c.equalsIgnoreCase(ConstantClass.percentFormat)){
-                                          //  amtVal = crsDis.Discount__r.Value__c;
+                                          dw.amount = (totalFee * dis.Value__c/100);
                                       }           
                                       dw.disId   = dis.Id;                
                                       dw.name    = dis.Name;
                                       dw.format  = dis.Format__c;
-                                      dw.amount  = amtVal;
                                       dw.type    = dis.Type__c;
                                       if(dw.type.equalsIgnoreCase(ConstantClass.referralType)){
                                           refDisWrapList.add(dw);
@@ -784,58 +791,58 @@ return crsFeeWrap;
                        Integer noOfLessInCurrMonth = 0;
                        system.debug('test');
                        //Calculate prorated number of lesson for month type class on the bases of selected date
-                     /*  if(fee.Frequency__c.equalsIgnoreCase(ConstantClass.monthlyFrequency)){
-                           if(tempDt.month() == System.today().month()){
-                               Integer numberOfDays = Date.daysInMonth(tempDt.year(), tempDt.month());
-                               Date lastDayOfMonth = Date.newInstance(tempDt.year(), tempDt.month(), numberOfDays);
-                               
-                               List<Session__c> sessList  = [SELECT Id, Name, Class__c, Sequence__c, Session_Date__c, Teacher__c, Status__c  
-                                                             FROM Session__c
-                                                             WHERE Class__c =:cls.Id AND Status__c =: ConstantClass.scheduledStatus
-                                                             AND Session_Date__c >=:tempDt AND Session_Date__c <=: lastDayOfMonth];  
-                               noOfLessInCurrMonth = sessList.size();
-                               // if(sessList.size() > 4)
-                               //  noOfLessInCurrMonth = 4;
-                           }
-                       }else{//Calculate prorated number of lesson for Term/Fixed type class on the bases of selected date
-                           
-                           List<Class_Term__c> clsTermList = [SELECT Id, Name, Sequence__c, Sessions__c, Start_Date__c, End_Date__c 
-                                                              FROM Class_Term__c
-                                                              WHERE Class__c=: cls.Id AND Status__c =:ConstantClass.ScheduledStatus AND Allow_Enrollment__c = True AND 
-                                                              Sessions__c > 0 AND Start_Date__c != null AND End_Date__c >: tempDt ORDER BY Sequence__c];
-                           Class_Term__c clsTerm = new Class_Term__c();
-                           if(clsTermList.size() > 0){
-                               //get specifi class term according to the selected enrolment date
-                               for(Class_Term__c clsTermTemp: clsTermList){
-                                   if(clsTermTemp.Start_Date__c <= tempDt && tempDt < clsTermTemp.End_Date__c){
-                                       clsTerm = clsTermTemp;
-                                       slcdCrsObj.slcdClsWrapObj.slctClsTermId   = clsTermTemp.Id;
-                                       slcdCrsObj.slcdClsWrapObj.slctclsTermName = clsTermTemp.Name;
-                                       break;
-                                   }
-                               }    
-                               //Check if no class term avaialble according to the enrolment date, Then check next term
-                               if(clsTerm.Id == null){
-                                   for(Class_Term__c clsTermTemp: clsTermList){
-                                       if(clsTermTemp.End_Date__c > tempDt){
-                                           clsTerm = clsTermTemp;
-                                           slcdCrsObj.slcdClsWrapObj.slctClsTermId   = clsTermTemp.Id;
-                                           slcdCrsObj.slcdClsWrapObj.slctclsTermName = clsTermTemp.Name;
-                                           break;
-                                       }
-                                   } 
-                               }    
-                           }       */ 
-                           //Fetch number of remaining session on the bases of term selected
-                           if(clsTerm.Id != null){
-                               List<Session__c> sessList  = [SELECT Id, Name, Class__c, Sequence__c, Session_Date__c, Teacher__c, Status__c  
-                                                             FROM Session__c
-                                                             WHERE Class_Term__c =:clsTerm.Id AND Status__c =: ConstantClass.scheduledStatus
-                                                             AND Session_Date__c >=: tempDt];  
-                               noOfLessInCurrMonth = sessList.size();
-                               System.debug('@@--->'+clsTerm.Id );
-                               System.debug('@@--->'+sessList.size());
-                           }
+                       /*  if(fee.Frequency__c.equalsIgnoreCase(ConstantClass.monthlyFrequency)){
+if(tempDt.month() == System.today().month()){
+Integer numberOfDays = Date.daysInMonth(tempDt.year(), tempDt.month());
+Date lastDayOfMonth = Date.newInstance(tempDt.year(), tempDt.month(), numberOfDays);
+
+List<Session__c> sessList  = [SELECT Id, Name, Class__c, Sequence__c, Session_Date__c, Teacher__c, Status__c  
+FROM Session__c
+WHERE Class__c =:cls.Id AND Status__c =: ConstantClass.scheduledStatus
+AND Session_Date__c >=:tempDt AND Session_Date__c <=: lastDayOfMonth];  
+noOfLessInCurrMonth = sessList.size();
+// if(sessList.size() > 4)
+//  noOfLessInCurrMonth = 4;
+}
+}else{//Calculate prorated number of lesson for Term/Fixed type class on the bases of selected date
+
+List<Class_Term__c> clsTermList = [SELECT Id, Name, Sequence__c, Sessions__c, Start_Date__c, End_Date__c 
+FROM Class_Term__c
+WHERE Class__c=: cls.Id AND Status__c =:ConstantClass.ScheduledStatus AND Allow_Enrollment__c = True AND 
+Sessions__c > 0 AND Start_Date__c != null AND End_Date__c >: tempDt ORDER BY Sequence__c];
+Class_Term__c clsTerm = new Class_Term__c();
+if(clsTermList.size() > 0){
+//get specifi class term according to the selected enrolment date
+for(Class_Term__c clsTermTemp: clsTermList){
+if(clsTermTemp.Start_Date__c <= tempDt && tempDt < clsTermTemp.End_Date__c){
+clsTerm = clsTermTemp;
+slcdCrsObj.slcdClsWrapObj.slctClsTermId   = clsTermTemp.Id;
+slcdCrsObj.slcdClsWrapObj.slctclsTermName = clsTermTemp.Name;
+break;
+}
+}    
+//Check if no class term avaialble according to the enrolment date, Then check next term
+if(clsTerm.Id == null){
+for(Class_Term__c clsTermTemp: clsTermList){
+if(clsTermTemp.End_Date__c > tempDt){
+clsTerm = clsTermTemp;
+slcdCrsObj.slcdClsWrapObj.slctClsTermId   = clsTermTemp.Id;
+slcdCrsObj.slcdClsWrapObj.slctclsTermName = clsTermTemp.Name;
+break;
+}
+} 
+}    
+}       */ 
+                       //Fetch number of remaining session on the bases of term selected
+                       if(clsTerm.Id != null){
+                           List<Session__c> sessList  = [SELECT Id, Name, Class__c, Sequence__c, Session_Date__c, Teacher__c, Status__c  
+                                                         FROM Session__c
+                                                         WHERE Class_Term__c =:clsTerm.Id AND Status__c =: ConstantClass.scheduledStatus
+                                                         AND Session_Date__c >=: tempDt];  
+                           noOfLessInCurrMonth = sessList.size();
+                           System.debug('@@--->'+clsTerm.Id );
+                           System.debug('@@--->'+sessList.size());
+                       }
                        //}
                        System.debug('@@--->'+noOfLessInCurrMonth);
                        Decimal packFee = fee.Unit_Price__c * noOfLessInCurrMonth;
@@ -971,6 +978,7 @@ return lstPickvals;*/
     @auraEnabled
     public static String completeEnrolment(String parAccStr, String slctdEnrolmentsStr, String globalDisListStr, Decimal totPayAmt, String refNo, String payMode){
         Account parAcc = (Account) System.JSON.deserialize(parAccStr, Account.class);
+        System.debug('parAcc-->'+parAcc);
         List<CustomerWrapper> slctdEnrolments = String.isNotBlank(slctdEnrolmentsStr) ? (List<CustomerWrapper>) JSON.deserialize(slctdEnrolmentsStr,List<CustomerWrapper>.class) : new List<CustomerWrapper>(); 
         List<DisWrapper> globalDisList = String.isNotBlank(globalDisListStr) ? (List<DisWrapper>) JSON.deserialize(globalDisListStr,List<DisWrapper>.class) : new List<DisWrapper>();
         
@@ -1016,27 +1024,21 @@ parAcc.BillingCountry = billCntryMap.get(parAcc.BillingCountry);
                 Account cstmrAlreadyAvl = new Account();
                 
                 String recTypeId = ConstantClass.customerRecTypeId;//Schema.SObjectType.Account.getRecordTypeInfosByName().get(ConstantClass.customerRecType).getRecordTypeId(); 
-                parAcc.RecordTypeId = recTypeId;
-                if(String.isBlank(parAcc.Id)){
+                if(String.isBlank(parAcc.Id) && String.isNotBlank(parAcc.PersonEmail)){
+                    parAcc.RecordTypeId = recTypeId;
                     List<Account> accList = [SELECT Id, Name, (SELECT Id, FirstName, LastName, PersonBirthDate FROM Students__r) 
                                              FROM Account WHERE PersonEmail =: parAcc.PersonEmail LIMIT 1];
                     if(accList.size() > 0){
                         cstmrAlreadyAvl = accList.get(0);
                         parAcc.Id = cstmrAlreadyAvl.Id;
                     }
+                }else if(String.isBlank(parAcc.Id) && String.isBlank(parAcc.PersonEmail)){
+                    parAcc.RecordTypeId = ConstantClass.corporateRecTypeId;
                 }
                 upsert parAcc;
                 
-                Map<String, Subscription__c> subsMap = new Map<String, Subscription__c>();
-                for(Subscription__c sub: [SELECT Id, Location__c, Status__c, Payment_Frequency__c 
-                                          FROM Subscription__c 
-                                          WHERE Customer__c =: parAcc.Id AND Status__c =:ConstantClass.activeStatus  AND Payment_Frequency__c != null]){
-                                              String paFre = sub.Payment_Frequency__c;
-                                              subsMap.put(paFre, sub);
-                                          }
-                
                 //Fill invoice
-                Invoice__c inv = UtilityClass.fillInvoice(parAcc.Id, null, null, ConstantClass.newEnrollmentInvType, ConstantClass.paidStatus);
+                Invoice__c inv = UtilityClass.fillInvoice(parAcc.Id, null, null, ConstantClass.newEnrollmentInvType, ConstantClass.dueStatus);
                 insert inv;
                 
                 
@@ -1066,7 +1068,7 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                     for(Session__c sess: [SELECT Id, Name, Class__c, Class_Term__c, Sequence__c, Session_Date__c, Teacher__c, Status__c, 
                                           Class_Term__r.Sequence__c, Class_Term__r.Start_Date__c, Class_Term__r.End_Date__c 
                                           FROM Session__c 
-                                          WHERE (Class__c IN:clsSessonMap.keySet() OR Class_Term__c IN:clsSessonMap.keySet()) 
+                                          WHERE (Class__c IN:clsSessonMap.keySet() AND Class_Term__c IN:clsSessonMap.keySet()) 
                                           AND Class__c != null AND Session_Date__c >= TODAY ORDER BY Sequence__c]){
                                               //For term or fixed based sessions                        
                                               if(sess.Class_Term__c != null){
@@ -1119,11 +1121,10 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                                        }
                 }
                 
+                
                 List<Account>                   stuList   = new List<Account>();
                 List<Enrollment__c>             enrList   = new List<Enrollment__c>();
                 List<Class__c> listClass = new List<Class__c>();
-                //  List<Subscription__c>           insSubList= new List<Subscription__c>();
-                List<Subscription_Line_Item__c> subLnList = new List<Subscription_Line_Item__c>();
                 List<Student_Session__c> stuSessList = new List<Student_Session__c>();
                 List<Invoice_Line_Item__c> invLnItms = new List<Invoice_Line_Item__c>();
                 for(CustomerWrapper cw: slctdEnrolments){
@@ -1157,7 +1158,7 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                         if(crsWrap.tutionFeeWrapperList.size() > 0)
                             slcdTutionFee = crsWrap.tutionFeeWrapperList.get(0);
                         
-                        Enrollment__c enr  = UtilityClass.fillEnrollment(parAcc.Id, slcdClsWrap.locationId, slcdClsWrap.clsId, crsWrap.enrolDate, ConstantClass.enrolledStatus);
+                        Enrollment__c enr  = UtilityClass.fillEnrollment(parAcc.Id, slcdClsWrap.locationId, slcdClsWrap.clsId, crsWrap.enrolDate, ConstantClass.draftStatus);
                         enr.Parent_Email__c= parAcc.PersonEmail;
                         enr.Student__r     = stuDet;
                         enr.Comments__c    = crsWrap.comments;
@@ -1171,16 +1172,9 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                         
                         //System.debug('@@@@nextSchDt  '+slcdClsWrap.clsType);
                         //Insert subscription line items
-                        if(slcdClsWrap.clsType.equalsIgnoreCase(ConstantClass.ongoingClsType) && crsWrap.tutionFeeWrapperList.size() > 0 && !(slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.oneTimeFrequency))){
-                            //FeeWrapper slcdTutionFee = crsWrap.tutionFeeWrapperList.get(0);
-                            Subscription__c subs = new Subscription__c();
-                            
-                            Date subsNextBillingDate; 
-                            //Next bill date on the bases of selected frequency
-                            system.debug('clsSessonMap.get(slcdClsWrap.slctClsTermId)..==>'+clsSessonMap.get(slcdClsWrap.slctClsTermId));
-                            if(clsSessonMap.get(slcdClsWrap.slctClsTermId) != null /*&& slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.termFrequency)*/){
-                                //subsNextBillingDate = clsSessonMap.get(slcdClsWrap.slctClsTermId).get(0).Class_Term__r.End_Date__c;
-                                
+                        if(slcdClsWrap.clsType.equalsIgnoreCase(ConstantClass.ongoingClsType) && 
+                           crsWrap.tutionFeeWrapperList.size() > 0 && 
+                           !(slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.oneTimeFrequency))){
                                 //Added on 27th May 2020
                                 Boolean isNeedToCheckStuSess = False;
                                 Integer noOfSess = 0;
@@ -1194,7 +1188,7 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                                         stuSess.Account__r   = stuDet;
                                         stuSess.Session__c   = sess.Id;
                                         stuSess.Enrollment__r= enr;
-                                        stuSess.Status__c= ConstantClass.ScheduledStatus;
+                                        stuSess.Status__c= ConstantClass.draftStatus;
                                         stuSess.Billable__c= True;
                                         stuSessList.add(stuSess); 
                                         system.debug('stuSessList-->'+stuSessList);
@@ -1203,109 +1197,7 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                                             break;
                                     }
                                 }
-                            }
-                            /*else if(slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.monthlyFrequency)){
-                                Date tempDt = crsWrap.enrolDate;
-                                if(tempDt.month() == System.today().month())
-                                    tempDt = tempDt.addMonths(1);
-                                subsNextBillingDate = Date.newInstance(tempDt.year(), tempDt.month(), 1);
-                                
-                                //Added on 27th May 2020
-                                Boolean isNeedToCheckStuSess = False;
-                                Integer noOfSess = 0;
-                                if(String.isNotBlank(slcdTutionFee.feeSchType) && slcdTutionFee.feeSchType.equalsIgnoreCase(ConstantClass.fixedType))
-                                    isNeedToCheckStuSess = true;
-                                system.debug(' clsSessonMap-->'+ clsSessonMap);
-                                for(Session__c sess : clsSessonMap.get(slcdClsWrap.clsId)){
-                                    if(sess.Session_Date__c >= crsWrap.enrolDate){
-                                        Student_Session__c stuSess = new Student_Session__c();
-                                        stuSess.Account__r   = stuDet;
-                                        stuSess.Session__c   = sess.Id;
-                                        stuSess.Enrollment__r= enr;
-                                        stuSess.Status__c= ConstantClass.ScheduledStatus;
-                                        stuSess.Billable__c= True;
-                                        stuSessList.add(stuSess);  
-                                        
-                                        noOfSess = noOfSess+1;
-                                        if(isNeedToCheckStuSess && slcdTutionFee.noOfUnit <= noOfSess)
-                                            break;
-                                    }
-                                }
-                            }*/
-                            
-                            if(subsMap.containsKey(slcdTutionFee.payFrequency)){
-                                subs = subsMap.get(slcdTutionFee.payFrequency);
-                            }else{
-                                subs.Location__c = slcdClsWrap.locationId;
-                                subs.Customer__c = parAcc.Id;
-                                subs.Status__c   = ConstantClass.activeStatus;
-                                subs.Payment_Frequency__c = slcdTutionFee.payFrequency;
-                                subs.Subscription_Start_Date__c = crsWrap.enrolDate;
-                                
-                                // subs.Next_Bill_Date__c = subsNextBillingDate;
-                                subsMap.put(subs.Payment_Frequency__c, subs);
-                            }
-                            /*    if(slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.monthlyFrequency)){
-if(subsList.size() > 0){
-subs = subsList.get(0);
-}else{
-subs.Location__c = slcdClsWrap.locationId;
-subs.Customer__c = parAcc.Id;
-subs.Status__c   = ConstantClass.activeStatus;
-subs.Payment_Frequency__c = ConstantClass.monthlyFrequency;
-subs.Subscription_Start_Date__c = crsWrap.enrolDate;
-
-subs.Next_Bill_Date__c = subsNextBillingDate;
-subsList.add(subs);    
-} 
-}else{
-subs.Location__c = slcdClsWrap.locationId;
-subs.Customer__c = parAcc.Id;
-subs.Status__c   = ConstantClass.activeStatus;
-subs.Payment_Frequency__c = ConstantClass.termFrequency;
-subs.Subscription_Start_Date__c = crsWrap.enrolDate;
-// if(clsSessonMap.get(slcdClsWrap.clsTermId) != null)
-//    subs.Next_Bill_Date__c = clsSessonMap.get(slcdClsWrap.clsTermId).End_Date__c;
-subs.Next_Bill_Date__c = subsNextBillingDate;
-subsList.add(subs);    
-}*/
-                            
-                            Subscription_Line_Item__c subsLnItem = new Subscription_Line_Item__c();
-                            subsLnItem.Subscription__r  = subs;
-                            subsLnItem.Enrollment__r    = enr;
-                            subsLnItem.Fee__c           = slcdTutionFee.feeId;
-                            subsLnItem.Status__c        = ConstantClass.activeStatus;
-                            subsLnItem.Subscription_Start_Date__c = crsWrap.enrolDate;
-                            if(slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.termFrequency)){
-                                //System.debug('@@@@nextClassTermMap  '+nextClassTermMap);
-                                // System.debug('@@@@slcdClsWrap.clsId   '+slcdClsWrap.clsId);
-                                if(nextClassTermMap.get(slcdClsWrap.clsId) != null){
-                                    Class_Term__c nextClsTerm = nextClassTermMap.get(slcdClsWrap.clsId);
-                                    
-                                    String schUnit  = nextClsTerm.Class__r.Advance_Billing_Unit__c;
-                                    Date nextSchDt  = nextClsTerm.Start_Date__c;
-                                    
-                                    // System.debug('@@@@nextSchDt  '+nextSchDt);
-                                    
-                                    if(String.isNotBlank(schUnit) && nextClsTerm.Class__r.Advance_Billing__c != null){
-                                        Integer advSchVal = Integer.valueOf(nextClsTerm.Class__r.Advance_Billing__c);
-                                        
-                                        if(schUnit.equalsIgnoreCase('Day(s)'))
-                                            nextSchDt = nextSchDt.addDays(-advSchVal);
-                                        else if(schUnit.equalsIgnoreCase('Week(s)'))
-                                            nextSchDt = nextSchDt.addDays(-(7*advSchVal));
-                                        else if(schUnit.equalsIgnoreCase('Month(s)'))
-                                            nextSchDt = nextSchDt.addMonths(-advSchVal);
-                                    }
-                                    
-                                    subsLnItem.Class_Term__c     = nextClsTerm.Id;
-                                    subsLnItem.Next_Bill_Date__c = nextSchDt;
-                                }
-                            }else{
-                                subsLnItem.Next_Bill_Date__c = subsNextBillingDate;
-                            }
-                            subLnList.add(subsLnItem);    
-                        }else if(slcdClsWrap.clsType.equalsIgnoreCase(ConstantClass.fixedType) || slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.oneTimeFrequency)){
+                           }else if(slcdClsWrap.clsType.equalsIgnoreCase(ConstantClass.fixedType) || slcdTutionFee.payFrequency.equalsIgnoreCase(ConstantClass.oneTimeFrequency)){
                             //Filling student session records for fixed course
                             system.debug('slcdClsWrap.slctClsTermId==>'+slcdClsWrap.slctClsTermId);
                             system.debug('clsSessonMap-->'+clsSessonMap);
@@ -1323,19 +1215,6 @@ subsList.add(subs);
                                 }
                             }
                         }
-                        
-                        
-                        //Inserting student session records
-                        /*   if(clsSessonMap.get(slcdClsWrap.slctClsTermId) != null){
-for(Session__c sess : clsSessonMap.get(slcdClsWrap.slctClsTermId).Sessions__r){
-Student_Session__c stuSess = new Student_Session__c();
-stuSess.Account__r   = stuDet;
-stuSess.Session__c   = sess.Id;
-stuSess.Enrollment__r= enr;
-stuSess.Status__c= ConstantClass.ScheduledStatus;
-stuSessList.add(stuSess);   
-}
-}*/
                         
                         //Class End date updation with Last Session's Date 
                         if(slcdClsWrap.clsType.equalsIgnoreCase(ConstantClass.fixedType)){
@@ -1387,9 +1266,9 @@ stuSessList.add(stuSess);
                             invLnItm.Enrollment__r = enr;
                             invLnItms.add(invLnItm);
                         }
+                        
                     }
                 }
-                
                 //Invoice line items for global Discount Amount
                 DisWrapper referralDis;
                 for(DisWrapper dis: globalDisList){
@@ -1419,20 +1298,6 @@ stuSessList.add(stuSess);
                     insert enrList;
                 }
                 
-                if(subsMap.values().size() > 0){
-                    //Upserting Subscription
-                    upsert subsMap.values();
-                    
-                    //Inserting Subscription Line Items
-                    if(subLnList.size() > 0){
-                        for(Subscription_Line_Item__c subLnItm : subLnList){
-                            subLnItm.Subscription__c  = subLnItm.Subscription__r.Id;
-                            subLnItm.Enrollment__c    = subLnItm.Enrollment__r.Id;
-                        }
-                        insert subLnList;
-                    }
-                }
-                
                 //Inserting student session bases of the session term
                 if(stuSessList.size() > 0){
                     for(Student_Session__c stuSess: stuSessList){
@@ -1449,29 +1314,6 @@ stuSessList.add(stuSess);
                     insert invLnItms;
                 }
                 
-                //Insert Payment record
-                Payment__c payment = UtilityClass.fillPayment(parAcc.Id, inv.Id, ConstantClass.paidStatus , totPayAmt);
-                //   payment.RecordTypeId= Schema.SObjectType.Payment__c.getRecordTypeInfosByName().get('Payment Transaction').getRecordTypeId(); 
-                payment.Transaction_Id__c = refNo;
-                payment.Cash_Mode__c = payMode;
-                insert payment;
-                
-                //Payment credit for referral discount
-                if(referralDis != null){
-                    //Payment__c reffCreditPay  = EnrollmentUtility.fillPayment(referralDis.referralById , null, 'Pending' , referralDis.amount);
-                    // reffCreditPay.RecordTypeId= Schema.SObjectType.Payment__c.getRecordTypeInfosByName().get('Payment As Credit').getRecordTypeId(); 
-                    //insPayList.add(reffCreditPay);
-                    
-                    /* Credit_Note__c crNote = new Credit_Note__c();
-crNote.Amount__c =  referralDis.amount;
-crNote.Customer__c = referralDis.referralById;
-crNote.Date_Issued__c = System.today();
-crNote.Status__c = 'Issued';
-insert crNote;*/
-                    Payment__c paymentAsCredit = UtilityClass.fillPayment(referralDis.referralById, null, 'Pending' , referralDis.amount);
-                    paymentAsCredit.Type__c = 'Credit';
-                    insert paymentAsCredit;
-                }
                 strMsg = enrList[enrList.size() - 1].Id;
             }else{
                 strMsg = 'Error: Object permission issue, please check with Admin.';

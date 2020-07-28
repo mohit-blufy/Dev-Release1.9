@@ -14,10 +14,11 @@ Create Sessions when class is update to Open status which having Frequency as Mo
 public class ClassTriggerHelper {
     //-------   Create a Term when A cLass status is updated from draft to open (Mar 23,2020)   -------//
     
-    public static void createTerm (List <Class__c> clsList) {
+    public static void createTerm (List <Class__c> clsList){
         List <Class_Term__c> clsTermlist = new List <Class_Term__c>();
         List <Session__c> sessList = new List <Session__c>();
         Set<String> setTeacherId = new Set<String>();
+        Set<String> setRoomId = new Set<String>();
         Set<String> setClassId = new Set<String>();
         Map<String,List<Class_Session__c>> mapClassIdToClassSessions = new Map<String,List<Class_Session__c>>();
         Map<String,List<Class_Term__c>> mapClassIdToClassTerms = new Map<String,List<Class_Term__c>>();
@@ -26,20 +27,19 @@ public class ClassTriggerHelper {
         List<Holiday__c> listOfHolidays = new List<Holiday__c>(); 
         Map<String,List<Teacher_Working_Hours__c>> mapTeacherIdToTechrWrkHour = new Map<String,List<Teacher_Working_Hours__c>>();
         Map<String,List<Teacher_Leave__c>> mapTeacherIdToTeacherLeave = new Map<String,List<Teacher_Leave__c>>();
-        
+        Map<String,List<Session__c>> mapTeacherIdToTeacherSessions = new Map<String,List<Session__c>>();
+        Map<String,List<Session__c>> mapRoomIdToRoomSessions = new Map<String,List<Session__c>>();
         
         //***********************Retrieving Terms with Open Status based on their Sequence**********************
-        List<Term__c> trmList = TermService.getAllTermsWithSharing();
+        List<Term__c> trmList = TermService.getAllTerms();
         
         for(Class__c cls : clsList){  
             setClassId.add(cls.Id);
-            if(cls.Auto_Schedule__c)
-                setTeacherId.add(cls.Teacher__c);
         }
         
         if(setClassId.size() > 0){
             //*********************Retrieving Class Session related to class which specify the number of sessions per day of a Class*******************
-            List<Class_Session__c> listClassSessionForEachClass = ClassSessionService.getClassSessionsByClssIdWithSharing(setClassId);
+            List<Class_Session__c> listClassSessionForEachClass = ClassSessionService.getClassSessionsByClssId(setClassId);
             if(listClassSessionForEachClass != NULL && listClassSessionForEachClass.size() > 0){
                 for(Class_Session__c clsSess : listClassSessionForEachClass){
                     List<Class_Session__c> listClassSession = new List<Class_Session__c>();
@@ -54,11 +54,32 @@ public class ClassTriggerHelper {
         }
         System.debug('mapClassIdToClassSessions-->'+mapClassIdToClassSessions);
         
+        if(mapClassIdToClassSessions.keySet().size() > 0){
+            List<Class_Session__c> listClsSession = new List<Class_Session__c>();
+            for(String key : mapClassIdToClassSessions.keySet()){
+                listClsSession.addAll(mapClassIdToClassSessions.get(key));
+            }
+            if(listClsSession.size() > 0){
+                for(Class_Session__c clsSess : listClsSession){
+                    if(String.isNotBlank(clsSess.Teacher__c))
+                        setTeacherId.add(clsSess.Teacher__c);
+                    if(String.isNotBlank(clsSess.Room__c))
+                        setRoomId.add(clsSess.Room__c);
+                }
+                
+            }
+            
+        }
         //************************Retrieving Teacher Leaves,Teacher Working Hour & Holiday of specified teacher of class*******************************
         if(setTeacherId.size() > 0){
             mapTeacherIdToTeacherLeave = UtilityClass.getTeacherLeaves(setTeacherId);
             mapTeacherIdToTechrWrkHour = UtilityClass.getTeacherWorkingHour(setTeacherId);
+            mapTeacherIdToTeacherSessions = UtilityClass.getTeacherRelatedSessions(setTeacherId);
             listOfHolidays = UtilityClass.getHolidays();
+        }
+        
+        if(setRoomId.size() > 0){
+            mapRoomIdToRoomSessions = UtilityClass.getRoomRelatedSessions(setRoomId);
         }
         
         for(Class__c cls : clsList){
@@ -123,7 +144,7 @@ public class ClassTriggerHelper {
         }
         
         if(clsTermlist.size() > 0){
-            clsTermlist = ClassTermService.insertClassTermRecordsWithSharing(clsTermlist);
+            clsTermlist = ClassTermService.insertClassTermRecords(clsTermlist);
             if(clsTermlist.size() > 0){
                 for(Class_Term__c clsTrm : clsTermlist){
                     List<Class_Term__c> listClassTerm = new List<Class_Term__c>();
@@ -158,7 +179,12 @@ public class ClassTriggerHelper {
                                    if(mapClassIdToClassSessions.keySet().size() > 0 && mapClassIdToClassSessions.containsKey(cls.Id) && 
                                       mapClassIdToClassSessions.get(cls.Id) != NULL){
                                           //**********Creating Sessions of Class from Class Term Start Date till Class Term End date********************
-                                          listSessionOfOneTerm = UtilityClass.createSessions(cls,clsTerm.Start_Date__c,clsTerm.End_Date__c,seq,clsTerm.Id,
+                                          Date sDate = clsTerm.Start_Date__c;
+                                          DateTime strtDate = DateTime.newInstance(sDate.year(),sDate.month(),sDate.day(),00,00,00);
+                                          
+                                          Date eDate = clsTerm.End_Date__c;
+                                          DateTime endDate = DateTime.newInstance(eDate.year(),eDate.month(),eDate.day(),00,00,00);
+                                          listSessionOfOneTerm = UtilityClass.createSessions(cls,strtDate,endDate,seq,clsTerm.Id,
                                                                                              mapClassIdToClassSessions.get(cls.Id),
                                                                                              (clsTerm.Sessions__c != NULL ? clsTerm.Sessions__c : null));
                                           seq +=  listSessionOfOneTerm.size();
@@ -195,8 +221,13 @@ public class ClassTriggerHelper {
                            for(Class_Term__c clsTerm : listClassTerm){
                                if(mapClassIdToClassSessions.keySet().size() > 0 && mapClassIdToClassSessions.containsKey(cls.Id) && 
                                   mapClassIdToClassSessions.get(cls.Id) != NULL){
+                                      Date sDate = clsTerm.Start_Date__c;
+                                      DateTime strtDate = DateTime.newInstance(sDate.year(),sDate.month(),sDate.day(),00,00,00);
+                                      
+                                      Date eDate = clsTerm.End_Date__c;
+                                      DateTime endDate = DateTime.newInstance(eDate.year(),eDate.month(),eDate.day(),00,00,00);
                                       //***************Creating Sessions of Class from Class Term Start Date till Class Term End date********************
-                                      listSesstionOfOneTerm = UtilityClass.createSessions(cls,clsTerm.Start_Date__c,clsTerm.End_Date__c,seq,clsTerm.Id,
+                                      listSesstionOfOneTerm = UtilityClass.createSessions(cls,strtDate,endDate,seq,clsTerm.Id,
                                                                                           mapClassIdToClassSessions.get(cls.Id),null);
                                       seq += listSesstionOfOneTerm.size();
                                       
@@ -220,7 +251,11 @@ public class ClassTriggerHelper {
                             List<Session__c> listSession = new List<Session__c>();
                             if(mapClassIdToClassSessions.keySet().size() > 0 && mapClassIdToClassSessions.containsKey(cls.Id) && 
                                mapClassIdToClassSessions.get(cls.Id) != NULL){
-                                   listSession = UtilityClass.createSessions(cls,cls.Start_Date__c,cls.End_Date__c,0,listClassTermForNew[0].Id,
+                                   Date sDate = cls.Start_Date__c;
+                                   DateTime strtDate = DateTime.newInstance(sDate.year(),sDate.month(),sDate.day(),00,00,00);
+                                   Date eDate = cls.End_Date__c;
+                                   DateTime endDate = DateTime.newInstance(eDate.year(),eDate.month(),eDate.day(),00,00,00);
+                                   listSession = UtilityClass.createSessions(cls,sDate,endDate,0,listClassTermForNew[0].Id,
                                                                              mapClassIdToClassSessions.get(cls.Id),
                                                                              (cls.Sessions__c != NULL ? cls.Sessions__c : null));
                                }
@@ -242,7 +277,8 @@ public class ClassTriggerHelper {
                     List<Session__c> listSession = mapClassIdToSessions.get(cls.Id);
                     //*********Get Updated Sessions Based on Holiday,Teacher Leaves,Teacher Working Hour*****************
                     listSession = UtilityClass.getUpdatedSessions(0,cls.Exclude_Public_Holidays__c,listSession,
-                                                                  mapTeacherIdToTeacherLeave, mapTeacherIdToTechrWrkHour, listOfHolidays);
+                                                                  mapTeacherIdToTeacherLeave, mapTeacherIdToTechrWrkHour, 
+                                                                  listOfHolidays,mapTeacherIdToTeacherSessions,mapRoomIdToRoomSessions);
                     mapClassIdToSessions.put(cls.Id,listSession);
                     cls.put('Last_Session_Date__c',listSession.get(listSession.size() - 1).Session_Date__c);
                     cls.put('Last_Session_Scheduled_Date__c',System.today());
@@ -256,7 +292,7 @@ public class ClassTriggerHelper {
                 listClassTerm.addAll(mapClassIdToClassTerms.get(key));
             }
             if(listClassTerm.size() > 0)
-                ClassTermService.updateClassTermRecordsWithSharing(listClassTerm);
+                ClassTermService.updateClassTermRecords(listClassTerm);
         }
         
         if(mapClassIdToSessions.keySet().size() > 0){
@@ -265,7 +301,7 @@ public class ClassTriggerHelper {
                 listSession.addAll(mapClassIdToSessions.get(key));
             }
             if(listSession.size() > 0)
-                SessionService.insertSessionRecordsWithSharing(listSession);
+                SessionService.insertSessionRecords(listSession);
         }
     }
     

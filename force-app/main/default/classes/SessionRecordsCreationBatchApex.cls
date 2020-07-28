@@ -10,12 +10,12 @@
 
 global with sharing class SessionRecordsCreationBatchApex implements Database.Batchable<sObject>{
     
-    global Database.QueryLocator start(Database.BatchableContext bc) {
+    global Database.QueryLocator start(Database.BatchableContext bc){
         //**************Retrieving Class with Open Status, Monthly Frequency,Advance Scheduling Unit is Month(s)  & Next Schedule Date is 
         //Today along with related Sessions,Class Session,Class Term & Enrollment Records***************************
         String query = 'SELECT Id,Name,Next_Schedule_Date__c,Last_Session_Date__c,Start_Date__c,Advance_Scheduling__c,Location__c,Auto_Schedule__c, ';
         query += ' Start_Time__c,Teacher__c,Duration__c,Days_of_Week__c,Sessions__c,Exclude_Public_Holidays__c,Frequency__c,Last_Scheduled_ClassTerm__c, ';
-        query += ' (SELECT Id,Duration__c,Start_Time__c FROM Class_Sessions__r ORDER BY Start_Time__c), ';
+        query += ' (SELECT Id,Duration__c,Start_Time__c,Teacher__c,Room__c FROM Class_Sessions__r ORDER BY Start_Time__c), ';
         query += ' (SELECT Id,Sequence__c FROM Class_Terms__r ORDER BY Sequence__c DESC LIMIT 1), ';
         query += ' (SELECT Id,Enrollment_End_Date__c,Student__c,Type__c FROM Enrollments__r), ';
         query += ' (SELECT Id,Sequence__c FROM Sessions__r ORDER BY Sequence__c DESC LIMIT 1) FROM Class__c ';
@@ -35,22 +35,35 @@ global with sharing class SessionRecordsCreationBatchApex implements Database.Ba
             Map<String,List<Class_Term__c>> mapClassIdToClassTerms = new Map<String,List<Class_Term__c>>();
             
             Set<String> setTeacherId = new Set<String>();
+            Set<String> setRoomId = new Set<String>();
             List<Holiday__c> listOfHolidays = new List<Holiday__c>();
             Map<String,List<Teacher_Working_Hours__c>> mapTeacherIdToTechrWrkHour = new Map<String,List<Teacher_Working_Hours__c>>();
             Map<String,List<Teacher_Leave__c>> mapTeacherIdToTeacherLeave = new Map<String,List<Teacher_Leave__c>>();
+            Map<String,List<Session__c>> mapTeacherIdToTeacherSessions = new Map<String,List<Session__c>>();
+            Map<String,List<Session__c>> mapRoomIdToRoomSessions = new Map<String,List<Session__c>>();
             
-            Map<String,Course__c> crsMap = new Map<String,Course__c>();
             for(Class__c classRec : listClass){
-                //********************Retrieving Teacher Id with Auto Schedule True for creating sessions of Class*************************
-                if(classRec.Auto_Schedule__c)
-                    setTeacherId.add(classRec.Teacher__c);
+                //*********************Retrieving Class Session related to class which specify the number of sessions per day of a Class*******************
+                if(classRec.Class_Sessions__r.size() > 0){
+                    for(Class_Session__c clsSess : classRec.Class_Sessions__r){
+                        if(String.isNotBlank(clsSess.Teacher__c))
+                            setTeacherId.add(clsSess.Teacher__c);
+                        if(String.isNotBlank(clsSess.Room__c))
+                            setRoomId.add(clsSess.Room__c);
+                    }
+                }
             }
             
             //************************Retrieving Teacher Leaves,Teacher Working Hour & Holiday of specified teacher of class**********************
             if(setTeacherId.size() > 0){
                 mapTeacherIdToTeacherLeave = UtilityClass.getTeacherLeaves(setTeacherId);
                 mapTeacherIdToTechrWrkHour = UtilityClass.getTeacherWorkingHour(setTeacherId);
+                mapTeacherIdToTeacherSessions = UtilityClass.getTeacherRelatedSessions(setTeacherId);
                 listOfHolidays = UtilityClass.getHolidays();
+            }
+            
+            if(setRoomId.size() > 0){
+                mapRoomIdToRoomSessions = UtilityClass.getRoomRelatedSessions(setRoomId);
             }
             
             for(Class__c classRec : listClass){
@@ -103,7 +116,7 @@ global with sharing class SessionRecordsCreationBatchApex implements Database.Ba
             }
             
             if(listClassTerm.size() > 0){
-                List<Class_Term__c> listClassTermAfterInsertion = ClassTermService.insertClassTermRecordsWithSharing(listClassTerm);
+                List<Class_Term__c> listClassTermAfterInsertion = ClassTermService.insertClassTermRecords(listClassTerm);
                 if(listClassTermAfterInsertion.size() > 0){
                     for(Class_Term__c clsTrm : listClassTermAfterInsertion){
                         List<Class_Term__c> listClassTermForEachClass = new List<Class_Term__c>();
@@ -147,7 +160,8 @@ global with sharing class SessionRecordsCreationBatchApex implements Database.Ba
                                //*********Get Updated Sessions Based on Holiday,Teacher Leaves,Teacher Working Hour*****************
                                listSession = UtilityClass.getUpdatedSessions(Integer.valueOf(classRec.Sessions__r[0].Sequence__c),classRec.Exclude_Public_Holidays__c,
                                                                              listSession,mapTeacherIdToTeacherLeave, mapTeacherIdToTechrWrkHour,
-                                                                             listOfHolidays);
+                                                                             listOfHolidays,mapTeacherIdToTeacherSessions,
+                                                                             mapRoomIdToRoomSessions);
                                //********Updating Last Scheduled ClassTerm with last class term sequence************
                                classRec.put('Last_Scheduled_ClassTerm__c',listClassTermForEachClass.get(listClassTermForEachClass.size() - 1).Sequence__c);
                                //********Updating Last session date with newly Created Session last session of The month************
@@ -162,7 +176,7 @@ global with sharing class SessionRecordsCreationBatchApex implements Database.Ba
                 }
             }
             if(listSessionToInsert.size() > 0){
-                listSessionToInsert = SessionService.insertSessionRecordsWithSharing(listSessionToInsert);
+                listSessionToInsert = SessionService.insertSessionRecords(listSessionToInsert);
                 for(Session__c sess : listSessionToInsert){
                     List<Session__c> listSession = new List<Session__c>();
                     if(mapClassIdToSessions.containsKey(sess.Class__c))
@@ -178,10 +192,10 @@ global with sharing class SessionRecordsCreationBatchApex implements Database.Ba
                     listClassTermToUpdate.addAll(mapClassIdToClassTerms.get(key));
                 }
                 if(listClassTermToUpdate.size() > 0)
-                    ClassTermService.updateClassTermRecordsWithSharing(listClassTermToUpdate);
+                    ClassTermService.updateClassTermRecords(listClassTermToUpdate);
             }
             if(listClassToUpdate.size() > 0)
-                ClassService.updateClassRecordsWithSharing(listClassToUpdate);
+                ClassService.updateClassRecords(listClassToUpdate);
             
             if(mapClassIdToSessions.keySet().size() > 0){
                 for(Class__c cls: listClass){
@@ -199,7 +213,7 @@ global with sharing class SessionRecordsCreationBatchApex implements Database.Ba
             }
             
             if(listStudentSession.size() > 0)
-                StudentSessionService.insertStudentSessionRecordsWithSharing(listStudentSession);
+                StudentSessionService.insertStudentSessionRecords(listStudentSession);
         }
         catch(Exception e){
             System.debug('Message-->'+e.getMessage());
@@ -209,7 +223,7 @@ global with sharing class SessionRecordsCreationBatchApex implements Database.Ba
             blufyErrLg.put('Process_Name__c','SessionRecordsCreationBatchApex');
             blufyErrLg.put('Description__c',e.getMessage());
             blufyErrLg.put('Title__c','Session Creation Batch');
-            BlufyErrorLogService.insertBlufyErrorLogRecordsWithSharing(new List<Blufy_Error_Log__c>{blufyErrLg});
+            BlufyErrorLogService.insertBlufyErrorLogRecords(new List<Blufy_Error_Log__c>{blufyErrLg});
         }
     }
     

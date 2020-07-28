@@ -37,8 +37,8 @@
             
             if(component.get("v.type") == 'Teacher')
                 selectedValue = nameList;*/
-            
-            if(component.get("v.type") != 'Teacher'){
+           // alert(selectedValue);
+            if(component.get("v.type") != 'Teacher' && component.get("v.type") != 'Corporate'){
                 var nameList = selectedValue.split(" ");
             	selectedValue = nameList[0]
             }

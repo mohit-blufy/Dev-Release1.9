@@ -1,0 +1,102 @@
+<aura:component implements="force:hasRecordId,force:lightningQuickActionWithoutHeader" controller="UpdateClassSessionsCompApex" access="global" >
+	<aura:html tag="style">
+        .cuf-scroller-content{
+        background:#fff;
+        }
+        .slds-modal__container { 
+        max-width: 100%; 
+        width: 70%;
+        }
+        .modal-body{ 
+        height :  100% !important; 
+        min-height: 500px !important; 
+        }
+    </aura:html>
+    
+    <aura:attribute name="showSpinner" type="Boolean" default="false" />
+    <aura:attribute name="shwError" type="Boolean" default="true" />
+    <aura:attribute name="sessionList" type="list"/>
+    <aura:attribute name="simpleRecord" type="Object"/>
+    <aura:attribute name="recordError" type="String"/>
+    
+    <aura:handler name="myApplicationEvent" event="c:AutoCompleteEvent" action="{!c.handleMyApplicationEvent}"/>
+    
+    <force:recordData aura:id="recordLoader"
+                      recordId="{!v.recordId}"
+                      targetFields="{!v.simpleRecord}"
+                      targetError="{!v.recordError}"
+                      fields="Status__c"
+                      layoutType = "FULL"
+                      recordUpdated="{!c.doInit}" 
+                      />
+    
+    <lightning:card title="">
+        <aura:if isTrue="{!v.showSpinner}">
+            <lightning:spinner style="margin:200px"  variant="brand" size="medium" />
+        </aura:if>
+        <aura:set attribute="title">
+            <div class="slds-modal__footer slds-modal__header" style="background-color: #2F5597;height:50px">
+                <div class="slds-m-left_x-small slds-float_left" style="font-size:20px;color:white">Update Sessions</div>	
+            </div> 	
+        </aura:set>
+        <div class="slds-p-horizontal_medium slds-p-right_large slds-p-top_small">
+            <aura:if isTrue="{!v.sessionList.length != 0}">
+                <table class="slds-table slds-table--bordered slds-table--cell-buffer slds-max-medium-table--stacked-horizontal"  >
+                    <thead>
+                        <tr style="height:40px" class="slds-text-title_caps">                                                
+                            <th scope="col">
+                                <div class="slds-truncate" title="S.No.">S.No.</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Date">Session Date</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Start Time">Start Time</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Teacher">Teacher</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Teacher">Room</div>
+                            </th>
+                        </tr>
+                    </thead>                
+                    <tbody>         
+                        <aura:iteration items="{!v.sessionList}" var="item" indexVar="key" >
+                            <tr style="height:50px">                                
+                                <th data-label="S.No.">
+                                    <div class="slds-truncate" title="{!item.sessSequence}">
+                                        <lightning:input name="seqnce" value="{!item.sessSequence}"/>
+                                    </div>
+                                </th>                               
+                                <th data-label="Session Date">
+                                    <div class="slds-truncate" title="{!item.stDate}">
+                                        <lightning:input type="date" name="sessDate" label="" value="{!item.stDate}" />
+                                    </div>
+                                </th>                                                                    
+                                <th data-label="Start Time">
+                                    <div class="slds-truncate" title="{!item.stTime}">
+                                        <lightning:input style="width:160px;" type="time" name="stTime" value="{!item.stTime}" />
+                                    </div>
+                                </th>
+                                <th data-label="Teacher">
+                                    <c:AutoCompleteCmp showLabel="false" type="Teacher" borderColor="" extendedWhereClause=" AND Recordtype.name = 'Teacher' " valueFieldApiName="Name" placeHolder="Search Teacher.." inputId="{!key+'_tchrId'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!item.tchrId}" inputValue="{!item.tchrName}"/>
+                                </th>
+                                <th data-label="Room">
+                                    <c:AutoCompleteCmp showLabel="false" type="Room" borderColor="" extendedWhereClause="" valueFieldApiName="Name" placeHolder="Search Room..." inputId="{!key+'_roomId'}" slcdIndex="{!key}"  label="" objectApiName="Room__c" selectedOption="{!item.roomId}" inputValue="{!item.roomName}"/>
+                                </th>
+                            </tr> 
+                        </aura:iteration>
+                    </tbody>            
+                </table>
+                <br/>
+                <footer class="slds-modal__footer slds-p-top_small">
+                    <lightning:button label="Cancel" onclick="{!c.doCancel}" variant="destructive" title="Base action" iconName="utility:close"  class="slds-m-right_medium" />
+                    <span>
+                        <lightning:button label="Save" onclick="{!c.doSave}" variant="brand"  title="Base action" iconName="utility:download" />
+                    </span>                   
+                </footer>
+            </aura:if>
+        </div> 
+        </lightning:card>
+</aura:component>
