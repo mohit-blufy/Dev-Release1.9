@@ -4,6 +4,10 @@ for(
     -->Rajesh1
     -->Rajesh2
     -->Mohit2
+    -->for(Rajesh....
+        ---1
+        ---2
+    )
     -->Rajesh3
     -->Rajesh4
 )
@@ -16,6 +20,10 @@ for()v2{
     -->Rajesh4
     -->Rajesh5
     -->Mohit5
+    -->for(Rajesh....
+        ---1
+        ---2
+    )
     -->Rajesh6
     -->Rajesh7
 }
