@@ -20,6 +20,14 @@ for()v2{
 for()sdf
 New Comment
 ------------------
+<<<<<<< HEAD
 else{
 
+=======
+fun() {
+a=1;
+b=2;
+c= 1+2;
+Sy.De(c);
+>>>>>>> 1d1758db53ddb6595bcca554f117bd270f023133
 }
