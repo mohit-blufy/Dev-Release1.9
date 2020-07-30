@@ -1,4 +1,4 @@
-public class ConstantClass { 
+public class ConstantClass {
     
     
     public static String customerRecTypeId     	 = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Customer').getRecordTypeId();
@@ -84,5 +84,8 @@ public class ConstantClass {
     public static String minutesDurationPicklist = 'Minutes';
     
     public static boolean isSkipHolidayForMonthlySess = false;
+
+    public static string section =  'Calendar Assessment';
+    public static String nameSpace = System.Label.Namespace == 'None' ? '' : System.Label.Namespace;
     
 }

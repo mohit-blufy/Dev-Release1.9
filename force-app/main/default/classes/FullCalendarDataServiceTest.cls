@@ -1,7 +1,7 @@
 /**
 	Name		: FullCalendarDataServiceTest
 	Date		: 23 March 2020	
-	Description : 
+	Description :
 	
 */
 @isTest
@@ -21,10 +21,14 @@ public class FullCalendarDataServiceTest {
         List<Class__c>  classList = [SELECT id,Name FROM Class__C WHERE Course__c =: cousrList[0].Id AND Teacher__c =: teacherList[0].Id];
         System.assert(classList.size() > 0, 'Fail to create Class!');
         
-        List<Session__c> sessionList = [SELECT Id, Name, Sequence__c, Class__c, Session_Date__c, Start_Time__c, End_Time__c, Teacher__c,Teacher__r.Name, Status__c, Event_Color__c  FROM Session__c WHERE Status__c !=: ConstantClass.sessionCancel];
+        List<Session__c> sessionList = [SELECT Id, Name, Sequence__c, Class__c, Session_Date__c, Start_Time__c, End_Time__c, Teacher__c,Teacher__r.Name, Status__c, Event_Color__c,Type__c  FROM Session__c WHERE Status__c !=: ConstantClass.sessionCancel];
         System.assert(sessionList.size() > 0, 'Fail to create  Session!');
         
+        List<Room__c> roomList = [SELECT Id, Name, Type__c, Location__c, Capacity__c FROM Room__c];
+        System.assert(roomList.size() > 0, 'Fail to create  Room!');
+        
         String classIds = '\''+ classList[0].Id + '\'';
+        String roomIds = '\''+ roomList[0].Id + '\'';
        // Date startDate = Date.newInstance(2020,03,24);
         String startDate = '2020-03-24';
         String endDate = '2020-03-29';
@@ -43,10 +47,15 @@ public class FullCalendarDataServiceTest {
         FullCalendarDataService.setNewSessionTiming(sessionList[0].Id, teacherList[0].Id, newTime, startDate);
         FullCalendarDataService.setNewTimeForAllSession(sessionList[0].Id, newTime);
         FullCalendarDataService.setNewDateTimeForCurrentAndUpComingSession(sessionList[0].Id, newTime, dayDiff, previousDay, '');
+        sessionList[0].Type__c = 'Placeholder';
+        update sessionList;
+        FullCalendarDataService.setNewDateTimeForCurrentAndUpComingSession(sessionList[0].Id, newTime, dayDiff, previousDay, '');
         FullCalendarDataService.insertNewSession(locationList[0].Id, teacherList[0].Id, newTime, startDate, duration, endDate, repeat, description);
         repeat = 'None';
         FullCalendarDataService.insertNewSession(locationList[0].Id, teacherList[0].Id, newTime, startDate, duration, endDate, repeat, description);
         FullCalendarDataService.getTeacherLeaves(teacherList[0].Id);
         FullCalendarDataService.getHolidays(startDate);
+        FullCalendarDataService.getSessionRoomByDate(locationList[0].Id,roomIds,startDate);
+        FullCalendarDataService.getSessionRoomByWeek(locationList[0].Id,roomIds,startDate,endDate);
     }
 }

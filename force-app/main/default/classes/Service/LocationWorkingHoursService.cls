@@ -1,23 +1,20 @@
 /**
 Name        :   LocationWorkingHoursService
-Date        :   10 JULY 2020 
+Date        :   10 JULY 2020
 Description :   This class is use for to perform DML operation on Location_Working_Hours__c Object
 */
 public class LocationWorkingHoursService {
     
     /**
-    Name        :  getLocationWorkingHoursRecords
-    Date        :  10-07-20
-    Description :  This function is use for to get the Location_Working_Hours__c records based on location Ids
-    Dev         :  Asif
+    getByLocationId on 10-07-20 get Location_Working_Hours__c  records based on location Ids
     */
-    public static List<Location_Working_Hours__c> getLocationWorkingHoursRecords(set<Id> accIds){
-        if(accIds.size() > 0){
+    public static List<Location_Working_Hours__c> getByLocationId(set<Id> locationIds){
+        if(locationIds.size() > 0){
             try{
-                List<Location_Working_Hours__c> locationList = [SELECT Id,Location__c, Start_Time__c, 
-                                                                End_Time__c,Day__c 
+                List<Location_Working_Hours__c> locationList = [SELECT Id, Name, Day__c,Start_Time__c,
+                                                                End_Time__c, Active__c, Location__c 
                                                                 FROM Location_Working_Hours__c 
-                                                                WHERE Location__c IN: accIds AND Active__c = true
+                                                                WHERE Location__c IN: locationIds AND Active__c = true
                                                                 WITH SECURITY_ENFORCED ];
                 return locationList;
             } catch(System.QueryException e){

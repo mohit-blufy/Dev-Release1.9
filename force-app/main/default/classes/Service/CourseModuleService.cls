@@ -1,17 +1,14 @@
 /**
-Name        :   CourseModuleService 
-Date        :   
+Name        :   CourseModuleService     
 Description :   This class is use for to perform DML operation on Course_Module__c Object
 */
 public class CourseModuleService {
     
     /**
-    Name        :  getCourseModule
-    Date        :  
-    Description :  This function is use for to get the Course_Module__c data based on courseId set Ids
-    Dev         :  Asif
+    getCourseModule get the Course_Module__c data based on courseId set Ids
+    
     */	
-    public static List<Course_Module__c> getCourseModule(Set<Id> courseId){
+    public static List<Course_Module__c> getByCourseId(Set<Id> courseId){
         try{
             if(!courseId.isEmpty()){
                 List<Course_Module__c> courseModList = new List<Course_Module__c>();

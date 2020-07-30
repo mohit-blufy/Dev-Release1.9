@@ -1,6 +1,6 @@
 public class SessionService {
     
-    //Get Sessions By Class Id 
+    //Get Sessions By Class Id
     public static List<Session__c> getSessionsByClassId(String classId){
         try{
             List<Session__c> listSession = [SELECT Id,Name,Session_Date__c,Start_Time__c,End_Time__c,Status__c,Teacher__c,Teacher__r.Name,

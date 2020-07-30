@@ -1,5 +1,5 @@
 /**
-    24-JULY-20 for SessionModuleHelper    
+    24-JULY-20 for SessionModuleHelper
 */
 @isTest
 public class TestSessionModuleHelper {

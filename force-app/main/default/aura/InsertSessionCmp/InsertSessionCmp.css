@@ -1,0 +1,11 @@
+.THIS .custom-heading {
+  font-size: 15px;  
+}
+.THIS.slds-modal__container {
+  max-width: 100%;
+  width: 70%;
+}
+.THIS.modal-body {
+  height: 100% !important;
+  min-height: 450px !important;
+}

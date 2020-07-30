@@ -1,5 +1,5 @@
 <apex:page standardStylesheets="false" controller="FullCalendarController" showHeader="false" applyHtmlTag="true" applyBodyTag="false">
-    <head> 
+    <head>
         <apex:slds />  
         <div id="spinner" style="display: none">
             <div class="slds-spinner_container" style="position:fixed">
@@ -9,7 +9,7 @@
                     <div class="slds-spinner__dot-b"></div>
                 </div>
             </div>
-        </div>
+        </div>    
         <c:full_calendar_js selectedLocation="{!selectedLocation}"
                             selectedTeacher="{!selectedTeacher}"
                             TodayDate="{!TodayDate}"
@@ -26,6 +26,7 @@
             <!-- <apex:actionFunction action="{!refreshResources}" name="handleResourcesTypeChange" reRender="filters" status="pageStatus" oncomplete="fetchResourceDataOnType();" /> -->
             <apex:actionFunction action="{!refreshClasses}" name="handleCourseChange" reRender="filters" status="pageStatus" oncomplete="fetchClassDataOnCourse();" />
             <apex:actionFunction action="{!refreshCourseAndClasses}" name="jsRefreshCC" reRender="filters" status="pageStatus" oncomplete="handleTeacherChange();"/>
+            <apex:actionFunction action="{!refreshRoom}" name="handleRoomTypeChange" reRender="filters" status="pageStatus" oncomplete="handleRoomTypeChng();" />
             <apex:actionStatus id="pageStatus">
                 <apex:facet name="start">
                     <div class="slds-spinner_container">
@@ -52,6 +53,7 @@
                                         <div class="slds-button-group" role="group">                                    
                                             <button class="slds-button slds-button_neutral slds-button_brand filterBtn location-button" name="Location" onclick="changeFilterView(this); return false;">Location</button>
                                             <button class="slds-button slds-button_neutral filterBtn teacher-button" name="Teacher" onclick="changeFilterView(this); return false;">Teacher</button>
+                                            <button class="slds-button slds-button_neutral filterBtn room-button" name="Room" onclick="changeFilterView(this); return false;">Room</button>
                                             <!-- commment line after discussed with Dharam And NITIN  -->
                                             <!-- <button class="slds-button slds-button_neutral filterBtn" name="Resource" onclick="changeFilterView(this); return false;">Resource</button> -->
                                         </div>
@@ -64,7 +66,10 @@
                     <div class="slds-col slds-size_9-of-12 slds-medium-size_8-of-12"> 
                         <div class="slds-page-header__col-actions">
                             <div class="slds-page-header__controls slds-float_right">                           
-                                <apex:outputPanel layout="block" styleClass="slds-grid slds-wrap" id="filters" rendered="{!isUserHaveAllAccess}">                                                       
+                                <apex:outputPanel layout="block" styleClass="slds-grid slds-wrap" id="filters" rendered="{!isUserHaveAllAccess}">     
+                                    <!-- <c:multi_select_cmp selectList="{!teacherList}" listName="Teacher"></c:multi_select_cmp>    
+                                    <c:multi_select_cmp selectList="{!courseList}" listName="Course"></c:multi_select_cmp>    
+                                    <c:multi_select_cmp selectList="{!classList}" listName="Class"></c:multi_select_cmp>                                                   -->
                                     <div class="slds-page-header__control">
                                         <ul class="slds-button-group-list">
                                             <li>
@@ -81,7 +86,7 @@
                                                     </div>   
                                                 </div>
                                             </li>
-                                            <li>
+                                            <li  class="non-room-list slds-show">
                                                 <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
                                                     <div class="slds-form-element">
                                                         <label class="slds-form-element__label" >Teacher</label>
@@ -95,7 +100,7 @@
                                                     </div>
                                                 </div>
                                             </li>
-                                            <li>
+                                            <li  class="non-room-list slds-show">
                                                 <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
                                                     <div class="slds-form-element">
                                                         <label class="slds-form-element__label">Course</label>
@@ -109,7 +114,7 @@
                                                     </div>             
                                                 </div>
                                             </li>
-                                            <li>
+                                            <li class="non-room-list slds-show">
                                                 <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
                                                     <div class="slds-form-element">
                                                         <label class="slds-form-element__label" >Class</label>
@@ -117,6 +122,34 @@
                                                             <div class="slds-select_container">
                                                                 <apex:selectList size="1" onchange="handleClassChange(this);" styleClass="slds-select select-class fix-width">
                                                                     <apex:selectOptions value="{!classList}"></apex:selectOptions>                       
+                                                                </apex:selectList>
+                                                            </div>
+                                                        </div>
+                                                    </div> 
+                                                </div>
+                                            </li>
+                                            <li class="room-list slds-hide">
+                                                <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label" >Room Types</label>
+                                                        <div class="slds-form-element__control">
+                                                            <div class="slds-select_container">
+                                                                <apex:selectList size="1" onchange="handleRoomTypeChange(this);" value="{!selectedRoomType}"  styleClass="slds-select select-room-type fix-width">
+                                                                    <apex:selectOptions value="{!roomTypeList}"></apex:selectOptions>                       
+                                                                </apex:selectList>
+                                                            </div>
+                                                        </div>
+                                                    </div> 
+                                                </div>
+                                            </li>
+                                            <li class="room-list slds-hide">
+                                                <div class="slds-col slds-p-bottom_medium slds-p-right_x-small"> 
+                                                    <div class="slds-form-element">
+                                                        <label class="slds-form-element__label" >Rooms</label>
+                                                        <div class="slds-form-element__control">
+                                                            <div class="slds-select_container">
+                                                                <apex:selectList size="1" onchange="handleRoomChange(this);"  styleClass="slds-select select-room fix-width">
+                                                                    <apex:selectOptions value="{!roomList}"></apex:selectOptions>                       
                                                                 </apex:selectList>
                                                             </div>
                                                         </div>
