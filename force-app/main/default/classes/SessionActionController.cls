@@ -142,16 +142,16 @@ Developer   :
             for (StudentSessionAssModel obj : studRecords){
                // system.debug('obj.isSelect'+obj.isSelect);
                 if (obj.isSelect){
-                    Assessment__c assessmentObj = new Assessment__c();
-                    assessmentObj.put('Student__c',obj.stuSess.Account__c);
-                    assessmentObj.put('Class__c',obj.stuSess.Session__r.Class__c);
-                    assessmentObj.put('Session__c',obj.stuSess.Session__c);
-                    assessmentObj.put('Assessor__c',obj.stuSess.Session__r.Teacher__c);
-                    assessmentObj.put('Enrollment__c',obj.stuSess.Enrollment__c);
-                    assessmentObj.put('Score_Grade__c',obj.selectedGrade);
-                    assessmentObj.put('Course_Assessment__c',crsAssId);
-                    assessmentObj.put('Status__c',ConstantClass.ScheduledStatus);
-                    //assessmentObj.put('Assessment_Date__c',Date.Today());
+                    Assessment__c assessmentObj = new Assessment__c();                    
+                    assessmentObj.put(ConstantClass.nameSpace+'Student__c',obj.stuSess.Account__c);
+                    assessmentObj.put(ConstantClass.nameSpace+'Class__c',obj.stuSess.Session__r.Class__c);
+                    assessmentObj.put(ConstantClass.nameSpace+'Session__c',obj.stuSess.Session__c);
+                    assessmentObj.put(ConstantClass.nameSpace+'Assessor__c',obj.stuSess.Session__r.Teacher__c);
+                    assessmentObj.put(ConstantClass.nameSpace+'Enrollment__c',obj.stuSess.Enrollment__c);
+                    assessmentObj.put(ConstantClass.nameSpace+'Score_Grade__c',obj.selectedGrade);
+                    assessmentObj.put(ConstantClass.nameSpace+'Course_Assessment__c',crsAssId);
+                    assessmentObj.put(ConstantClass.nameSpace+'Status__c',ConstantClass.ScheduledStatus);
+                    assessmentObj.put(ConstantClass.nameSpace+'Assessment_Date__c',Date.Today());
                     if(obj.keyValues.size() > 0){
                         for(KeyValuesWrapper keyValueObj : obj.keyValues){
                             if(keyValueObj.type == 'Date'){

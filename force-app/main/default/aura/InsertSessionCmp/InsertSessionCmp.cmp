@@ -1,8 +1,9 @@
 <aura:component implements="force:hasRecordId,force:lightningQuickActionwithoutheader">
     <aura:attribute name="showSpinner" type="Boolean" default="false" />
     <aura:attribute name="showComponent" type="Boolean" default="false" />
+    <aura:attribute name="rows" type="list[]" />
     <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
-
+    
     <aura:html tag="style">
         .cuf-scroller-content{
         background:#fff;
@@ -24,8 +25,8 @@
             </aura:if>
             <div class="slds-size_1-of-1 slds-modal__header" style="height:60px">
                 <div class=" slds-float_left custom-heading">Schedule Session</div>
-                <lightning:button label="Save" title="Save" onclick="{! c.saveRecords }" />
-                <lightning:button label="Cancel" title="Cancel" onclick="{! c.closeModal }" />
+                <!-- <lightning:button label="Save" title="Save" onclick="{! c.saveRecords }" />
+                <lightning:button label="Cancel" title="Cancel" onclick="{! c.closeModal }" /> -->
             </div>
             <div class="slds-p-horizontal_small">
                 <div>
@@ -71,8 +72,35 @@
                     </lightning:layout>
                 </div>
                 <div>
-
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col">Day</th>
+                                <th scope="col">StartDate/Time</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Teacher</th>
+                                <th scope="col">Room</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <aura:iteration items="{!v.rows}" var="row">
+                                <tr>
+                                    <c:TableRowsCmp rows="{!row}" index="{!row.index}" />
+                                </tr>
+                            </aura:iteration>                            
+                        </tbody>
+                    </table>
+                    <div class="slds-p-vertical_x-small">
+                        <lightning:button class="slds-float_right" variant="brand" label="Add Row" title="Add Row" onclick="{!c.addRows}" />
+                    </div>
                 </div>
+                <footer>
+                    <div class="slds-align_absolute-center slds-p-vertical_x-small">
+                        <lightning:button label="Save" title="Save" onclick="{! c.saveRecords }" />
+                        <lightning:button label="Cancel" title="Cancel" onclick="{! c.closeModal }" />
+                    </div>
+                </footer>
             </div>
         </lightning:card>
     </aura:if>
