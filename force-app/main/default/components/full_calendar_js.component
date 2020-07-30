@@ -1,4 +1,4 @@
-<apex:component controller="FullCalendarDataService"> 
+<apex:component controller="FullCalendarDataService">
     <apex:attribute name="selectedLocation" type="String" description="for selected location" />
     <apex:attribute name="selectedTeacher" type="String" description="for selected teacher" />
     <apex:attribute name="TodayDate" type="String" description="for today date" />
@@ -145,6 +145,8 @@
         var selectedCourseValue = '';
         var selectedResourceValue = '';
         var selectedResourceType = '';
+        var selectedRoomValue = '';
+        var selectedRoomType = '';
         var isModeViewChanged = false;
         var isComeFromDatePicker = false;
         var calendarInfo;
@@ -381,9 +383,11 @@
                     //commment line after discussed with Dharam And NITIN 
                     // if (selectedModeView == 'Resource') {
                     //     fetechSessionResourceViewByWeekFromSF(selectLocation, selectTeacher);
-                    // } else {
-                    fetchSessionByWeekFromSF(selectTeacher, selectLocation);
-                    //}
+                    if(selectedModeView == 'Room'){
+                        fetechSessionRoomViewByWeekFromSF(selectLocation);
+                    } else {
+                        fetchSessionByWeekFromSF(selectTeacher, selectLocation);
+                    }
                 }
             } else if (selectedViewType == 'dayGridMonth') {
                 if (isComeFromDatePicker == false) {
@@ -396,9 +400,11 @@
                 //commment line after discussed with Dharam And NITIN 
                 // if (selectedModeView == 'Resource') {
                 //     fetechSessionResourceViewByWeekFromSF(selectLocation, selectTeacher);
-                // } else {
-                fetchSessionByWeekFromSF(selectTeacher, selectLocation);
-                // }
+                if(selectedModeView == 'Room'){
+                    fetechSessionRoomViewByWeekFromSF(selectLocation);
+                } else {
+                 fetchSessionByWeekFromSF(selectTeacher, selectLocation);
+                }
             } else {
                 if (isComeFromDatePicker == false) {
                     selectedDate = createDateFormat(calendar.getDate());
@@ -410,7 +416,11 @@
                 // if (selectedModeView == 'Resource') {
                 //     fetechSessionByResourceView(selectLocation, selectTeacher);
                 // } else {
-                fetchSessionsByDateFromSF(selectTeacher, selectLocation);
+                if(selectedModeView == 'Room'){
+                    fetechSessionByDateRoomView(selectLocation);
+                } else {
+                    fetchSessionsByDateFromSF(selectTeacher, selectLocation);
+                }
                 //}
 
             }
@@ -545,6 +555,58 @@
         //         { escape: true }
         //     );
         // }
+
+        function fetechSessionByDateRoomView(selectedLocation){
+            document.getElementById("spinner").style.display = "block";
+            console.log("selectedRoomValue",selectedRoomValue);
+            console.log('selectedDate',selectedDate);
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.FullCalendarDataService.getSessionRoomByDate}',
+                selectedLocation, selectedRoomValue, selectedDate,
+                function (result, event) {
+                    document.getElementById("spinner").style.display = "none";
+                    console.log(event.status);
+                    if (event.status) {
+                        console.log('resultSession Room --> ', result);
+                        sessionEvent = result;
+                        createSessionAsEvents();
+                        if (calendar) {
+                            calendar.destroy();
+                            refreshCalendar();
+                        } else {
+                            refreshCalendar();
+                        }
+                        isComeFromDatePicker = false;
+                    }
+                },
+                { escape: true }
+            );
+        }
+        function fetechSessionRoomViewByWeekFromSF(selectedLocation){
+            document.getElementById("spinner").style.display = "block";
+            console.log("selectedRoomValue",selectedRoomValue);
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.FullCalendarDataService.getSessionRoomByWeek}',
+                selectedLocation, selectedRoomValue, startDate, endDate,
+                function (result, event) {
+                    document.getElementById("spinner").style.display = "none";
+                    console.log(event.status);
+                    if (event.status) {
+                        console.log('resultSession Room --> ', result);
+                        sessionEvent = result;
+                        createSessionAsEvents();
+                        if (calendar) {
+                            calendar.destroy();
+                            refreshCalendar();
+                        } else {
+                            refreshCalendar();
+                        }
+                        isComeFromDatePicker = false;
+                    }
+                },
+                { escape: true }
+            );
+        }
 
         function setNewEventTimeFromSf(eventId, parentId, startTime, currentDate, needToRefresh) {
             document.getElementById("spinner").style.display = "block";
@@ -772,18 +834,18 @@
                 if (seesionArr) {
                     seesionArr.forEach(element => {
                         //console.log('@@@@element.Session_Date__c', element.Session_Date__c);
-                        let sessionDate = new Date(element.educato__Session_Date__c);
+                        let sessionDate = new Date(element.Session_Date__c);
                         // update on 30-03-20 check if date and time is in the past so disabled the event drag and drop functionality 
                         let currentDate = new Date();
                         //let sessionStartDate = new Date(createDateFormat(sessionDate) + 'T' + msToTime(element.Start_Time__c));
-                        let sessionStartDate = new Date(sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.educato__Start_Time__c));
+                        let sessionStartDate = new Date(sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.Start_Time__c));
                         if (selectedModeView == 'Location') {
                             let locationId = document.querySelector('.select-location').value;
                             let teacherName = '';
                             let isEditable = false;
 
-                            if (element.educato__Teacher__r != undefined) {
-                                teacherName = element.educato__Teacher__r.Name;
+                            if (element.Teacher__r != undefined) {
+                                teacherName = element.Teacher__r.Name;
                             }
                             //Added on 24-04-20 disabled drag and drop event if user profile type is equal to teacher
                             if(currentDate.getTime() < sessionStartDate.getTime() && currentUserProfileName != 'Teacher'){
@@ -795,24 +857,24 @@
                                 resourceId: locationId,
                                 //start: createDateFormat(sessionDate) + 'T' + msToTime(element.Start_Time__c),
                                 //end: createDateFormat(sessionDate) + 'T' + msToTime(element.End_Time__c),
-                                start: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.educato__Start_Time__c),
-                                end: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.educato__End_Time__c),
+                                start: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.Start_Time__c),
+                                end: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.End_Time__c),
                                 title: element.Name + ' - ' + teacherName,
-                                color: element.educato__Event_Color__c,
-                                textColor: element.educato__Event_Text_Color__c,
+                                color: element.Event_Color__c,
+                                textColor: element.Event_Text_Color__c,
                                 editable: false,
                                 startEditable: isEditable,
                                 extendedProps: {
-                                    'class': element.educato__Class__c,
-                                    'teacher': element.educato__Teacher__c,
-                                    'type'  : element.educato__Type__c
+                                    'class': element.Class__c,
+                                    'teacher': element.Teacher__c,
+                                    'type'  : element.Type__c
                                 }
                             });
                         } else if (selectedModeView == 'Teacher') {
                             let teacherName = '';
                             let isEditable = false;
-                            if (element.educato__Teacher__r != undefined) {
-                                teacherName = element.educato__Teacher__r.Name;
+                            if (element.Teacher__r != undefined) {
+                                teacherName = element.Teacher__r.Name;
                             }
                             //Added on 24-04-20 disabled drag and drop event if user profile type is equal to teacher
                             if(currentDate.getTime() < sessionStartDate.getTime() && currentUserProfileName != 'Teacher'){
@@ -821,21 +883,31 @@
 
                             events.push({
                                 id: element.Id,
-                                resourceId: element.educato__Teacher__c,
+                                resourceId: element.Teacher__c,
                                 //start: createDateFormat(sessionDate) + 'T' + msToTime(element.Start_Time__c),
                                 //end: createDateFormat(sessionDate) + 'T' + msToTime(element.End_Time__c),
-                                start: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.educato__Start_Time__c),
-                                end: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.educato__End_Time__c),
+                                start: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.Start_Time__c),
+                                end: sessionDate.toISOString().split('T')[0] + 'T' + msToTime(element.End_Time__c),
                                 title: element.Name + ' - ' + teacherName,
-                                color: element.educato__Event_Color__c,
-                                textColor: element.educato__Event_Text_Color__c,
+                                color: element.Event_Color__c,
+                                textColor: element.Event_Text_Color__c,
                                 editable: false,
                                 startEditable: isEditable,
                                 extendedProps: {
-                                    'class': element.educato__Class__c,
-                                    'teacher': element.educato__Teacher__c,
-                                    'type'  : element.educato__Type__c
+                                    'class': element.Class__c,
+                                    'teacher': element.Teacher__c,
+                                    'type'  : element.Type__c
                                 }
+                            });
+                        }else if(selectedModeView == 'Room'){
+                            let sessionDate = new Date(element.Session_Date__c);
+                            events.push({
+                                id: element.Id,
+                                resourceId: element.Room__c,
+                                start: createDateFormat(sessionDate) + 'T' + msToTime(element.Start_Time__c),
+                                end: createDateFormat(sessionDate) + 'T' + msToTime(element.End_Time__c),
+                                title: element.Teacher__r.Name +' ('+element.Room__r.Name+')',
+                                color: element.Event_Color__c,
                             });
                         }
 
@@ -908,6 +980,17 @@
                 }
                 //isComeFromDatePicker = false;
 
+            }else if(selectedModeView == 'Room'){
+                let options = document.querySelector('.select-room');
+                let selectedValue = document.querySelector('.select-room').value;
+                for (idx of options) {
+                    if (selectedValue == 'All_Rooms' && idx.value != 'All_Rooms') {
+                        resources.push({ id: idx.value, title: idx.label });
+                    } else if (idx.value != 'All_Rooms' && selectedValue == idx.value) {
+                        resources.push({ id: idx.value, title: idx.label });
+                    }
+                }
+                console.log('resources ', resources);
             }
             //commment line after discussed with Dharam And NITIN 
             //  else if (selectedModeView == 'Resource') {
@@ -934,20 +1017,20 @@
                     //console.log('WorkingHours ', result);
 
                     result.forEach(ele => {
-                        if (ele.educato__Day__c.includes(';')) {
-                            let daysArr = ele.educato__Day__c.split(';');
+                        if (ele.Day__c.includes(';')) {
+                            let daysArr = ele.Day__c.split(';');
                             daysArr.forEach(dayName => {
                                 workingHoursArr.push({
                                     day: dayName,
-                                    startTime: ele.educato__Start_Time__c,
-                                    endTime: ele.educato__End_Time__c,
+                                    startTime: ele.Start_Time__c,
+                                    endTime: ele.End_Time__c,
                                 });
                             });
                         } else {
                             workingHoursArr.push({
-                                day: ele.educato__Day__c,
-                                startTime: ele.educato__Start_Time__c,
-                                endTime: ele.educato__End_Time__c,
+                                day: ele.Day__c,
+                                startTime: ele.Start_Time__c,
+                                endTime: ele.End_Time__c,
                             });
                         }
                     });
@@ -982,25 +1065,25 @@
                     //console.log(event.status);
                     //console.log('TeacherHOurs --> ', result);
                     result.forEach(ele => {
-                        if (ele.educato__Day__c.includes(';')) {
-                            let daysArr = ele.educato__Day__c.split(';');
+                        if (ele.Day__c.includes(';')) {
+                            let daysArr = ele.Day__c.split(';');
                             daysArr.forEach(dayName => {
-                                if (!teacherWorkingHour.some(teacher => teacher.id == ele.educato__Teacher__c && teacher.day == dayName)) {
+                                if (!teacherWorkingHour.some(teacher => teacher.id == ele.Teacher__c && teacher.day == dayName)) {
                                     teacherWorkingHour.push({
-                                        'id': ele.educato__Teacher__c,
+                                        'id': ele.Teacher__c,
                                         'day': dayName,
-                                        'start_time': ele.educato__Start_Time__c,
-                                        'end_time': ele.educato__End_Time__c
+                                        'start_time': ele.Start_Time__c,
+                                        'end_time': ele.End_Time__c
                                     });
                                 }
                             });
                         } else {
-                            if (!teacherWorkingHour.some(teacher => teacher.id == ele.educato__Teacher__c && teacher.day == ele.educato__Day__c)) {
+                            if (!teacherWorkingHour.some(teacher => teacher.id == ele.Teacher__c && teacher.day == ele.Day__c)) {
                                 teacherWorkingHour.push({
-                                    'id': ele.educato__Teacher__c,
-                                    'day': ele.educato__Day__c,
-                                    'start_time': ele.educato__Start_Time__c,
-                                    'end_time': ele.educato__End_Time__c
+                                    'id': ele.Teacher__c,
+                                    'day': ele.Day__c,
+                                    'start_time': ele.Start_Time__c,
+                                    'end_time': ele.End_Time__c
                                 });
                             }
                         }
@@ -1122,7 +1205,7 @@
             //console.log('checkLeavesAndHolidays');
             if(teacherLeavesArr.length > 0){
                     for(idx of teacherLeavesArr){
-                        if(idx.Teacher__c == teacherId && createDateFormat(new Date(idx.educato__Start_Date__c)) <= srtDate && createDateFormat(new Date(idx.educato__End_Date__c)) >= edDate){
+                        if(idx.Teacher__c == teacherId && createDateFormat(new Date(idx.Start_Date__c)) <= srtDate && createDateFormat(new Date(idx.End_Date__c)) >= edDate){
                             return true;
                         }
                     }
@@ -1130,7 +1213,7 @@
 
             if(holidaysArr.length > 0){
                 for(idx of holidaysArr){
-                    if(createDateFormat(new Date(idx.educato__Start_Date__c)) <= srtDate && createDateFormat(new Date(idx.educato__End_Date__c)) >= edDate){
+                    if(createDateFormat(new Date(idx.Start_Date__c)) <= srtDate && createDateFormat(new Date(idx.End_Date__c)) >= edDate){
                         return true;
                     }
                 }
@@ -1141,6 +1224,7 @@
         function refreshSession() {
             document.getElementById("spinner").style.display = "block";
             //console.log(selectedViewType);
+            toggleFilter();
             createResources();
             let selectLocation = document.querySelector('.select-location').value;
             getTeacherLeaveFromSF();
@@ -1148,6 +1232,9 @@
             //update on 30-03-20 to get all class value for get only those session records which teacher are presented at time
             selectedClassValue = "";
             getSelectedClassValue();
+            if(selectedModeView == 'Room'){
+                getRoomValue();
+            }
             createWorkingHours(selectLocation, true);
             if(isCalendarInRescheduleMode == true){
                 unactiveRescheduleMode();
@@ -1185,9 +1272,10 @@
                 selectedModeView = event;
                 document.querySelector('.teacher-button').classList.add('slds-button_brand');
             }                               
-            if (selectedModeView != 'Resource') {
+            if (selectedModeView != 'Resource' && selectedModeView != 'Room') {
                 if (isModeViewChanged == true) {
                     isModeViewChanged = false;
+                    toggleFilter();
                     // document.querySelector('.select-res-type').disabled = true
                     // document.querySelector('.select-resource').disabled = true;
                     handleChangeCalendarDay();
@@ -1212,6 +1300,12 @@
                 } else {
                     refreshCalendar();
                 }
+            }else if(selectedModeView == 'Room'){
+                isModeViewChanged = true;
+                toggleFilter();
+                getRoomValue();
+                createResources();
+                handleChangeCalendarDay();
             }
             // commment Code after discussed with Dharam And NITIN 
             // } else if (selectedModeView == 'Resource') {
@@ -1250,6 +1344,36 @@
                 getSelectedClassValue();
 
             handleChangeCalendarDay();
+        }
+
+        function handleRoomChange(event){
+            console.log('caling room');
+            selectedRoomValue = "";
+            let value = event.value;
+            if (value != 'All_Rooms'){
+                selectedRoomValue = "'" + value + "'";
+            }else{
+                getRoomValue();
+            }
+            createResources();
+            handleChangeCalendarDay();
+        }
+
+        /**
+        Name        :   handleRoomTypeChng
+        Date        :   22 JULY 2020
+        Description :   
+        Developer   : 
+        */
+        function handleRoomTypeChng(){           
+            selectedRoomValue = "";
+            selectedRoomValue = document.querySelector('.select-room').value;        
+            document.querySelector('.select-room').value = 'All_Rooms';           
+            getRoomValue();            
+            toggleFilter();
+            createResources();
+            //  alert('as');
+             handleChangeCalendarDay();
         }
 
         function getSelectedClassValue() {
@@ -1292,7 +1416,15 @@
         //         getResourcesValue();
         //     handleChangeCalendarDay();
         // }
-
+        function getRoomValue() {
+            selectedRoomValue = '';
+            let resData = document.querySelector('.select-room').options;
+            for (let indx of resData) {
+                if (indx.value != 'All_Rooms')
+                selectedRoomValue += "'" + indx.value + "',";
+            }
+            selectedRoomValue = selectedRoomValue.replace(/,\s*$/, "");
+        }
         function getDateFromDatePicker(event) {
             //console.log('date----> ', event);
             //console.log('date value -->', event.value);
@@ -1340,6 +1472,7 @@
                     if (calendarInfo.oldResource != null && calendarInfo.newResource != null) {
                         parentId = calendarInfo.newResource.id;
                     }
+                    console.log('parentId',parentId);
                     //console.log(startDate + ' - ' + endDate + ' - ' + parentId);
                     setNewEventTimeFromSf(eventId, parentId, startTime, currentDate, false);
                 }
@@ -1546,7 +1679,7 @@
             let currentDate = new Date();
             if ((action == 'drop' && currentDate.getTime() < calendarInfo.event.start.getTime()) || (action == 'click' && currentDate.getTime() < dateEvent.date.getTime())) {
                 //Added on 13-04-20 to reschedule those session which type is placeholder and bypass the working hour logic
-                if(calendarInfo.event.extendedProps.class == undefined && calendarInfo.event.extendedProps.type == 'Placeholder'){
+                if(calendarInfo.event.extendedProps.class == undefined && calendarInfo.event.extendedProps.type == 'Placeholder' || selectedModeView == 'Room'){
                     document.querySelector(".confirmation-model").classList.remove('slds-hide');
                 }else{            
                     for(ele of teacherWorkingHour) {
@@ -1635,6 +1768,41 @@
             }
 
         }
+
+          /**
+        Name        :   toggleFilter
+        Date        :   21 JULY 2020
+        Description :   
+        Developer   : 
+        */
+        function toggleFilter(){
+            console.log('selectedModeView',selectedModeView);
+            if(selectedModeView == 'Room'){
+                document.querySelectorAll('.non-room-list').forEach(ele=>{
+                    if(ele.className.indexOf('slds-show') != -1){
+                        ele.classList.remove('slds-show');
+                    }                
+                    ele.classList.add('slds-hide');
+                });
+                document.querySelectorAll('.room-list').forEach(ele=>{
+                    ele.classList.add('slds-show');
+                    if(ele.className.indexOf('slds-hide') != -1){
+                        ele.classList.remove('slds-hide');
+                    }
+                });
+            }else{
+                console.log('else');
+                document.querySelectorAll('.non-room-list').forEach(ele=>{
+                    ele.classList.add('slds-show');
+                    ele.classList.remove('slds-hide');
+                });
+                document.querySelectorAll('.room-list').forEach(ele=>{
+                    ele.classList.remove('slds-show');
+                    ele.classList.add('slds-hide');
+                });
+            }
+        }
+
 
     </script>
     <div class="add-session-modal_div slds-hide">

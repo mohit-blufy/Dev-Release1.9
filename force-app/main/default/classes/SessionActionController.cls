@@ -82,13 +82,30 @@ Developer   :
      @RemoteAction
     global static List<StudentSessionAssModel> getSessionStudentForAssessment(string sessionId){
         List<StudentSessionAssModel> studentSessAssList = new List<StudentSessionAssModel>();
-        List<String> grdList = UtilityClass.getPickValues('Assessment__c', 'Score_Grade__c');
-        for(Student_Session__c stu: getSessionStudent(sessionId)){
-            StudentSessionAssModel stuSessAss = new StudentSessionAssModel(stu, false, grdList); 
-            studentSessAssList.add(stuSessAss);
+        List<User_Interface_Settings__mdt> userList = UserInterfaceConfigService.getAssessmentData();
+        if(userList.size() > 0){
+            List<studentAssessmentModal> studentAssessmentList = new List<studentAssessmentModal>();
+            for(User_Interface_Settings__mdt uiObj : userList){
+                studentAssessmentModal  sObj = new studentAssessmentModal();
+                sobj.dataType = uiObj.Data_Type__c;
+                sobj.label = uiObj.MasterLabel;
+                sobj.name = uiObj.Field_API_Name__c;
+                sobj.sequence = uiObj.Sequence__c;
+                sobj.require = uiObj.Required__c;
+                if(uiObj.Data_Type__c == 'Picklist'){
+                    sobj.picklistVal = UtilityClass.getPickValues(uiObj.Object_API_Name__c, uiObj.Field_API_Name__c);
+                }
+                studentAssessmentList.add(sObj);
+            }
+            // List<String> grdList = UtilityClass.getPickValues('Assessment__c', 'Score_Grade__c');
+            for(Student_Session__c stu: getSessionStudent(sessionId)){
+                StudentSessionAssModel stuSessAss = new StudentSessionAssModel(stu, false, studentAssessmentList); 
+                studentSessAssList.add(stuSessAss);
+            }
+            System.debug('studentSessAssList@@'+studentSessAssList);
+            return studentSessAssList;
         }
-        System.debug('studentSessAssList@@'+studentSessAssList);
-        return studentSessAssList;
+        return null;
     }
 
     /**
@@ -99,7 +116,7 @@ Developer   :
     */
     @RemoteAction
     global static List<Course_Assessment__c> getCrsAssessmentNames(String crsId){
-        //System.debug('crsId@@@'+crsId);
+        System.debug('crsId@@@'+crsId);
         List<Course_Assessment__c> crsAssessmentPlist = [SELECT Name,Course__c FROM Course_Assessment__c where Course__c =: crsId];
         system.debug('crsAssessmentPlist-->'+crsAssessmentPlist);
         if (crsAssessmentPlist.size() > 0){
@@ -120,11 +137,12 @@ Developer   :
         List<Assessment__c> assessList = new List<Assessment__c>();
         if (String.isBlank(crsAssId))
             crsAssId = null;
-        
+        //system.debug('studRecords'+studRecords);
         if(studRecords != null ){
             for (StudentSessionAssModel obj : studRecords){
+               // system.debug('obj.isSelect'+obj.isSelect);
                 if (obj.isSelect){
-                    Assessment__c assessmentObj        = new Assessment__c();
+                    Assessment__c assessmentObj = new Assessment__c();
                     assessmentObj.put('Student__c',obj.stuSess.Account__c);
                     assessmentObj.put('Class__c',obj.stuSess.Session__r.Class__c);
                     assessmentObj.put('Session__c',obj.stuSess.Session__c);
@@ -133,7 +151,20 @@ Developer   :
                     assessmentObj.put('Score_Grade__c',obj.selectedGrade);
                     assessmentObj.put('Course_Assessment__c',crsAssId);
                     assessmentObj.put('Status__c',ConstantClass.ScheduledStatus);
-                    assessmentObj.put('Assessment_Date__c',Date.Today());
+                    //assessmentObj.put('Assessment_Date__c',Date.Today());
+                    if(obj.keyValues.size() > 0){
+                        for(KeyValuesWrapper keyValueObj : obj.keyValues){
+                            if(keyValueObj.type == 'Date'){
+                                assessmentObj.put(keyValueObj.name,Date.valueOf(keyValueObj.value));
+                            }else if(keyValueObj.type == 'Number'){
+                                assessmentObj.put(keyValueObj.name,Decimal.valueOf(keyValueObj.value));
+                            }else if(keyValueObj.type == 'Boolean'){
+                                assessmentObj.put(keyValueObj.name,Boolean.valueOf(keyValueObj.value));
+                            }else{
+                                assessmentObj.put(keyValueObj.name,keyValueObj.value);
+                            }                        
+                        }
+                    }
                     assessList.add(assessmentObj);
                     //System.debug('assessList@@'+assessmentObj);       
                 }
@@ -311,14 +342,14 @@ Developer   :
     global class StudentSessionAssModel{
         public Student_Session__c stuSess;           
         public Boolean isSelect;   
-        public String selectedGrade;
-        public List<String> gradeList;
-       
+        public String selectedGrade;        
+        public List<studentAssessmentModal> studentAssList;
+        public List<KeyValuesWrapper> keyValues;
         
-        public StudentSessionAssModel(Student_Session__c stuSess, Boolean isSelect, List<String> gradeList){
+        public StudentSessionAssModel(Student_Session__c stuSess, Boolean isSelect,  List<studentAssessmentModal> studentAssList){
             this.stuSess  = stuSess;
-            this.isSelect = isSelect;
-            this.gradeList=gradeList;
+            this.isSelect = isSelect;        
+            this.studentAssList = studentAssList;
         }
     }
     
@@ -327,4 +358,17 @@ Developer   :
         public String historyBy;        
         public String description;        
     }
-} 
+    class studentAssessmentModal{
+        public string dataType;
+        public string label;
+        public string name;
+        public Decimal sequence;
+        public Boolean require;
+        public List<String> picklistVal;         
+    }
+    class KeyValuesWrapper{
+        public String name;
+        public String value;
+        public String type;
+    }
+}

@@ -1,0 +1,79 @@
+<aura:component implements="force:hasRecordId,force:lightningQuickActionwithoutheader">
+    <aura:attribute name="showSpinner" type="Boolean" default="false" />
+    <aura:attribute name="showComponent" type="Boolean" default="false" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <aura:html tag="style">
+        .cuf-scroller-content{
+        background:#fff;
+        }
+        .slds-modal__container {
+        max-width: 100%;
+        width: 70%;
+        }
+        .modal-body{
+        height : 100% !important;
+        min-height: 450px !important;
+        }
+    </aura:html>
+
+    <aura:if isTrue="{!v.showComponent}">
+        <lightning:card title="">
+            <aura:if isTrue="{!v.showSpinner}">
+                <lightning:spinner name="mySpinner" variant="brand" size="medium" />
+            </aura:if>
+            <div class="slds-size_1-of-1 slds-modal__header" style="height:60px">
+                <div class=" slds-float_left custom-heading">Schedule Session</div>
+                <lightning:button label="Save" title="Save" onclick="{! c.saveRecords }" />
+                <lightning:button label="Cancel" title="Cancel" onclick="{! c.closeModal }" />
+            </div>
+            <div class="slds-p-horizontal_small">
+                <div>
+                    <lightning:layout multipleRows="true">
+                        <lightning:layoutItem size="12">
+                            <div class="page-section page-header">
+                                <span>Language</span>
+                                :
+                                <span>Chiness</span>
+                            </div>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem size="12">
+                            <div class="page-section page-header">
+                                <span>Course Type</span>
+                                :
+                                <span>Full Time</span>
+                            </div>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem size="12">
+                            <div class="page-section page-header">
+                                <span>Sub Type</span>
+                                :
+                                <span>Maxi</span>
+                            </div>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem size="12">
+                            <div class="page-section page-header">
+                                <span>Level</span>
+                                :
+                                <span>Elementary 1A</span>
+                            </div>
+                        </lightning:layoutItem>
+                    </lightning:layout>
+                </div>
+                <div>
+                    <lightning:layout>
+                        <lightning:layoutItem size="12">
+                            <div class="page-section page-header" style="color: aliceblue;
+                            padding: 6px 7px;background-color: #2f2b2b;">
+                                Session From 11:00 to 13:00
+                            </div>
+                        </lightning:layoutItem>
+                    </lightning:layout>
+                </div>
+                <div>
+
+                </div>
+            </div>
+        </lightning:card>
+    </aura:if>
+</aura:component>

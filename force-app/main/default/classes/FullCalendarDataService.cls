@@ -9,7 +9,7 @@ global with sharing class FullCalendarDataService {
     static boolean isTeacherLeaveAccessible;
     
     private static String getSOQLQuery(){      
-        return 'SELECT Id, Name, Sequence__c, Class__c, Session_Date__c, Start_Time__c, End_Time__c, Teacher__c, Teacher__r.Name, Status__c, Event_Color__c, Event_Text_Color__c, Type__c  FROM Session__c WHERE  Status__c !=: status  AND ';
+        return 'SELECT Id, Name, Sequence__c, Class__c, Session_Date__c, Start_Time__c, End_Time__c, Teacher__c, Teacher__r.Name, Status__c, Event_Color__c, Event_Text_Color__c, Type__c, Room__c,Room__r.Name  FROM Session__c WHERE  Status__c !=: status  AND ';
     }
     
     /**
@@ -199,7 +199,7 @@ Developer   :
             isLocationWorkingHoursAccessible = FieldPremissionCrudUtility.checkReadPermission('Location_Working_Hours__c', fieldsApiName, false);
         if(isLocationWorkingHoursAccessible){
             if(String.isNotBlank(locationId)){
-                for(Location_Working_Hours__c wokObj : [SELECT Id, Name, Day__c, Start_Time__c, End_Time__c, Active__c, Location__c FROM Location_Working_Hours__c WHERE location__c =: locationId AND Active__c = true]){
+                for(Location_Working_Hours__c wokObj : LocationWorkingHoursService.getByLocationId(new Set<Id>{locationId})){
                     if(wokObj.Active__c == true){
                         workingHourList.add(wokObj);
                     }
@@ -271,7 +271,68 @@ Developer   :
     //     }
     //     return sessionModelObj;
     // }
-    
+
+    /**
+    Name        :   getSessionRoomByDate
+    Date        :   22 JULY 2020
+    Description :   
+    Developer   :   
+    */
+    @RemoteAction
+    global static SessionRecordModel getSessionRoomByDate(String selectedLocation, String selectedRoomValue, String selectedDate){
+        String query = getSOQLQuery();
+        system.debug('selectedDate '+selectedDate);
+        SessionRecordModel sessionModelObj = new SessionRecordModel();   
+        List<session__c> sessionRoomList = new List<session__c>();       
+        if(String.isNotBlank(selectedDate) && String.isNotBlank(selectedRoomValue)){     
+            date selectDate = date.valueOf(selectedDate);   
+            
+            if(String.isNotBlank(selectedLocation)){
+                query += ' location__c =: selectedLocation AND ';
+            }     
+            query += ' Room__c IN('+ selectedRoomValue +') AND Session_Date__c =: selectDate WITH SECURITY_ENFORCED';
+            system.debug('query '+query);
+            sessionRoomList = Database.query(query);
+            if(sessionRoomList.size() > 0){
+                sessionModelObj.locationId = selectedLocation;
+                //sessionModelObj.teacherId = teacherId;
+                sessionModelObj.sessionModelList = sessionRoomList;   
+            }
+        }
+        return  sessionModelObj;     
+    }
+
+    /**
+    Name        :   getSessionRoomByWeek
+    Date        :   21 JULY 2020
+    Description :   
+    Developer   :   
+    */
+    @RemoteAction
+    global static SessionRecordModel getSessionRoomByWeek(String selectedLocation, String selectedRoomValue, String startDate, String endDate){
+        String query = getSOQLQuery();
+        List<session__c> sessionRoomList = new List<session__c>();
+        SessionRecordModel sessionModelObj = new SessionRecordModel();   
+        if(String.isNotBlank(startDate) && String.isNotBlank(endDate)  && String.isNotBlank(selectedRoomValue)){  
+            date startDt = date.valueOf(startDate);  
+            date endDt = date.valueOf(endDate);   
+            
+            if(String.isNotBlank(selectedLocation)){
+                query += ' location__c =: selectedLocation AND ';
+            }                 
+            query += ' Room__c IN('+ selectedRoomValue +')AND Session_Date__c >=: startDt AND  Session_Date__c <=: endDt WITH SECURITY_ENFORCED';                                                      
+            system.debug('query '+query);
+            sessionRoomList = Database.query(query);
+            if(sessionRoomList.size() > 0){
+                sessionModelObj.locationId = selectedLocation;
+                //sessionModelObj.teacherId = teacherId;
+                sessionModelObj.sessionModelList = sessionRoomList;   
+            }
+        } 
+        return  sessionModelObj;   
+    }
+
+
     /**
 Name        :   getTeacherWorkingHours
 Date        :   29 Feb 2020
@@ -285,7 +346,7 @@ Developer   :
             isTeacherWorkingHoursAccessible = FieldPremissionCrudUtility.checkReadPermission('Teacher_Working_Hours__c', fieldsApiName, false);                
         if(isTeacherWorkingHoursAccessible){
             if(String.isNotBlank(locationId)){
-                for(Teacher_Working_Hours__c teacherObj : [Select id, start_time__c, end_time__c, location__c, teacher__c,Day__c from Teacher_Working_Hours__c WHERE location__c =: locationId  AND Active__c  = true]){
+                for(Teacher_Working_Hours__c teacherObj : TeacherWorkingHoursService.getByLocationId(new Set<Id>{locationId})){
                     teacherWorkingHourList.add(teacherObj);               
                 }
             }
@@ -300,16 +361,21 @@ Description :
 Developer   :   
 */
     @RemoteAction
-    global static void setNewSessionTiming(Id recId, String parentId, String newStartTime, String currentDate){
+    global static void setNewSessionTiming(Id recId, Id parentId, String newStartTime, String currentDate){
         //system.debug('recId  '+recId);
         Session__c sessionObj;
         List<Session_Resource__c> sessionResList = new List<Session_Resource__c>();
         if(String.isNotBlank(recId)){
             String sObjName = recId.getSObjectType().getDescribe().getName();
             if(sObjName == 'Session__c'){
-                sessionObj = new Session__c(id = recId);
+                sessionObj = new Session__c(id = recId);            
                 if(String.isNotBlank(parentId)){
-                    sessionObj.Teacher__c = parentId;
+                    String parentName = parentId.getSObjectType().getDescribe().getName();
+                    if(parentName == 'Room__c'){
+                        sessionObj.Room__c = parentId;
+                    }else{
+                        sessionObj.Teacher__c = parentId;
+                    }
                 }
             }/*else if(sObjName == 'Session_Resource__c'){
 sessionResList = [SELECT id,Session__r.id,Resource__c FROM Session_Resource__c WHERE id =: recId LIMIT 1];  
@@ -345,7 +411,7 @@ sessionResList[0].Resource__c = parentId;
     /**
 Name        :   setNewTimeForAllSession
 Date        :   05 Mar 2020
-Description :   use for set new time of all sessions 
+Description :   use for set new time of all sessions
 Developer   :   
 */
     @RemoteAction
@@ -354,7 +420,7 @@ Developer   :
             isSessionAccessible = FieldPremissionCrudUtility.checkReadPermission('Session__c', fieldsApiName, false);
         if(isSessionAccessible){
             if(String.isNotBlank(sessionId)){
-                List<Session__c> sessionList = [SELECT Id, Teacher__c, Teacher__r.location__c, Session_Date__c, Start_Time__c FROM Session__c WHERE id =: sessionId];
+                List<Session__c> sessionList = SessionService.getById(new set<Id>{sessionId});
                 sessionList =  [SELECT Id, Start_Time__c FROM Session__c 
                                 WHERE Teacher__c =: sessionList[0].Teacher__c AND 
                                 Teacher__r.location__c =: sessionList[0].Teacher__r.location__c AND
@@ -391,7 +457,7 @@ Description :   function is use for set new date and time for current selected s
 Developer   :   
 */
     @RemoteAction 
-    global static void setNewDateTimeForCurrentAndUpComingSession(String sessionId, String newStartTime,  Integer dayDiffernce, Integer previousDay, String parentId){
+    global static void setNewDateTimeForCurrentAndUpComingSession(String sessionId, String newStartTime,  Integer dayDiffernce, Integer previousDay, Id parentId){
         if(String.isNotBlank(sessionId)){
             List<VacationModel> vacationList = new List<VacationModel>();
             boolean isHoliday = false;        
@@ -410,7 +476,7 @@ Developer   :
 
             if(isSessionAccessible && isHolidayAccessible && isTeacherLeaveAccessible && isBlufyConfigAccessible){
                 List<Blufy_Config__mdt> blufyList = [SELECT Id, Overlap_Holiday_For_Monthly_Session__c FROM Blufy_Config__mdt LIMIT 1];
-                List<Session__c> sessionList = [SELECT Id, Location__c, Teacher__c, Teacher__r.location__c, Session_Date__c, Start_Time__c, Notes__c, Type__c FROM Session__c WHERE id =: sessionId];
+                List<Session__c> sessionList = SessionService.getById(new set<Id>{sessionId});
                 if(sessionList.size() > 0){
                     for(Holiday__c holiObj : [SELECT Id, Start_Time__c, Start_Date__c, End_Time__c, End_Date__c FROM Holiday__c WHERE CALENDAR_YEAR(Start_Date__c) =: sessionList[0].Session_Date__c.year() ]){
                         VacationModel vacObj = new VacationModel();
@@ -479,7 +545,12 @@ Developer   :
                             sessionObj.Start_Time__c = startTime;                         
                             sessionObj.Session_Date__c = currentDate.addDays(dayDiffernce);
                             if(String.isNotBlank(parentId)){
-                                sessionObj.Teacher__c = parentId;
+                                String parentName = parentId.getSObjectType().getDescribe().getName();
+                                if(parentName == 'Room__c'){
+                                    sessionObj.Room__c = parentId;
+                                }else{
+                                    sessionObj.Teacher__c = parentId;
+                                }
                             }
                         }
                         

@@ -4,12 +4,15 @@ global with sharing class FullCalendarController {
     public String selectedLocation{get;set;}
     public String selectedCourse{get;set;}
     //public String selectedResourcesType {get;set;}
+    public String selectedRoomType{get;set;}
     public List<SelectOption> locationList{get;set;}
     public List<SelectOption> teacherList{get;set;}  
     public List<SelectOption> courseList{get;set;}
     public List<SelectOption> classList{get;set;}
     //public List<SelectOption> resourcesList{get;set;}
     //public List<SelectOption> resourcesTypeList{get;set;}
+    public List<SelectOption> roomTypeList{get;set;}
+    public List<SelectOption> roomList{get;set;}
     public Full_Calendar_Configuration__mdt calendarConfigMetadataObject {get;set;}
     public boolean isUserHaveAllAccess{get;set;}
     private List<Full_Calendar_Configuration__mdt> calendarConfigMetaList;
@@ -20,22 +23,27 @@ global with sharing class FullCalendarController {
     
     public FullCalendarController(){
         Set<String> fieldsApiName = new Set<String>{'Id','Name'};
-            boolean isAccountAccessible;
+        boolean isAccountAccessible;
         boolean isCourseAccessible;
         boolean isClassAccessible;
+        boolean isRommAccessible;
         isAccountAccessible = FieldPremissionCrudUtility.checkReadPermission('Account',fieldsApiName,false);               
-        isCourseAccessible = FieldPremissionCrudUtility.checkReadPermission(Label.Namespace+'Course__c',fieldsApiName,false);
+        isCourseAccessible = FieldPremissionCrudUtility.checkReadPermission('Course__c',fieldsApiName,false);
         fieldsApiName.add('Course__c');
         fieldsApiName.add('Teacher__c');
-        isClassAccessible = FieldPremissionCrudUtility.checkReadPermission(Label.Namespace+'Course__c',fieldsApiName,false);
+        isClassAccessible = FieldPremissionCrudUtility.checkReadPermission('Course__c',fieldsApiName,false);
+
+        fieldsApiName = new Set<String>{'Id','Name','Type__c'};
+        isRommAccessible = FieldPremissionCrudUtility.checkReadPermission('Room__c',fieldsApiName,false);
         
-        if(isAccountAccessible && isCourseAccessible && isCourseAccessible){
+        if(isAccountAccessible && isCourseAccessible && isCourseAccessible && isRommAccessible){
             isUserHaveAllAccess = true;
             locationList  = new list<SelectOption>();
             teacherList   = new list<SelectOption>();
             courseList    = new list<SelectOption>();
             classList     = new list<SelectOption>();
             //resourcesList = new list<SelectOption>();
+            roomTypeList  = new list<SelectOption>();
             calendarConfigMetaList = new list<Full_Calendar_Configuration__mdt>();            
             teacherMap = new Map<Id, String>();
             teacherLocationIds = new Set<Id>();
@@ -66,7 +74,15 @@ global with sharing class FullCalendarController {
             if(courseList.size() > 0){
                 selectedCourse = courseList.get(0).getValue();
                 populateClasses();
-            }         
+            }   
+
+            populateRoomType();
+            if(roomTypeList.size() > 0){
+                selectedRoomType = roomTypeList.get(0).getValue();
+            }
+            if(String.isNotBlank(selectedLocation) && String.isNotBlank(selectedRoomType)){
+                populateRoom();
+            }
         }else{
             isUserHaveAllAccess = false;
         }
@@ -239,13 +255,13 @@ Developer   :
         selectedTeacher = teacherList.get(0).getValue();
         populateCourses();
         populateClasses();
-        
+        populateRoom();
         //populateResource();        
         //system.debug('selectedLocation'+selectedLocation);
     }
     
     /**
-Name        :   getTodayDate 
+Name        :   getTodayDate
 Date        :   19 Feb 2020
 Description :   Function is use for to get currrent date for full calendar
 Developer   :   
@@ -282,7 +298,54 @@ Developer   :
     // public void refreshResources(){
     //     populateResource();       
     // }
-    
+
+    /**
+    Name        :   populateRoomType
+    Date        :   21 JULY 2020
+    Description :   Function is use for to get type of room 
+    Developer   :   
+    */
+    private void populateRoomType(){        
+        Schema.DescribeFieldResult fieldResult = Room__c.Type__c.getDescribe();
+         roomTypeList.add(new SelectOption('All_Room_Types','All Room Types'));
+        List<Schema.PicklistEntry> ple = fieldResult.getPicklistValues();
+        for( Schema.PicklistEntry pickListVal : ple){
+            roomTypeList.add(new SelectOption(pickListVal.getLabel(), pickListVal.getValue()));
+            system.debug(pickListVal.getLabel()+'-'+ pickListVal.getValue());
+        } 
+    }
+
+    /**
+    Name        :   populateRoom
+    Date        :   21 JULY 2020
+    Description :   
+    Developer   :   
+    */
+    private void populateRoom(){
+        roomList = new List<SelectOption>();
+        String roomTypeValues = '';
+        if(selectedRoomType == 'All_Room_Types'){
+            for(SelectOption selectOpt : roomTypeList){
+                if(selectOpt.getValue() != 'All_Room_Types')
+                roomTypeValues += '\''+string.escapeSingleQuotes(selectOpt.getValue())+ '\',';
+            }            
+            roomTypeValues = roomTypeValues.removeEnd(',');
+        }else{
+            roomTypeValues = '\''+string.escapeSingleQuotes(selectedRoomType)+ '\'';
+        }
+        List<Room__c> roomRecordList = RoomService.getRooms(selectedLocation, roomTypeValues);
+        if(roomRecordList.size() > 0){
+            roomList.add(new SelectOption('All_Rooms', 'All Rooms'));
+            for(Room__c roomObj : roomRecordList){
+                roomList.add(new SelectOption(roomObj.id, roomObj.Name));
+            }
+        }
+    }
+
+    public void refreshRoom(){
+            populateRoom();       
+    }
+
     public void refreshClasses(){
         populateClasses();
     }
@@ -296,7 +359,7 @@ Developer   :
     }
     
     private void getFullCalendatMetadata(){        
-        Boolean isFullCalConfigmdtAccesible = FieldPremissionCrudUtility.checkReadPermission(Label.Namespace+'Full_Calendar_Configuration__mdt', new Set<String>{'Id',
+        Boolean isFullCalConfigmdtAccesible = FieldPremissionCrudUtility.checkReadPermission('Full_Calendar_Configuration__mdt', new Set<String>{'Id',
             'Mode_Button_Color__c','Scheduler_License_Key__c','Selected_Mode_Button_Color__c','Selected_View_Button_Color__c','View_Button_Color__c',
             'Non_Business_Hours_Color__c','Modal_Header_Footer_Color__c','Business_Hours_Color__c','Calendar_Border_Color__c'}, false);
         if(isFullCalConfigmdtAccesible){
