@@ -1,0 +1,21 @@
+<aura:component>
+    <aura:attribute name="rows" type="List[]" />
+    <aura:attribute name="index" type="Integer" />
+    <td>{!v.rows.Day}</td>
+    <td>
+        <lightning:input type="datetime" />
+    </td>
+    <td>
+        <lightning:input type="number" />
+    </td>
+    <td>
+        <lightning:input type="Text" />
+    </td>
+    <td>
+        <lightning:input type="tex" />
+    </td>
+    <td>
+        <lightning:buttonIcon iconName="utility:delete" variant="bare" onclick="{! c.handleClick }"
+            alternativeText="close" title="close" size="large"  class="slds-float_right"/>
+    </td>
+</aura:component>
