@@ -2,7 +2,7 @@
     <apex:attribute name="customMetaDataConfig" type="Full_Calendar_Configuration__mdt" description="for custom data Configration"
                     />
     <style>
-        .custom-anchor {
+        .custom-anchor { 
         text-decoration: none !important;
         }
         

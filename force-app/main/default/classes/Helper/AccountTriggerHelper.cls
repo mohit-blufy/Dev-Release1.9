@@ -4,7 +4,7 @@ Date        :   08-07-20
 Description :   This class is a helper of account trigger
 Dev         :   Asif
 */
-public  class AccountTriggerHelper {
+public  class AccountTriggerHelper { 
    /**
     Name        :   createTeacherWorkingHours
     Date        :   08-07-20
