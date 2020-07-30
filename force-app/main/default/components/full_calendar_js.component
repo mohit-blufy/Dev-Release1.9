@@ -1,4 +1,4 @@
-<apex:component controller="FullCalendarDataService">
+<apex:component controller="FullCalendarDataService"> 
     <apex:attribute name="selectedLocation" type="String" description="for selected location" />
     <apex:attribute name="selectedTeacher" type="String" description="for selected teacher" />
     <apex:attribute name="TodayDate" type="String" description="for today date" />

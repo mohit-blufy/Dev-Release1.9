@@ -1,4 +1,4 @@
-public class ConstantClass {
+public class ConstantClass { 
     
     
     public static String customerRecTypeId     	 = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Customer').getRecordTypeId();

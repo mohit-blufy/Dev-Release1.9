@@ -345,7 +345,7 @@ sessionResList[0].Resource__c = parentId;
     /**
 Name        :   setNewTimeForAllSession
 Date        :   05 Mar 2020
-Description :   use for set new time of all sessions
+Description :   use for set new time of all sessions 
 Developer   :   
 */
     @RemoteAction

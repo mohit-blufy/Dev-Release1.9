@@ -245,7 +245,7 @@ Developer   :
     }
     
     /**
-Name        :   getTodayDate
+Name        :   getTodayDate 
 Date        :   19 Feb 2020
 Description :   Function is use for to get currrent date for full calendar
 Developer   :   
