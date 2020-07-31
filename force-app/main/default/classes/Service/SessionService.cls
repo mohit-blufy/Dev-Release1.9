@@ -77,6 +77,7 @@ public class SessionService {
         }
         return null; 
     }
+    //Added by Rajesh on 31st July 2020, For session rollup on class
     public static List<AggregateResult> getSessionsAgreeByClassIds(Set<String> clsIds){
         try{
             List<String> excludeTypeList = new List<String>{ConstantClass.sessionType, ConstantClass.sessionIndividualType};

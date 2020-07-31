@@ -64,6 +64,7 @@ public class SessionTriggerHandler {
     }
     //Divya: to get Student Sessions Map by session id
 
+    //Added by Rajesh on 31st July 2020, For session rollup on class
     public static void sessionRollUpOnClass(Set<String> clsIds){
         Map<String, Integer> clsSessionMap = new Map<String, Integer>();
         for(AggregateResult result : SessionService.getSessionsAgreeByClassIds(clsIds)){

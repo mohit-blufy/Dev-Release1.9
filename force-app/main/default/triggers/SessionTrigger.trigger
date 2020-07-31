@@ -13,7 +13,7 @@ trigger SessionTrigger on Session__c(after insert,after update) {
         SessionTriggerHandler.updateStudentSession(Trigger.oldMap,Trigger.newMap);
     }
 
-    //Added by Rajesh on 31st July 2020
+    //Added by Rajesh on 31st July 2020, For session rollup on class
     if((Trigger.isInsert || Trigger.isUpdate) && Trigger.isAfter){
       Set<String> clsIds = new Set<String>();
       for(Session__c sess: Trigger.new){
