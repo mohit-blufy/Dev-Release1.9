@@ -87,9 +87,9 @@ public with sharing class EnrollmentTriggerHelper {
         List<Student_Session__c> listStuSession = new List<Student_Session__c>();
         
         for(Enrollment__c enrol : listEnrollment){
+            mapEnrolmentIdToClassId.put(enrol.Id,enrol.Class__c);
             if(enrol.Type__c == ConstantClass.ongoingClsType){
                 setParentAccId.add(enrol.Parent__c);   
-                mapEnrolmentIdToClassId.put(enrol.Id,enrol.Class__c);
             }
         }
         
@@ -125,6 +125,13 @@ public with sharing class EnrollmentTriggerHelper {
         if(mapEnrolIdToEnrollment.keySet().size() > 0){
             for(String key : mapEnrolIdToEnrollment.keySet()){
                 Enrollment__c enrolmnt = mapEnrolIdToEnrollment.get(key);
+                if(enrolmnt.Student_Sessions__r.size() > 0){
+                    for(Student_Session__c stuSess : enrolmnt.Student_Sessions__r){
+                        stuSess.Status__c = ConstantClass.ScheduledStatus;
+                        listStuSession.add(stuSess);
+                    }
+                }
+                
                 if(enrolmnt.Type__c == ConstantClass.ongoingClsType && enrolmnt.Class__r.Type__c == ConstantClass.ongoingClsType
                    && enrolmnt.Invoice_Line_Items__r.size() > 0 && 
                    !(enrolmnt.Invoice_Line_Items__r[0].Fee__r.Frequency__c.equalsIgnoreCase(ConstantClass.oneTimeFrequency))){
@@ -162,10 +169,6 @@ public with sharing class EnrollmentTriggerHelper {
                    if(enrolmnt.Student_Sessions__r.size() > 0){
                        Integer stuSessSize = enrolmnt.Student_Sessions__r.size()-1;
                        currClsTrmStrtDate = enrolmnt.Student_Sessions__r[stuSessSize].Session__r.Class_Term__r.Start_Date__c;
-                       for(Student_Session__c stuSess : enrolmnt.Student_Sessions__r){
-                           stuSess.Status__c = ConstantClass.ScheduledStatus;
-                           listStuSession.add(stuSess);
-                       }
                    }
                    
                    if(mapClassToClassTerms.containsKey(enrolmnt.Class__c) && currClsTrmStrtDate != NULL){
