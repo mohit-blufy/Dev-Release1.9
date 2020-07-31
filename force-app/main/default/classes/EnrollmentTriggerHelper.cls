@@ -213,9 +213,8 @@ public with sharing class EnrollmentTriggerHelper {
             StudentSessionService.updateStudentSessionRecords(listStuSession);
         }
 
-        if(listSubsItem.size() > 0){
+        if(listSubsItem.size() > 0)
             SubscriptionLineItemService.insertSubsLineItemRecords(listSubsItem);
-        }
     }
     
     public static Fee_Allocation__c fillFeeAllocation(Enrollment__c enrol, Invoice_Line_Item__c lnItm, Integer curMonthDays, Decimal tutionFeeAmt, Date currLesDt){
