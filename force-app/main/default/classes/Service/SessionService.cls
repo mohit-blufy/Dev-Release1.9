@@ -77,4 +77,17 @@ public class SessionService {
         }
         return null; 
     }
+    //Added by Rajesh on 31st July 2020, For session rollup on class
+    public static List<AggregateResult> getSessionsAgreeByClassIds(Set<String> clsIds){
+        try{
+            List<String> excludeTypeList = new List<String>{ConstantClass.sessionType, ConstantClass.sessionIndividualType};
+            return [SELECT Count(Id) sessionCount, Class__c, Status__c 
+                    FROM Session__c WHERE Class__c IN: clsIds AND Type__c NOT IN:excludeTypeList WITH SECURITY_ENFORCED
+                    GROUP BY Class__c, Status__c];  
+        }
+        catch (System.QueryException e){
+            System.debug(e.getMessage());
+        }
+        return null; 
+    }
 }
