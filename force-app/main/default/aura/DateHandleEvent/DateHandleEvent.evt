@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Event when date is changed">
+    <aura:attribute name="selectedDate" type="String"/>
+    <aura:attribute name="index" type="Integer"/>
+</aura:event>

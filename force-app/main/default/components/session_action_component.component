@@ -361,6 +361,7 @@
                     table += '<span class="slds-form-element__label"> </span> </label> </div> </div> </div> </th>';
                     table += '<th>S/N</th> <th>Name</th>';
                     if (assessmenetObj.length > 0) {
+                        assessmenetObj.sort(compare);
                         for (let idx of assessmenetObj) {
                             console.log(idx.label);
                             table += `<th>${idx.label} ${idx.require == true ? '<span style="color:red">*</span>' : ''}</th>`;
@@ -377,8 +378,7 @@
                             table += '</td> <td>';
                             table += indx.stuSess.Account__r != undefined ? indx.stuSess.Account__r.Name : '';
                             table += '</td>';
-                            if (assessmenetObj.length > 0) {
-                                assessmenetObj.sort(compare);
+                            if (assessmenetObj.length > 0) {                            
                                 console.log(assessmenetObj);
                                 for (let idx of assessmenetObj) {
                                     table += '<td>';
