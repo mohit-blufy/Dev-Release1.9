@@ -12,6 +12,10 @@
     <aura:attribute name="isSameAsParent" type="boolean" default="false" />
     <aura:attribute name="showModal" type="boolean" default="false"/>
     <aura:attribute name="discountModal" type="boolean" default="false"/>
+    <aura:attribute name="courseDiscountModal" type="boolean" default="false"/>
+    <aura:attribute name="stuIndex" type="Decimal" default="0"/>
+    <aura:attribute name="clsIndex" type="Decimal" default="0"/>
+    <aura:attribute name="discountList" type="List" />
     
     <!-- Student model varialbes -->
     <aura:attribute name="maxBirthDate" type="Date" />
@@ -59,14 +63,14 @@
                 <h2 class="slds-section_title slds-text-heading_small " ><strong>Contact Details</strong></h2>
                 <div class="demo-only demo-only--sizing slds-grid slds-wrap slds-gutters">
                     <div class="slds-col slds-medium-size_1-of-1 slds-p-top_small">
-                        <lightning:input type="toggle" name="toggleButton" aura:id="tglbtn" label="Corporate/Customer Account" 
-                                         messageToggleActive="Corporate" messageToggleInactive="Customer" checked="{!v.isCorporateAccount}" 
+                        <lightning:input type="toggle" name="toggleButton" aura:id="tglbtn" label="Individual / Corporate Account" 
+                                         messageToggleActive="" messageToggleInactive="" checked="{!v.isCorporateAccount}" 
                                          onchange="{!c.handleChange}" />
                     </div>
                     <aura:if isTrue="{!v.isCorporateAccount}">
                         <div class="slds-col slds-medium-size_1-of-2 slds-p-top_small">
                             <!--<lightning:input class="myinput" label="First Name" aura:id="conDetReqId" value="{!v.contactDetail.FirstName}" required="true" />-->
-                            <c:AutoCompleteCmp label="Name" inputId="contactId" objectApiName="Account" type="Corporate" valueFieldApiName="Name" extendedWhereClause="  AND Recordtype.name = 'Business Account'" placeHolder="Search Contact..." selectedOption="{!v.slcdAccId}" inputValue="{!v.slcdAccName}" required="true" requiredCls="contactId"/>
+                            <c:AutoCompleteCmp label="Name" inputId="contactId" objectApiName="Account" type="Corporate" valueFieldApiName="Name" extendedWhereClause="  AND Recordtype.name = 'B2B Account'" placeHolder="Search Contact..." selectedOption="{!v.slcdAccId}" inputValue="{!v.slcdAccName}" required="true" requiredCls="contactId"/>
                             <div id="requiredContactErrorMsg" class="slds-form-element__help" style="color:rgb(194, 59, 54);display:none;">Complete this field</div>
                         </div>
                     </aura:if>
@@ -109,8 +113,8 @@
                             <lightning:input class="myinput" aura:id="conDetReqId" label="Country" value="{!v.contactDetail.BillingCountry}" required="true" />                                                          
                         </div>
                         
-                         <div class="slds-col slds-medium-size_1-of-2 slds-p-top_x-large">
-                             <lightning:input type="checkbox" class="myinput" aura:id="" label="Same As Student" checked="{!v.isSameAsParent}"/>                                                          
+                        <div class="slds-col slds-medium-size_1-of-2 slds-p-top_x-large">
+                            <lightning:input type="checkbox" class="myinput" aura:id="" label="Same As Student" checked="{!v.isSameAsParent}" onchange="{!c.sameAsParentChange}"/>                                                          
                         </div>
                     </aura:if>
                 </div>
@@ -133,11 +137,11 @@
                     <thead class="thead-dark">
                         <tr>
                             <th>#</th>
+                            <th>Relationship</th>
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Gender</th>
-                            <th>Date of Birth</th>
-                            <th>Relationship</th>
+                            <th>Date of Birth</th>  
                             <th style="width:85px;">Add Class</th>
                             <!--<th>Edit</th>-->
                             <th>Delete</th>
@@ -147,6 +151,15 @@
                         <aura:iteration items="{!v.stuClsWrapperList}" var="stuWraper" indexVar="key">
                             <tr>
                                 <td>{!key+1}</td>
+                                <td>
+                                    <lightning:select aura:id="relationShipReq" required="true" name="select2" value="{!stuWraper.studentDetails.Relationship_with_contact__c}" label=""
+                                                      class="label-hidden" disabled="{!v.isCorporateAccount}" messageWhenValueMissing="Complete this field" >
+                                        <option value="">--None--</option>
+                                        <aura:iteration items="{!v.relationShipList}" var="c">
+                                            <option value="{!c}">{!c}</option>
+                                        </aura:iteration>
+                                    </lightning:select>  
+                                </td>
                                 <td>
                                     <c:AutoCompleteCmp showLabel="false" type="Student" extendedWhereClause="{!v.contactDetail.Id}" valueFieldApiName="FirstName" placeHolder="Search Student.." inputId="{!key+'_student'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!stuWraper.studentDetails.Id}" inputValue="{!stuWraper.studentDetails.FirstName}" required="true" requiredCls="stuRequired"/>
                                     <div id="{!'requiredStuErrorMsg'+key}" class="slds-form-element__help" style="color:rgb(194, 59, 54);display:none;">Complete this field</div>
@@ -161,15 +174,7 @@
                                     </lightning:select>  
                                 </td>
                                 <td>
-                                    <lightning:input type="date" name="input5" label=""  variant = "label-hidden"  required="true" value="{!stuWraper.studentDetails.PersonBirthdate}" max="{!v.maxBirthDate}" autocomplete="off"/>
-                                </td>
-                                <td>
-                                    <lightning:select aura:id="StuDetReqId" required="true" name="select2" value="{!stuWraper.studentDetails.Relationship_with_contact__c}" label="" class="label-hidden"  >
-                                        <option value="">--None--</option>
-                                        <aura:iteration items="{!v.relationShipList}" var="c">
-                                            <option value="{!c}">{!c}</option>
-                                        </aura:iteration>
-                                    </lightning:select>  
+                                    <lightning:input type="date" aura:id="StuDetReqId" name="input5" label=""  variant = "label-hidden"  required="true" value="{!stuWraper.studentDetails.PersonBirthdate}" max="{!v.maxBirthDate}" autocomplete="off"/>
                                 </td>
                                 <td class="slds-text-align_center">
                                     <div id="{!key}" onclick="{!c.mymodal}">
@@ -219,10 +224,13 @@
                                                     <p class="slds-text-heading_x-small slds-p-vertical_small slds-text-align_right">
                                                         <span class="">
                                                             <div id="{!key+'_'+j}" style="display:inline-block; padding-right:12px;" onclick="{! c.deleteCls }">
-                                                                <lightning:buttonIcon iconName="utility:delete" variant="bare" alternativeText="Settings" class="slds-text-color_error "/>
+                                                                <lightning:buttonIcon iconName="utility:delete" variant="bare" alternativeText="Delete" class="slds-text-color_error "/>
                                                             </div>
-                                                            <div id="{!key+'_'+j}" onclick="{! c.editCls }" style="display:inline-block;">
-                                                                <lightning:buttonIcon iconName="utility:edit_form" variant="bare" alternativeText="Settings" class="slds-text-color_success"  />
+                                                            <div id="{!key+'_'+j}" onclick="{! c.editCls }" style="display:inline-block; padding-right:12px;">
+                                                                <lightning:buttonIcon iconName="utility:edit_form" variant="bare" alternativeText="Edit" class="slds-text-color_success"  />
+                                                            </div>
+                                                            <div id="{!key+'_'+j}" onclick="{!c.handleCourseDiscount}" style="display:inline-block;">
+                                                                <lightning:buttonIcon iconName="utility:moneybag" variant="bare" alternativeText="Discount" class="slds-text-color_success"  />
                                                             </div>
                                                         </span>
                                                     </p>
@@ -469,12 +477,12 @@
                 </div>
             </div>
             
-           <!-- <h2 class="slds-text-heading_small title"><img src="{!$Resource.pay}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Confirm and Pay &nbsp;&nbsp;<span class="slds-float_right">--><!--${!v.grandTotAmt}--><!--<lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></span></h2>-->
+            <!-- <h2 class="slds-text-heading_small title"><img src="{!$Resource.pay}" style="height:23px;"  alt="pay" />&nbsp;&nbsp;Confirm and Pay &nbsp;&nbsp;<span class="slds-float_right">--><!--${!v.grandTotAmt}--><!--<lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></span></h2>-->
             <div class="slds-p-vertical_small slds-p-horizontal_large">	
                 <div class="slds-grid slds-gutters /*slds-grid_align-spread*/ slds-grid_align-end"> 
                     <!--<div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small slds-p-right_large" style="border-right:1px dashed rgb(221, 219, 218);">-->
                     <div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small slds-p-right_large">
-                       <!-- <p class="slds-p-bottom_small"><strong>Offline Payment:</strong></p>
+                        <!-- <p class="slds-p-bottom_small"><strong>Offline Payment:</strong></p>
                         <div class="slds-grid slds-gutters">
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><abbr class="slds-required">*</abbr>Payment Reference No:
                             </div>
@@ -486,8 +494,8 @@
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><abbr class="slds-required">*</abbr>Payment Mode:
                             </div>
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">-->
-                                <!--<lightning:input name="inputb" aura:id="" label="" variant = "label-hidden"  placeholder="Payment Mode" value="" required="true" />-->
-                                <!--<lightning:select class="label-hidden" name="payMode" aura:id="" label=""  variant = "label-hidden" value="{!v.payModeSlcdStr}"  required="true">
+                        <!--<lightning:input name="inputb" aura:id="" label="" variant = "label-hidden"  placeholder="Payment Mode" value="" required="true" />-->
+                        <!--<lightning:select class="label-hidden" name="payMode" aura:id="" label=""  variant = "label-hidden" value="{!v.payModeSlcdStr}"  required="true">
                                     
                                     <aura:iteration items="{!v.payModeList}" var="payMode">
                                         <option value="{!payMode}">{!payMode}</option>
@@ -495,17 +503,17 @@
                                 </lightning:select>     
                             </div>
                         </div>-->
-                       <!-- <div class="slds-grid slds-gutters">
+                        <!-- <div class="slds-grid slds-gutters">
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small"><abbr class="slds-required">*</abbr>Payment Amount:</div>
                             <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
                                <lightning:input name="inputb" aura:id="" label="" variant = "label-hidden" readonly="true"  placeholder="0" value="{!v.grandTotAmt}" required="true"  />
                                 <lightning:formattedNumber value="{!v.grandTotAmt}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                             </div>
                         </div>-->
-                  	  <div class="slds-text-align_right slds-p-vertical_small">
+                        <div class="slds-text-align_right slds-p-vertical_small">
                             <lightning:button label="Confirm" onclick="{! c.saveEnrolments }" iconName="action:update" variant="success" class="icon-large text-white "/>
                         </div>
-                    <!--
+                        <!--
                     <div class="slds-col slds-size_6-of-12 slds-p-bottom_xx-small  slds-p-right_large">
                         <p class="slds-p-bottom_small"><strong>Online Payment:</strong></p>
                         
@@ -772,23 +780,7 @@
                                                     <lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>
                                                 <td class="slds-align_absolute-center">
-                                                    <ui:inputCheckbox value="{!rf.isSelected}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
-                                                </td>   
-                                            </tr>
-                                        </aura:iteration>
-                                    </aura:if>
-                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.relatedFeeWrapperList))}">
-                                        <aura:iteration items="{!v.slcdCrsObject.relatedFeeWrapperList}" var="rf" indexVar="j">
-                                            <tr>
-                                                <th></th>
-                                                <td>{!rf.feeName}</td>
-                                                <td>{!rf.feeType}</td>
-                                                <td>{!rf.payFrequency}</td>
-                                                <td class="slds-text-align_right"><!--${!rf.feeAmount}-->
-                                                    <lightning:formattedNumber value="{!rf.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
-                                                </td>
-                                                <td class="slds-align_absolute-center">
-                                                    <ui:inputCheckbox value="{!rf.isSelected}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}"/>
+                                                    <ui:inputCheckbox value="{!rf.isSelected}" aura:id="regFeeFeeChk" change="{!c.feeOnCheck}" disabled="{!and(rf.isSelected,rf.isOverride)}"/>
                                                 </td>   
                                             </tr>
                                         </aura:iteration>
@@ -804,29 +796,7 @@
                                                 <td class="slds-text-align_right"><!--${!dep.feeAmount}-->
                                                     <lightning:formattedNumber value="{!dep.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
                                                 </td>										
-                                                <td class="slds-align_absolute-center"><ui:inputCheckbox  value="{!dep.isSelected}" aura:id="depFeeFeeChk" change="{!c.feeOnCheck}"/></td>
-                                            </tr>
-                                        </aura:iteration>
-                                    </aura:if>
-                                    <aura:if isTrue="{!not(empty(v.slcdCrsObject.disWrapperList))}">
-                                        <aura:iteration items="{!v.slcdCrsObject.disWrapperList}" var="dis" indexVar="j">
-                                            <tr>
-                                                <!--<td>{!j+!}</td>-->
-                                                <!-- <th></th>
-                                                <td>{!dis.feeName}</td>
-                                                <td>{!dis.feeType}</td>
-                                                <td>{!dis.payFrequency}</td>
-                                                <td class="slds-text-align_right">
-                                                 <lightning:formattedNumber value="{!dis.feeAmount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/>
-                                                </td>									
-                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" text="{!j}" aura:id="disFeeFeeChk" change="{!c.discountOnCheck}"/></td>-->
-                                                
-                                                <th></th>
-                                                <td>{!dis.name}</td>
-                                                <td>{!dis.type}</td>
-                                                <td></td>
-                                                <td class="slds-text-align_right"><!--${!dis.amount}--><strong style="color:red;"><lightning:formattedNumber value="{!dis.amount}" style="currency" currencyCode="{!$Label.c.Default_Currency}" currencyDisplayAs="symbol"/></strong></td>										
-                                                <td class="slds-align_absolute-center"><ui:inputCheckbox value="{!dis.isSelected}" text="{!j}" aura:id="crsDisFeeFeeChk"  change="{!c.crsDiscountOnCheck}"/></td>
+                                                <td class="slds-align_absolute-center"><ui:inputCheckbox  value="{!dep.isSelected}" aura:id="depFeeFeeChk" change="{!c.feeOnCheck}" disabled="{!and(dep.isSelected,dep.isOverride)}"/></td>
                                             </tr>
                                         </aura:iteration>
                                     </aura:if>
@@ -937,6 +907,62 @@
                     <lightning:button label="Close" variant="destructive" title="Base action" iconName="utility:close" onclick="{! c.closeDiscountModel }" class="slds-m-right_medium" />
                     <span>
                         <lightning:button label="Save" variant="brand"  title="Base action" onclick="{! c.saveGlobalDiscount }" iconName="utility:download" />
+                    </span>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open "></div>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.courseDiscountModal}">
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium modal2"  aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header slds-text-align_left slds-p-around_none">                  
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate title slds-text-heading_xx-small" ><img src="{!$Resource.discount}" style="width:26px; height:23px;" />&nbsp;&nbsp;Course Discounts </h2>
+                </header>
+                <div class="slds-modal__content slds-p-vertical_small slds-p-horizontal_xx-large" id="modal-content-id-1" style="min-height:50vh;">
+                    <div class="slds-p-bottom_small">
+                        <div style="overflow-y:auto; /*max-height:180vh;*/">
+                            <table class="table table-custom">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Format</th>
+                                        <th style="width:160px">Amount</th>
+                                        <th>Select</th>
+                                    </tr> 
+                                </thead>
+                                <tbody>
+                                    <aura:iteration items="{!v.discountList}" var="disc" indexVar="j">
+                                        <tr>
+                                            <td>{!j+1}</td>
+                                            <td>{!disc.name}</td>
+                                            <td>{!disc.type}</td>
+                                            <td>{!disc.format}</td>
+                                            <td style="width:160px;text-align:center;">
+                                                <aura:if isTrue="{!disc.isOverride}">
+                                                    <lightning:input style="width:160px" name="amtVal" value="{!disc.amount}" />
+                                                    <aura:set attribute="else">
+                                                        {!disc.amount}
+                                                    </aura:set>
+                                                </aura:if>       
+                                            </td>
+                                            <td>
+                                                <ui:inputCheckbox value="{!disc.isSelected}" text="{!j}" aura:id="globalDisChk" change="" class="slds-m-left_small" />
+                                            </td>
+                                        </tr>
+                                    </aura:iteration>
+                                </tbody>
+                            </table>
+                        </div>	
+                    </div>
+                </div>
+                <footer class="slds-modal__footer slds-p-vertical_medium">
+                    <lightning:button label="Close" variant="destructive" title="Base action" iconName="utility:close" onclick="{!c.closeCourseDiscountModal}" class="slds-m-right_medium" />
+                    <span>
+                        <lightning:button label="Save" variant="brand"  title="Base action" onclick="{!c.calculateCourseDiscount}" iconName="utility:download" />
                     </span>
                 </footer>
             </div>

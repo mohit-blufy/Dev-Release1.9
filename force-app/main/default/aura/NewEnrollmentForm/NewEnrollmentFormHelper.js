@@ -141,7 +141,7 @@
             var slcdCrsList = slctdCrsWithStuList[i].slctdClsDetails
             for(var j = 0; j < slcdCrsList.length; j++){
                 var slcdTstionFeeAmt  = 0;
-                
+                var tuitionfee = 0;
                 //tution fee addition
                 var feeList = slcdCrsList[j].tutionFeeWrapperList; 
                 for(var k = 0; k < feeList.length; k++){
@@ -149,7 +149,7 @@
                         slcdTstionFeeAmt += feeList[k].feeProratedAmount;
                     else
                         slcdTstionFeeAmt += feeList[k].feeAmount;
-                    
+                    tuitionfee = slcdTstionFeeAmt;
                     if(feeList[k].isGSTApplicable && feeList[k].feeProratedAmount > 0)
                         gstAppFeeAmount += feeList[k].feeProratedAmount;
                     else if(feeList[k].isGSTApplicable)
@@ -180,8 +180,16 @@
                 //Other course discount deduction
                 var disList = slcdCrsList[j].disWrapperList;
                 for(var k = 0; k < disList.length; k++){
-                    if(disList[k].isSelected)
-                        slcdTstionFeeAmt -= disList[k].amount;
+                    if(disList[k].isSelected){
+                        if(disList[k].format == 'Percent'){
+                            slcdTstionFeeAmt -= (tuitionfee * disList[k].amount/100);
+                        }
+                        else{
+                            slcdTstionFeeAmt -= disList[k].amount;
+                        }
+                    }
+                        
+                    
                 }
                 
                 //Early bird discount deduction
@@ -190,7 +198,6 @@
                     if(disList[k].isSelected)
                         slcdTstionFeeAmt -= disList[k].amount;
                 }
-                
                 slcdCrsList[j].totWithProratedFee = slcdTstionFeeAmt;
                 grandTot += slcdTstionFeeAmt;
             }

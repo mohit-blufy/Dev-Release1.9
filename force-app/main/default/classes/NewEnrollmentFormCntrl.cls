@@ -128,7 +128,7 @@ crsFeeWrap.totWithProratedFee += fw.feeAmount;
 }*/
             //CourseFeeData crsFeeData = new CourseFeeData();
             //List<CourseFee> crFeeLs  = crsFeeData.getByCourseId(crId);
-            List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdWithSharing(crId);
+            List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseId(crId);
             //if(crFeeLs != null){
             if(listCourseFee != null && listCourseFee.size() > 0){
                 for(Course_Fee__c crFee: listCourseFee){
@@ -144,17 +144,17 @@ crsFeeWrap.totWithProratedFee += fw.feeAmount;
                     
                     if(crFee.Fee__r.Type__c == ConstantClass.depositFeeType){
                         fw.isSelected = crFee.Fee__r.Required__c;
-                        fw.isOverride = crFee.Fee__r.Override__c;
                         crsFeeWrap.depositWrapperList.add(fw);
                         if(fw.isSelected){
+                            fw.isOverride = true;
                             crsFeeWrap.totFee += fw.feeAmount; 
                             crsFeeWrap.totWithProratedFee += fw.feeAmount;
                         }
                     }else if(crFee.Fee__r.Type__c != ConstantClass.tutionFeeType){
                         fw.isSelected = crFee.Fee__r.Required__c;
-                        fw.isOverride = crFee.Fee__r.Override__c;
                         crsFeeWrap.feeWrapperList.add(fw);
                         if(fw.isSelected){
+                            fw.isOverride = true;
                             crsFeeWrap.totFee += fw.feeAmount; 
                             crsFeeWrap.totWithProratedFee += fw.feeAmount;
                         }
@@ -230,40 +230,43 @@ crsFeeWrap.totWithProratedFee += fw.feeAmount;
                                       }
                                   }
                               }
-            
-            for(Course_Discount__c crsDis: [SELECT Id, Name, Discount__c, Discount__r.Name, Discount__r.Days_Before_Class__c, Discount__r.Value__c, Discount__r.Override__c, Discount__r.Required__c,
-                                            Discount__r.Type__c, Discount__r.Format__c, Discount__r.Start_Date__c, Discount__r.End_Date__c 
-                                            FROM Course_Discount__c 
-                                            WHERE Course__c =:crId AND Discount__r.Format__c != null AND Discount__r.Global__c=False AND 
-                                            Discount__r.Active__c = True AND Discount__r.Value__c != null AND Discount__r.Type__c !=:ConstantClass.earlyBirdDiscount]){
-                                                
-                                                Decimal amtVal = 0;
-                                                if(crsDis.Discount__r.Format__c.equalsIgnoreCase(ConstantClass.amountFormat)){
-                                                    amtVal = crsDis.Discount__r.Value__c;
-                                                }else if(crsDis.Discount__r.Format__c.equalsIgnoreCase(ConstantClass.percentFormat)){
-                                                    //  amtVal = crsDis.Discount__r.Value__c;
-                                                }
-                                                
-                                                DisWrapper dw = new DisWrapper();
-                                                dw.disId      = crsDis.Discount__c;
-                                                dw.isSelected = crsDis.Discount__r.Required__c;
-                                                dw.isOverride = crsDis.Discount__r.Override__c;
-                                                dw.name       = crsDis.Discount__r.Name;
-                                                dw.amount     = amtVal;
-                                                dw.type       = crsDis.Discount__r.Type__c;
-                                                
-                                                if(dw.isSelected){
-                                                    crsFeeWrap.totFee -= dw.amount; 
-                                                    crsFeeWrap.totWithProratedFee -= dw.amount;
-                                                }
-                                                
-                                                disList.add(dw);
-                                            }
-            
             crsFeeWrap.classWrapperList.addAll(cwList);
-            crsFeeWrap.disWrapperList.addAll(disList);
         }
         return crsFeeWrap;
+    }
+
+    @AuraEnabled
+    public static List<DisWrapper> fetchCourseDiscount(String courseId){
+        List<DisWrapper> listDiscount  = new List<DisWrapper>();
+        try{
+            if(String.isNotBlank(courseId)){
+                List<Course_Discount__c> listCourseDiscount = CourseDiscountService.getCourseDiscountByCourseId(courseId);
+                if(listCourseDiscount.size() > 0){
+                    for(Course_Discount__c crsDis: listCourseDiscount){                                
+                        Decimal amtVal = 0;
+                        if(crsDis.Discount__r.Format__c.equalsIgnoreCase(ConstantClass.amountFormat)){
+                            amtVal = crsDis.Discount__r.Value__c;
+                        }else if(crsDis.Discount__r.Format__c.equalsIgnoreCase(ConstantClass.percentFormat)){
+                            amtVal = crsDis.Discount__r.Value__c;
+                        }
+                        
+                        DisWrapper dw = new DisWrapper();
+                        dw.disId      = crsDis.Discount__c;
+                        //dw.isSelected = crsDis.Discount__r.Required__c;
+                        dw.isOverride = crsDis.Discount__r.Override__c;
+                        dw.format = crsDis.Discount__r.Format__c;
+                        dw.name       = crsDis.Discount__r.Name;
+                        dw.amount     = amtVal;
+                        dw.type       = crsDis.Discount__r.Type__c;
+                        listDiscount.add(dw);
+                    }
+                }
+            }
+            return listDiscount;
+        }catch(Exception e){
+            system.debug('Error-->'+e.getMessage());
+        }
+        return null;
     }
     
     //This function is used to get class term amount on the bases of class term session and selected course unit price
@@ -306,7 +309,7 @@ tutionFeeWrapperList.add(fw);
 }*/
                 //CourseFeeData crsFeeData = new CourseFeeData();
                 // List<CourseFee> crFeeLs  = crsFeeData.getByCourseIdOrType(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
-                List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdOrTypeWithSharing(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
+                List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdOrType(clsList.get(0).Course__c, ConstantClass.tutionFeeType, clsList.get(0).Frequency__c);
                 //if(crFeeLs != null){
                 if(listCourseFee != NULL && listCourseFee.size() > 0){
                     for(Course_Fee__c crFee: listCourseFee){
@@ -387,7 +390,7 @@ crsFeeWrap.feeWrapperList.add(fw);
 }*/
                     //  CourseFeeData crsFeeData = new CourseFeeData();
                     //List<CourseFee> crFeeLs  = crsFeeData.getByCourseId(crId);
-                    List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseIdWithSharing(crId);
+                    List<Course_Fee__c> listCourseFee = CourseFeeService.getByCourseId(crId);
                     //if(crFeeLs != null){
                     if(listCourseFee != NULL && listCourseFee.size() > 0){
                         for(Course_Fee__c crFee: listCourseFee){
@@ -398,7 +401,7 @@ crsFeeWrap.feeWrapperList.add(fw);
                             fw.payFrequency = crFee.Fee__r.Frequency__c;  
                             fw.feeAmount  = crFee.Fee__r.Amount__c;
                             fw.isSelected = crFee.Fee__r.Required__c;
-                            fw.isOverride = crFee.Fee__r.Override__c;
+                           // fw.isOverride = crFee.Fee__r.Override__c;
                             fw.isGSTApplicable = crFee.Fee__r.GST_Applicable__c;
                             //  fw.tutionFeeUnitPrice = crFee.Fee__r.Unit_Price__c;
                             fw.feeSchType = crFee.Fee__r.Schedule__c;  
@@ -408,10 +411,14 @@ crsFeeWrap.feeWrapperList.add(fw);
                                 fw.isSelected = false;
                                 if(!slcdFee.contains(crFee.Fee__c) &&  crFee.Fee__r.Frequency__c ==clsList.get(0).Frequency__c)
                                     crsFeeWrap.tutionFeeWrapperList.add(fw);
-                            }else if(crFee.Fee__r.Type__c == ConstantClass.depositFeeType){                       
+                            }else if(crFee.Fee__r.Type__c == ConstantClass.depositFeeType){       
+                                if(fw.isSelected)
+                                    fw.isOverride = true;                
                                 if(!slcdFee.contains(crFee.Fee__c))
                                     crsFeeWrap.depositWrapperList.add(fw);
                             }else{
+                                if(fw.isSelected)
+                                    fw.isOverride = true;
                                 if(!slcdFee.contains(crFee.Fee__c))
                                     crsFeeWrap.feeWrapperList.add(fw);
                             }   
@@ -641,7 +648,7 @@ return crsFeeWrap;
     public static List<DisWrapper> checkEarlyBirdDiscount(String clsWrapStr){ 
         ClassWrapper clsWrap = (ClassWrapper) System.JSON.deserialize(clsWrapStr, ClassWrapper.class);
         List<DisWrapper> disWrapList = new List<DisWrapper>();
-        if(isCourseFeeAccessible && isClassAccessible && isDiscountAccessible && isCourseDiscAccessible){
+       /* if(isCourseFeeAccessible && isClassAccessible && isDiscountAccessible && isCourseDiscAccessible){
             if(String.isNotBlank(clsWrap.clsId)){
                 List<Class__c> clsList = [SELECT Id, Name, Start_Date__c, Course__c FROM Class__c WHERE Id =:clsWrap.clsId AND Start_Date__c != null];
                 
@@ -675,7 +682,7 @@ return crsFeeWrap;
                                                     }
                 }
             }
-        }
+        }*/
         return disWrapList;
     }
     
@@ -948,7 +955,8 @@ slcdCrsObj.tutionFeeWrapperList[0] = fw; */
                     fw.noOfUnit    = rFee.Units__c != null ? Integer.valueOf(rFee.Units__c):0;
                     fw.feeParent   = rFee.Parent__c;
                     fw.isSelected  = rFee.Required__c;
-                    fw.isOverride  = rFee.Override__c;
+                    if(fw.isSelected)
+                        fw.isOverride  = true;
                     fw.isGSTApplicable = rFee.GST_Applicable__c;
                     listFeeWrapper.add(fw);
                 }
@@ -1468,11 +1476,13 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
         @AuraEnabled public String  promoCode{get;set;}
         @AuraEnabled public Boolean isSelected{get;set;}
         @AuraEnabled public Boolean isOverride{get;set;}
+        @AuraEnabled public Boolean isAlreadyApplied{get;set;}
         
         public DisWrapper(){
             this.amount   = 0;
             this.isSelected = False;
             this.isOverride = False;
+            this.isAlreadyApplied = true;
         }
     }
 }

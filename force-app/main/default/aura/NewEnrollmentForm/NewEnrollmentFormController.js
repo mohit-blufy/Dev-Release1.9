@@ -59,7 +59,8 @@
                 // console.log('@@@@@ add student res   '+JSON.stringify(res));
                 if(component.get("v.isSameAsParent")){
                     res.studentDetails.FirstName = parFirstName;
-                    res.studentDetails.LastName  = component.get("v.contactDetail.LastName");   
+                    res.studentDetails.LastName  = component.get("v.contactDetail.LastName"); 
+                    res.studentDetails.Relationship_with_contact__c = 'Self'
                 }
                 slctdCrsList.push(res);
                 component.set("v.stuClsWrapperList",slctdCrsList);
@@ -367,7 +368,28 @@
         component.set("v.globalDisList", tempGlbDisLst);
         component.set("v.discountModal", false);
     },
-    mymodal : function(component, event, helper) {      
+    mymodal : function(component, event, helper) {
+        var indx = parseInt(event.target.id);
+        var slctdCrsList= component.get("v.stuClsWrapperList");
+        var slctdStuWrap =slctdCrsList[indx];
+        // alert(component.find('relationShip'+indx))
+        
+        
+        var allValid1 = true;
+        var relationValid = true;
+        if(!component.get("v.isCorporateAccount") && slctdCrsList.length > 1){
+            allValid1 = component.find('relationShipReq').reduce(function (validSoFar, inputCmp) {
+                inputCmp.showHelpMessageIfInvalid();
+                return validSoFar && !inputCmp.get('v.validity').valueMissing;
+            }, true);
+        }
+        
+        if(!component.get("v.isCorporateAccount") && slctdCrsList.length == 1 
+           && $A.util.isEmpty(slctdStuWrap.studentDetails.Relationship_with_contact__c)){
+            component.find('relationShipReq').showHelpMessageIfInvalid();
+            relationValid = false;
+        }
+        
         var allValid = component.find('StuDetReqId').reduce(function (validSoFar, inputCmp) {
             inputCmp.showHelpMessageIfInvalid();
             return validSoFar && !inputCmp.get('v.validity').valueMissing;
@@ -385,10 +407,7 @@
             }
         }
         
-        if(allValid && noFirstCsmtIssue){
-            var indx = parseInt(event.target.id);
-            var slctdCrsList= component.get("v.stuClsWrapperList");
-            var slctdStuWrap =slctdCrsList[indx];
+        if(allValid && noFirstCsmtIssue && (allValid1 || relationValid)){
             slctdStuWrap.stuRecNo = indx;
             var stuFirstName = document.getElementById(indx+"_student").value;
             slctdStuWrap.studentDetails.FirstName = stuFirstName;
@@ -567,6 +586,7 @@
         //console.log('@@@@@1 slctdCrsList  '+JSON.stringify(slctdCrsList));
         
         if(type == 'Course'){
+            component.set("v.crsId",valueId);
             var action = component.get("c.fetchCrsClsDetails");
             action.setParams({
                 "crId" : valueId
@@ -605,7 +625,7 @@
             var action = component.get("c.getchSlcdAccDetails");
             action.setParams({
                 "accId" : valueId,
-                "isCorporateAccount" : component.get("v.isCorporateAccount")
+                "isCorporateAccount" : false
             });
             action.setCallback(this,function(result){
                 if(result.getState() == "SUCCESS"){
@@ -616,6 +636,8 @@
                         var slctdCrsList= component.get("{!v.stuClsWrapperList}");
                         //   console.log('@@@@@2 slctdCrsList  '+JSON.stringify(component.get("v.stuClsWrapperList")));
                         slctdCrsList[indx].studentDetails = res;
+                        if(component.get("v.isCorporateAccount"))
+                        	slctdCrsList[indx].studentDetails.Relationship_with_contact__c = '';
                         /*try{
                         	slctdCrsList[indx].studentDetails = res;
                         }catch(err) {
@@ -765,7 +787,6 @@
             helper.alertToast(component,event,'Error',errMsg);
         }else{
             var crsObj = component.get("v.slcdCrsObject"); //alert(JSON.stringify(crsObj)
-            //crsObj.feeWrapperList.push(crsObj.relatedFeeWrapperList)
             console.log(JSON.stringify(crsObj));
             var action = component.get("c.calculateProratedAmount");
             action.setParams({"slcdCrsObjStr" : JSON.stringify(crsObj)});
@@ -842,7 +863,7 @@
                                 for(var k = 0; k < feeList.length; k++){
                                     if(feeList[k].isSelected){
                                         if(feeList[k].feeProratedAmount > 0)
-                                        	slcdTstionFeeAmt += feeList[k].feeProratedAmount;
+                                            slcdTstionFeeAmt += feeList[k].feeProratedAmount;
                                         else
                                             slcdTstionFeeAmt += feeList[k].feeAmount;
                                         
@@ -867,7 +888,7 @@
                                 for(var k = 0; k < feeList.length; k++){
                                     if(feeList[k].isSelected){
                                         slcdTstionFeeAmt += feeList[k].feeAmount;
-                                       // totDepFee += feeList[k].feeAmount;
+                                        // totDepFee += feeList[k].feeAmount;
                                         
                                         if(feeList[k].isGSTApplicable)
                                             gstAppFeeAmount += feeList[k].feeAmount;
@@ -894,8 +915,8 @@
                         }
                         
                         var gstPrcnt = parseInt($A.get("{!$Label.c.GST_Rate}"));
-                       // var tempAmt = grandTot-totDepFee; 
-                       // alert(gstAppFeeAmount);
+                        // var tempAmt = grandTot-totDepFee; 
+                        // alert(gstAppFeeAmount);
                         var tempAmt = (gstAppFeeAmount*gstPrcnt/100);                            
                         component.set("v.gstAmount", tempAmt); 
                         
@@ -911,141 +932,6 @@
             });            
             
             $A.enqueueAction(action);
-            
-            /*
-             var crsObj = component.get("v.slcdCrsObject"); //alert(JSON.stringify(crsObj));
-            crsObj.classWrapperList = [];// alert(JSON.stringify(crsObj.slcdClsWrapObj));
-            
-            //Add selected tution fee
-            var slcdTutionFee;
-            for(var i = 0; i < crsObj.tutionFeeWrapperList.length; i++){
-                var slcdTFees= crsObj.tutionFeeWrapperList[i];
-                if(slcdTFees.isSelected){
-                    slcdTutionFee = slcdTFees;
-                } 
-            }
-
-            crsObj.tutionFeeWrapperList = [];
-            
-            var action = component.get("c.calculateProratedAmount");
-            action.setParams({"slcdCrsObj" : crsObj, "fw" : slcdTutionFee});
-            action.setCallback(this,function(result){
-                if(result.getState() == "SUCCESS"){
-                    var res = result.getReturnValue();
-                    //alert(JSON.stringify(res));
-                    if(res){
-                        if(slcdTutionFee){
-                            crsObj.tutionFeeWrapperList.push(res);
-                        }
-                        var slcdDis;
-                        for(var i = 0; i < crsObj.earlybirdDisWrapperList.length; i++){
-                            var slcdDiscount= crsObj.earlybirdDisWrapperList[i];
-                            if(slcdDiscount.isSelected){
-                                slcdDis = slcdDiscount;
-                            } 
-                        }
-                        crsObj.earlybirdDisWrapperList = [];
-                        if(slcdDis)
-                            crsObj.earlybirdDisWrapperList.push(slcdDis);
-                        
-                        var toastMsg = "Course successfully Added.";
-                        var slctdCrsWithStuList= component.get("v.stuClsWrapperList"); //alert(JSON.stringify(slctdCrsWithStuList));
-                        var stuDetWithCrs = component.get("v.stuClsWrapper");//alert(JSON.stringify(stuDetWithCrs));
-                        // alert(crsObj.typeAddEdit);
-                        if(crsObj.typeAddEdit == 'Edit'){
-                            stuDetWithCrs.slctdClsDetails[crsObj.recNo] = crsObj;
-                            toastMsg = "Course successfully Updated.";
-                        }else{
-                            stuDetWithCrs.slctdClsDetails.push(crsObj);
-                        }
-                        slctdCrsWithStuList[stuDetWithCrs.stuRecNo] = stuDetWithCrs;
-                        
-                        
-                        //Grand total caculation
-                        var grandTot = 0;
-                        var totDepFee = 0;
-                        for(var i = 0; i < slctdCrsWithStuList.length; i++){
-                            var slcdCrsList = slctdCrsWithStuList[i].slctdClsDetails;
-                            for(var j = 0; j < slcdCrsList.length; j++){
-                                var tustionFeeObj = slcdCrsList[j].tutionFeeWrapperList[0];
-                                slcdCrsList[j].totWithProratedFee = (slcdCrsList[j].totFee + tustionFeeObj.feeProratedAmount) -  tustionFeeObj.feeAmount;
-                                console.log('Tot fee -->'+slcdCrsList[j].totFee+'      pro--->'+tustionFeeObj.feeProratedAmount+'    feeAmt --->'+ tustionFeeObj.feeAmount);
-                                console.log('totWithProratedFee -->'+slcdCrsList[j].totWithProratedFee);
-                                grandTot += slcdCrsList[j].totWithProratedFee;
-                                
-                                var depositList = slcdCrsList[j].depositWrapperList;
-                                for(var k = 0; k < depositList.length; k++){
-                                    totDepFee += depositList[k].feeAmount;
-                                }
-                            }
-                        }
-
-                        var gstPrcnt = parseInt($A.get("{!$Label.c.GST_Rate}"));
-                        var tempAmt = grandTot-totDepFee; 
-                        tempAmt = (tempAmt*gstPrcnt/100);                            
-                        component.set("v.gstAmount", tempAmt); 
-                        
-                        component.set("v.enrFeeTotAmt", grandTot); 
-                        component.set("v.grandTotAmt", grandTot + tempAmt); 
-                        component.set("v.stuClsWrapperList", slctdCrsWithStuList);
-                        component.set("v.showModal", false);
-                        
-                        
-                        helper.alertToast(component,event,"Success",toastMsg);
-                    }
-                }
-            });            
-            
-            $A.enqueueAction(action);*/
-            //}
-            //Add selected Discount
-            /*  var slcdDis;
-            for(var i = 0; i < crsObj.earlybirdDisWrapperList.length; i++){
-                var slcdDiscount= crsObj.earlybirdDisWrapperList[i];
-                if(slcdDiscount.isSelected){
-                    slcdDis = slcdDiscount;
-                } 
-            }
-            crsObj.earlybirdDisWrapperList = [];
-            if(slcdDis)
-                crsObj.earlybirdDisWrapperList.push(slcdDis);
-            
-            var toastMsg = "Course successfully Added.";
-            var slctdCrsWithStuList= component.get("{!v.stuClsWrapperList}"); //alert(JSON.stringify(slctdCrsWithStuList));
-            var stuDetWithCrs = component.get("{!v.stuClsWrapper}");//alert(JSON.stringify(stuDetWithCrs));
-           // alert(crsObj.typeAddEdit);
-            if(crsObj.typeAddEdit == 'Edit'){
-                stuDetWithCrs.slctdClsDetails[crsObj.recNo] = crsObj;
-                toastMsg = "Course successfully Updated.";
-            }else{
-            	stuDetWithCrs.slctdClsDetails.push(crsObj);
-            }
-            slctdCrsWithStuList[stuDetWithCrs.stuRecNo] = stuDetWithCrs;
-            
-            
-            //Grand total caculation
-            var grandTot = 0;
-            for(var i = 0; i < slctdCrsWithStuList.length; i++){
-                var slcdCrsList = slctdCrsWithStuList[i].slctdClsDetails;
-                for(var j = 0; j < slcdCrsList.length; j++){
-                    grandTot += slcdCrsList[j].totFee;
-                }
-            }
-            component.set("v.grandTotAmt", grandTot); 
-            component.set("v.enrFeeTotAmt", grandTot); 
-            
-            component.set("v.stuClsWrapperList", slctdCrsWithStuList);
-            component.set("v.showModal", false);
-           
-            
-            helper.alertToast(component,event,"Success",toastMsg);*/
-            /*var toastEvent = $A.get("e.force:showToast");
-            toastEvent.setParams({
-                "title": "Success!",
-                "type" : "Success",
-                "message":toastMsg
-            });
-            toastEvent.fire();*/
         }
     },
     
@@ -1075,7 +961,7 @@
                 checkEmail = true;
             } 
         }
-
+        
         var allValid = true;
         if(!component.get("v.confrmMessage")){
             component.find('confrmmsg').showHelpMessageIfInvalid();
@@ -1092,10 +978,14 @@
                 if($A.util.isEmpty(component.get("v.stuClsWrapperList")[i].studentDetails.FirstName) || 
                    $A.util.isEmpty(component.get("v.stuClsWrapperList")[i].studentDetails.LastName) ||
                    $A.util.isEmpty(component.get("v.stuClsWrapperList")[i].studentDetails.PersonBirthdate)||
-                   $A.util.isEmpty(component.get("v.stuClsWrapperList")[i].studentDetails.Gender__c)||
-                   $A.util.isEmpty(component.get("v.stuClsWrapperList")[i].studentDetails.Relationship_with_contact__c)){
+                   $A.util.isEmpty(component.get("v.stuClsWrapperList")[i].studentDetails.Gender__c)){
                     checkStudent = true;
                     break;
+                }
+                if($A.util.isEmpty(component.get("v.stuClsWrapperList")[i].studentDetails.Relationship_with_contact__c) &&
+                   !component.get("v.isCorporateAccount")){
+                    checkStudent = true;
+                    alert('test')
                 }
             }
         }
@@ -1115,7 +1005,7 @@
         if(checkClass){
             helper.alertToast(component,event,"ERROR","Add class for every Student");
         }
-            
+        
         if(allValid && !checkStudent && !checkClass && allValid1 && noFirstCsmtIssue && checkEmail){
             component.set("v.toggleSpinner", true);
             var contactDet = component.get("v.contactDetail");
@@ -1179,9 +1069,80 @@
     handleChange :  function(component,event,helper){
         component.set("v.stuClsWrapperList",null);
         document.getElementById("contactId").value = null;
+        component.set("v.isSameAsParent",false);
     },   
     
-    sameAsParent : function(component,event,helper){
-       
+    sameAsParentChange : function(component,event,helper){
+        var slctdCrsList= component.get("v.stuClsWrapperList");
+        // alert(JSON.stringify(slctdCrsList))
+        if(component.get("v.isSameAsParent") && !$A.util.isEmpty(slctdCrsList)){
+            var parFirstName = document.getElementById("contactId").value;
+            for(var i = 0; i < slctdCrsList.length; i++){
+                slctdCrsList[i].studentDetails.FirstName = parFirstName;
+                slctdCrsList[i].studentDetails.LastName  = component.get("v.contactDetail.LastName");
+                slctdCrsList[i].studentDetails.Relationship_with_contact__c = 'Self'; 
+            }    
+        }
+        else if(!component.get("v.isSameAsParent") && !$A.util.isEmpty(slctdCrsList)){
+            var parFirstName = document.getElementById("contactId").value;
+            for(var i = 0; i < slctdCrsList.length; i++){
+                slctdCrsList[i].studentDetails.FirstName = '';
+                slctdCrsList[i].studentDetails.LastName  = '';
+                slctdCrsList[i].studentDetails.Relationship_with_contact__c = '';
+            } 
+        }
+        component.set("v.stuClsWrapperList",slctdCrsList);
+        
+    },
+    
+    handleCourseDiscount : function(component,event,helper){
+        component.set("v.courseDiscountModal",true);
+        var selectedCheckText = event.target.id;
+        var indexList = selectedCheckText.split("_");
+        component.set("v.stuIndex",indexList[0]);
+        component.set("v.clsIndex",indexList[1]);
+        if(!$A.util.isEmpty(component.get("v.crsId"))){
+            component.set("v.discountList",null);
+            var disWrapperList = component.get("v.discountList");
+            var action = component.get("c.fetchCourseDiscount");
+            action.setParams({
+                "courseId" : component.get("v.crsId")
+            });
+            action.setCallback(this,function(response){
+                if(response.getState() === "SUCCESS"){
+                    if(response.getReturnValue().length > 0){
+                        disWrapperList = response.getReturnValue();
+                        component.set("v.discountList",disWrapperList);
+                    }
+                }
+            });
+            $A.enqueueAction(action);
+        }
+    },
+    
+    closeCourseDiscountModal : function(component,event,helper){
+        component.set("v.courseDiscountModal",false);
+    },
+    
+    calculateCourseDiscount : function(component,event,helper){
+        var stuWrap = component.get("v.stuClsWrapperList");
+        var stuIndex = component.get("v.stuIndex");
+        var clsIndex = component.get("v.clsIndex");
+        var stuRec = stuWrap[stuIndex];
+        var totalFee = stuWrap[stuIndex].slctdClsDetails[clsIndex].totWithProratedFee;
+        if(!$A.util.isEmpty(component.get("v.discountList")) && !$A.util.isEmpty(totalFee)){
+            var discountList = component.get("v.discountList");
+            var discountListToAdd = [];
+            for(var i = 0; i< discountList.length; i++){
+                if(discountList[i].isSelected){
+                    discountListToAdd.push(discountList[i]);
+                }
+            }
+            console.log(JSON.stringify(discountListToAdd))
+            console.log(JSON.stringify(stuWrap[stuIndex].slctdClsDetails[clsIndex].disWrapperList))
+            stuWrap[stuIndex].slctdClsDetails[clsIndex].disWrapperList = discountListToAdd;
+            helper.totAmountcalculation(component, event, stuWrap);
+            component.set("v.courseDiscountModal",false);
+        }
     }
 })
