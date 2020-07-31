@@ -1,6 +1,6 @@
 public class CourseFeeService{
     
-    public static List<Course_Fee__c> getByCourseIdWithSharing(String sId){  
+    public static List<Course_Fee__c> getByCourseId(String sId){  
         try{
             List<Course_Fee__c> listCourseFee = new List<Course_Fee__c>();
             for(Course_Fee__c crFee: [SELECT Id, Name, Fee__c, Fee__r.Name, Fee__r.Amount__c, Fee__r.Unit_Price__c, Course__c,
@@ -19,7 +19,7 @@ public class CourseFeeService{
         return null;    
     }
 
-    public static List<Course_Fee__c> getByCourseIdOrTypeWithSharing(String sId, String type, String frequency){        
+    public static List<Course_Fee__c> getByCourseIdOrType(String sId, String type, String frequency){        
         try{
             List<Course_Fee__c> listCourseFee = new List<Course_Fee__c>();        
             for(Course_Fee__c crFee: [SELECT Id, Name, Fee__c, Fee__r.Name, Fee__r.Amount__c, Fee__r.Unit_Price__c, Course__c,
@@ -40,7 +40,7 @@ public class CourseFeeService{
     }
 
     //Insertion of Course Fee Records
-    public static void insertCourseFeeRecordsWithSharing(List<Course_Fee__c> listCourseFee){
+    public static void insertCourseFeeRecords(List<Course_Fee__c> listCourseFee){
         try{
             if(listCourseFee.size() > 0){
                 SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.CREATABLE, listCourseFee,true);
@@ -58,7 +58,7 @@ public class CourseFeeService{
     }
 
     //Updation of Course Fee Records
-    public static void updateCourseFeeRecordsWithSharing(List<Course_Fee__c> listCourseFee){
+    public static void updateCourseFeeRecords(List<Course_Fee__c> listCourseFee){
         try{
             if(listCourseFee.size() > 0){
                 SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.UPDATABLE, listCourseFee,true);
