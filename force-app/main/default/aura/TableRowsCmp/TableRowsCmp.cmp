@@ -1,21 +1,19 @@
 <aura:component>
     <aura:attribute name="rows" type="List[]" />
-    <aura:attribute name="index" type="Integer" />
+    <aura:attribute name="index" type="Integer" />    
+    <aura:registerEvent name="handleDateEvent" type="c:DateHandleEvent"/>
+    <aura:registerEvent name="showModal" type="c:ShowModalEvent"/>
     <td>{!v.rows.Day}</td>
     <td>
-        <lightning:input type="datetime" />
+        <lightning:input type="datetime" value="{!v.rows.StartDt}" onchange="{!c.handleDateChange}" />
     </td>
     <td>
         <lightning:input type="number" />
     </td>
     <td>
-        <lightning:input type="Text" />
+        <lightning:input type="Text" name="Teacher__c" onclick="{!c.showLookupModal}" />
     </td>
     <td>
-        <lightning:input type="tex" />
-    </td>
-    <td>
-        <lightning:buttonIcon iconName="utility:delete" variant="bare" onclick="{! c.handleClick }"
-            alternativeText="close" title="close" size="large"  class="slds-float_right"/>
+        <lightning:input type="text" name="Room__c" onclick="{!c.showLookupModal}" />
     </td>
 </aura:component>
