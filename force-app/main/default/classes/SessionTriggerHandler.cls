@@ -66,9 +66,7 @@ public class SessionTriggerHandler {
 
     public static void sessionRollUpOnClass(Set<String> clsIds){
         Map<String, Integer> clsSessionMap = new Map<String, Integer>();
-        for(AggregateResult result : [SELECT Count(Id) sessionCount, Class__c, Status__c 
-                                      FROM Session__c WHERE Class__c IN: clsIds AND Type__c NOT IN ('Placeholder', 'Individual')
-                                      GROUP BY Class__c, Status__c]){
+        for(AggregateResult result : SessionService.getSessionsAgreeByClassIds(clsIds)){
             String clsId      = (String)result.get('Class__c');
             String status       = (String)result.get('Status__c');
             Integer countSess = (Integer)result.get('sessionCount');
@@ -79,10 +77,10 @@ public class SessionTriggerHandler {
         
         List<Class__c> updateClasList = new List<Class__c>();
         for(String clsId: clsIds){
-            Class__c cls = new Class__c(Id=clsId, Total_Sessions__c=0, Scheduled_Sessions__c=0, Completed_Sessions__c=0, Cancelled_Sessions__c=0);
-            String schKey   = clsId+':'+'Scheduled';
-            String cmpKey   = clsId+':'+'Completed';
-            String cncldKey = clsId+':'+'Canceled';
+            Class__c cls = new Class__c(Id=clsId, Total_Sessions__c=0, Scheduled_Sessions__c=0, Completed_Sessions__c=0, Canceled_Sessions__c=0);
+            String schKey   = clsId+':'+ConstantClass.ScheduledStatus;
+            String cmpKey   = clsId+':'+ConstantClass.sessionCompleted;
+            String cncldKey = clsId+':'+ConstantClass.sessionCancel;
 
             if(clsSessionMap.get(schKey) != null){
                 cls.Total_Sessions__c = clsSessionMap.get(schKey);
@@ -93,13 +91,13 @@ public class SessionTriggerHandler {
                 cls.Completed_Sessions__c = clsSessionMap.get(cmpKey);
             }
             if(clsSessionMap.get(cncldKey) != null){
-                cls.Cancelled_Sessions__c = clsSessionMap.get(cncldKey);
+                cls.Canceled_Sessions__c = clsSessionMap.get(cncldKey);
             }
 
             updateClasList.add(cls);
         }
 
         if(updateClasList.size() > 0)
-            update updateClasList;
+            ClassService.updateClassRecords(updateClasList);
     }
 }
