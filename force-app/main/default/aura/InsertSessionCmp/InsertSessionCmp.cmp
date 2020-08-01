@@ -2,8 +2,13 @@
     <aura:attribute name="showSpinner" type="Boolean" default="false" />
     <aura:attribute name="showComponent" type="Boolean" default="false" />
     <aura:attribute name="rows" type="list[]" />
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="isModalOpen" type="Boolean" default="false" />
+    <aura:attribute name="objectName" type="String" />
     <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
-    
+    <aura:handler name="handleDateEvent" event="c:DateHandleEvent" action="{!c.handleDateEvent}" />
+    <aura:handler name="showModal" event="c:ShowModalEvent" action="{!c.handleModalEvent}" />
+
     <aura:html tag="style">
         .cuf-scroller-content{
         background:#fff;
@@ -31,33 +36,14 @@
             <div class="slds-p-horizontal_small">
                 <div>
                     <lightning:layout multipleRows="true">
-                        <lightning:layoutItem size="12">
-                            <div class="page-section page-header">
-                                <span>Language</span>
-                                :
-                                <span>Chiness</span>
-                            </div>
-                        </lightning:layoutItem>
-                        <lightning:layoutItem size="12">
-                            <div class="page-section page-header">
-                                <span>Course Type</span>
-                                :
-                                <span>Full Time</span>
-                            </div>
-                        </lightning:layoutItem>
-                        <lightning:layoutItem size="12">
-                            <div class="page-section page-header">
-                                <span>Sub Type</span>
-                                :
-                                <span>Maxi</span>
-                            </div>
-                        </lightning:layoutItem>
-                        <lightning:layoutItem size="12">
-                            <div class="page-section page-header">
-                                <span>Level</span>
-                                :
-                                <span>Elementary 1A</span>
-                            </div>
+                        <lightning:layoutItem size="12" class="slds-p-top_small slds-p-bottom_small">
+                            <lightning:recordViewForm recordId="{!v.recordId}" objectApiName="Enrollment__c"
+                                density="compact">
+                                <div class="slds-box">
+                                    <lightning:outputField fieldName="Name" />
+                                    <lightning:outputField fieldName="Enrollment_Date__c" />
+                                </div>
+                            </lightning:recordViewForm>
                         </lightning:layoutItem>
                     </lightning:layout>
                 </div>
@@ -84,15 +70,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <aura:iteration items="{!v.rows}" var="row">
+                            <aura:iteration items="{!v.rows}" var="row" indexVar="i">
                                 <tr>
-                                    <c:TableRowsCmp rows="{!row}" index="{!row.index}" />
+                                    <c:TableRowsCmp rows="{!row}" index="{!i}" />
+                                    <td>
+                                        <button class="slds-button slds-button_icon" tabindex="-1" title="Delete Row"
+                                            onclick="{!c.deleteRow}" id="{!i}"
+                                            style="{!2 > v.addValues.length ? 'display:none' : ''}">
+                                            <lightning:icon iconName="utility:delete" size="small"
+                                                alternativeText="down" />
+                                            <span class="slds-assistive-text">Delete Row</span>
+                                        </button>
+                                    </td>
                                 </tr>
-                            </aura:iteration>                            
+                            </aura:iteration>
                         </tbody>
                     </table>
                     <div class="slds-p-vertical_x-small">
-                        <lightning:button class="slds-float_right" variant="brand" label="Add Row" title="Add Row" onclick="{!c.addRows}" />
+                        <lightning:button class="slds-float_right" variant="brand" label="Add Row" title="Add Row"
+                            onclick="{!c.addRows}" />
                     </div>
                 </div>
                 <footer>
@@ -103,5 +99,8 @@
                 </footer>
             </div>
         </lightning:card>
+        <aura:if isTrue="{!v.isModalOpen}">
+            <c:LookupCmp isModalOpen="{!v.isModalOpen}" title="Teacher" objectName="{!v.objectName}"></c:LookupCmp>
+        </aura:if>
     </aura:if>
 </aura:component>

@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Event when clicked on input box">
+    <aura:attribute name="objectName" type="String"/>
+    <aura:attribute name="fieldName" type="String"/>
+</aura:event>

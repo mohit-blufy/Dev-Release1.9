@@ -71,6 +71,7 @@ public class ConstantClass {
     public static String secondaryFeeRecordTypeId= Schema.SObjectType.Fee__c.getRecordTypeInfosByName().get('Secondary').getRecordTypeId();
     public static String inActiveCourse          = 'Inactive';
     public static String sessionCancel           = 'Canceled';
+    public static String sessionCompleted        = 'Completed';
     
     public static String sessionStandardType     = 'Standard';
     public static String sessionExceptionType    = 'Exception'; 
@@ -78,6 +79,7 @@ public class ConstantClass {
     public static String termOpenStatus = 'Open';
     
     public static String sessionType = 'Placeholder';
+    public static String sessionIndividualType = 'Individual';
     
     public static String creditNoteCashMode = 'Credit Note';
     public static String creditNoteStatusUtilized = 'Utilized';

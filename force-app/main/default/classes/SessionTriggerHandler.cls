@@ -63,4 +63,42 @@ public class SessionTriggerHandler {
         return studentSessionWithSessionMap;
     }
     //Divya: to get Student Sessions Map by session id
+
+    //Added by Rajesh on 31st July 2020, For session rollup on class
+    public static void sessionRollUpOnClass(Set<String> clsIds){
+        Map<String, Integer> clsSessionMap = new Map<String, Integer>();
+        for(AggregateResult result : SessionService.getSessionsAgreeByClassIds(clsIds)){
+            String clsId      = (String)result.get('Class__c');
+            String status       = (String)result.get('Status__c');
+            Integer countSess = (Integer)result.get('sessionCount');
+
+            String key = clsId+':'+status;
+            clsSessionMap.put(key,countSess );
+        } 
+        
+        List<Class__c> updateClasList = new List<Class__c>();
+        for(String clsId: clsIds){
+            Class__c cls = new Class__c(Id=clsId, Total_Sessions__c=0, Scheduled_Sessions__c=0, Completed_Sessions__c=0, Canceled_Sessions__c=0);
+            String schKey   = clsId+':'+ConstantClass.ScheduledStatus;
+            String cmpKey   = clsId+':'+ConstantClass.sessionCompleted;
+            String cncldKey = clsId+':'+ConstantClass.sessionCancel;
+
+            if(clsSessionMap.get(schKey) != null){
+                cls.Total_Sessions__c = clsSessionMap.get(schKey);
+                cls.Scheduled_Sessions__c = clsSessionMap.get(schKey);
+            }
+            if(clsSessionMap.get(cmpKey) != null){
+                cls.Total_Sessions__c    += clsSessionMap.get(cmpKey);
+                cls.Completed_Sessions__c = clsSessionMap.get(cmpKey);
+            }
+            if(clsSessionMap.get(cncldKey) != null){
+                cls.Canceled_Sessions__c = clsSessionMap.get(cncldKey);
+            }
+
+            updateClasList.add(cls);
+        }
+
+        if(updateClasList.size() > 0)
+            ClassService.updateClassRecords(updateClasList);
+    }
 }
