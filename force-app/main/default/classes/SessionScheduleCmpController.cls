@@ -93,7 +93,8 @@ public class SessionScheduleCmpController {
                         sessList.add(fillSessWrapper(sess,mapTeacherIdToTeacherName,mapRoomIdToRoomName));
                     }
                 }
-                wrpCls.sessList = sessList;
+                   system.debug('sessList-->'+sessList);
+                  wrpCls.sessList = sessList;
             }
         }
         return wrpCls;
@@ -107,9 +108,9 @@ public class SessionScheduleCmpController {
                                                      sess.clsId        = session.Class__c;
                                                      sess.clsTrmId     = session.Class_Term__c;
                                                      sess.tchrId       = session.Teacher__c;
-                                                     sess.tchrName     = (mapTeacherIdToTeacherName.containsKey(session.Teacher__c) ? mapTeacherIdToTeacherName.get(session.Teacher__c) : null);
+                                                     sess.tchrName     = (mapTeacherIdToTeacherName != NULL && mapTeacherIdToTeacherName.containsKey(session.Teacher__c) ? mapTeacherIdToTeacherName.get(session.Teacher__c) : null);
                                                      sess.roomId       = session.Room__c;
-                                                     sess.roomName     = (mapRoomIdToRoomName.containsKey(session.Room__c) ? mapRoomIdToRoomName.get(session.Room__c) : null);
+                                                     sess.roomName     = (mapRoomIdToRoomName != NULL && mapRoomIdToRoomName.containsKey(session.Room__c) ? mapRoomIdToRoomName.get(session.Room__c) : null);
                                                      sess.clsLocId	   = session.Location__c;
                                                      sess.status       = ConstantClass.ScheduledStatus;
                                                      sess.stDate       = session.Session_Date__c;
@@ -194,6 +195,27 @@ public class SessionScheduleCmpController {
         }
         return null;
     } 
+    
+    @AuraEnabled
+    public static sessionWrapper checkTeacherOrRoomAvailability(SessionWrapper session,String type){
+        try{
+            system.debug('session-->'+session);
+          //  sessionWrapper sess = (sessionWrapper)JSON.deserialize(session, sessionWrapper.class);
+            sessionWrapper updatedSess = new sessionWrapper();
+            
+            if(session != NULL){
+               Session__c sessObj = fillSession(session,session.clsTrmId);
+                sessObj = UtilityClass.checkAvailabilityTeacherOrRoom(sessObj, type);
+                updatedSess = fillSessWrapper(sessObj,null,null);
+            }
+            system.debug('updatedSess-->'+updatedSess);
+            return updatedSess;
+        }
+        catch(Exception e){
+            system.debug('Error-->'+e.getMessage()+e.getLineNumber());
+        }
+        return null;
+    }
     
     public static Session__c fillSession(sessionWrapper sess, String clsTermId){
         Session__c session  = new Session__c();

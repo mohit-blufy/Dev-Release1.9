@@ -688,7 +688,7 @@ return crsFeeWrap;
     
     //This function is used to fetch other discount which configured globally
     @auraEnabled
-    public static List<DisWrapper> fetchOtherDiscount(Decimal totalFee){ 
+    public static List<DisWrapper> fetchOtherDiscount(){ 
         List<DisWrapper> disWrapList = new List<DisWrapper>();
         
         List<DisWrapper> refDisWrapList  = new List<DisWrapper>();
@@ -696,19 +696,22 @@ return crsFeeWrap;
         List<DisWrapper> othrDisWrapList = new List<DisWrapper>();
         
         if(isDiscountAccessible){
-            for(Discount__c dis: [SELECT Id, Name, Value__c, Type__c, Format__c, Code__c, Start_Date__c, End_Date__c 
+            for(Discount__c dis: [SELECT Id, Name, Value__c, Type__c, Format__c, Code__c, Start_Date__c, End_Date__c,
+                                  Override__c
                                   FROM Discount__c 
                                   WHERE Format__c != null AND Active__c = True AND Value__c != null AND 
                                   Global__c = true AND (Start_Date__c <= Today AND  End_Date__c >= Today)]){
                                       DisWrapper dw = new DisWrapper();
                                       if(dis.Format__c.equalsIgnoreCase(ConstantClass.amountFormat)){
-                                          dw.amount = dis.Value__c;
+                                       //   dw.amount = dis.Value__c;
                                       }else if(dis.Format__c.equalsIgnoreCase(ConstantClass.percentFormat)){
-                                          dw.amount = (totalFee * dis.Value__c/100);
-                                      }           
+                                        //  dw.amount = dis.Value__c;
+                                      }  
+                                      dw.amount = dis.Value__c;
                                       dw.disId   = dis.Id;                
                                       dw.name    = dis.Name;
                                       dw.format  = dis.Format__c;
+                                      dw.isOverride = dis.Override__c;
                                       dw.type    = dis.Type__c;
                                       if(dw.type.equalsIgnoreCase(ConstantClass.referralType)){
                                           refDisWrapList.add(dw);
@@ -1476,13 +1479,11 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
         @AuraEnabled public String  promoCode{get;set;}
         @AuraEnabled public Boolean isSelected{get;set;}
         @AuraEnabled public Boolean isOverride{get;set;}
-        @AuraEnabled public Boolean isAlreadyApplied{get;set;}
         
         public DisWrapper(){
             this.amount   = 0;
             this.isSelected = False;
             this.isOverride = False;
-            this.isAlreadyApplied = true;
         }
     }
 }

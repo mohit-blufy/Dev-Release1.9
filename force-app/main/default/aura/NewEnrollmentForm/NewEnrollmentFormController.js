@@ -296,10 +296,6 @@
     
     mydiscount:function(component, event) {
         var action = component.get("c.fetchOtherDiscount");
-        action.setParams({
-            "totalFee" : component.get("v.enrFeeTotAmt")
-        });
-        
         action.setCallback(this,function(result){
             var res = result.getReturnValue();
             component.set("v.globalDisList", res);
@@ -329,13 +325,18 @@
     },
     saveGlobalDiscount : function(component, event, helper) {
         var glbDisLst = component.get("v.globalDisList");
-        
+        var enrFeeTotAmt = component.get("v.enrFeeTotAmt"); 
         var tempGlbDisLst = [];
         var totDisAmt = 0;
         for(var i = 0; i < glbDisLst.length; i++){
             if(glbDisLst[i].isSelected){
                 tempGlbDisLst.push(glbDisLst[i]);
-                totDisAmt += glbDisLst[i].amount;
+                if(glbDisLst[i].format == 'Percent'){
+                 	totDisAmt += enrFeeTotAmt * parseInt(glbDisLst[i].amount)/100;
+                    glbDisLst[i].amount = enrFeeTotAmt * parseInt(glbDisLst[i].amount)/100;
+                }
+                else
+                    totDisAmt += parseInt(glbDisLst[i].amount);
             }
         }
         //calcuting total deposit fee for exclude 
@@ -351,14 +352,12 @@
                 }
             }
         }
-        var enrFeeTotAmt = component.get("v.enrFeeTotAmt"); 
+        
+        
         var grandTotAmt  = enrFeeTotAmt - (totDepFee+totDisAmt);
         var gstPrcnt 	 = parseInt($A.get("{!$Label.c.GST_Rate}"));
         var tempGstAmt	 = (grandTotAmt*gstPrcnt/100);                            
-        
-        
         var grandTotAmt  = enrFeeTotAmt - totDisAmt + tempGstAmt;
-        
         component.set("v.gstAmount", tempGstAmt);
         /* var gstAmt       = component.get("v.gstAmount");
         var enrFeeTotAmt = component.get("v.enrFeeTotAmt"); 

@@ -70,7 +70,7 @@
                     <aura:if isTrue="{!v.isCorporateAccount}">
                         <div class="slds-col slds-medium-size_1-of-2 slds-p-top_small">
                             <!--<lightning:input class="myinput" label="First Name" aura:id="conDetReqId" value="{!v.contactDetail.FirstName}" required="true" />-->
-                            <c:AutoCompleteCmp label="Name" inputId="contactId" objectApiName="Account" type="Corporate" valueFieldApiName="Name" extendedWhereClause="  AND Recordtype.name = 'B2B Account'" placeHolder="Search Contact..." selectedOption="{!v.slcdAccId}" inputValue="{!v.slcdAccName}" required="true" requiredCls="contactId"/>
+                            <c:AutoCompleteCmp label="Name" inputId="contactId" objectApiName="Account" type="Corporate" valueFieldApiName="Name" extendedWhereClause="  AND Recordtype.DeveloperName  = 'Business_Account'" placeHolder="Search Contact..." selectedOption="{!v.slcdAccId}" inputValue="{!v.slcdAccName}" required="true" requiredCls="contactId"/>
                             <div id="requiredContactErrorMsg" class="slds-form-element__help" style="color:rgb(194, 59, 54);display:none;">Complete this field</div>
                         </div>
                     </aura:if>
@@ -881,7 +881,12 @@
                                             <td>
                                                 <div class="slds-grid slds-grid_vertical-align-center">
                                                     <div class="slds-col">
-                                                        <span class="slds-p-right_small">${!globalDis.amount}</span>
+                                                        <aura:if isTrue="{!globalDis.isOverride}">
+                                                            <lightning:input name="amtVal" value="{!globalDis.amount}" />
+                                                            <aura:set attribute="else">
+                                                                {!globalDis.amount}
+                                                            </aura:set>
+                                                        </aura:if> 
                                                     </div>
                                                     <div class="slds-col slds-size_9-of-12">
                                                         <aura:if isTrue="{!globalDis.type == 'Referral'}">
