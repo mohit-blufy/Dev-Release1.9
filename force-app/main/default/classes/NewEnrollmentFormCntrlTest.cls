@@ -15,7 +15,7 @@ public class NewEnrollmentFormCntrlTest {
         
         Class__c classObj = BlufyTestUtil.createClassRec('Name', courseObj.Id, 'Classroom', 'Open', teacherObj.Id, 20,
                                                          'Fixed', 24, Date.today().addDays(1), Time.newInstance(10, 00, 00, 00),
-                                                         'Hours', 2,'One-time');
+                                                         'Hours', 2,'One-time',null);
         classObj.Days_of_Week__c 	  = 'Fri;Mon;Tue;Wed;Sat;Thu;Sun';
         classObj.Location__c          = locationObj.Id;
         classObj.End_Date__c = Date.today().addMonths(6);
@@ -28,7 +28,10 @@ public class NewEnrollmentFormCntrlTest {
 		Class_Term__c classTermObj = BlufyTestUtil.createClassTerms('Term 1',classObj.id,14,Date.today().addDays(1),Date.today().addMonths(6),1, ConstantClass.ScheduledStatus ,termObj.id);
         insert classTermObj;
         
-        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id,teacherObj.Id, classObj.Id, Date.today().addDays(7), Time.newInstance(10, 00, 00, 00), 'Scheduled', 'Hours', 2,'Standard');
+        Room__c roomObj = BlufyTestUtil.createRoom(locationObj.Id, 'Room1', 'Group', 35);
+        insert roomObj;
+        
+        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id,teacherObj.Id, classObj.Id, Date.today().addDays(7), Time.newInstance(10, 00, 00, 00), 'Scheduled', 'Hours', 2,'Standard', roomObj.Id);
         insert sessionObj;
         
         Account customerObj = new Account(LastName = 'lie',personEmail = 'Test1@gmail.com',RecordTypeId =ConstantClass.stuCustomerRecordTypeId);
@@ -77,25 +80,26 @@ public class NewEnrollmentFormCntrlTest {
         
         NewEnrollmentFormCntrl.fetchCourses();
         NewEnrollmentFormCntrl.fetchTermAndCondition();
-        NewEnrollmentFormCntrl.getchSlcdAccDetails(customerObj.Id);
+        NewEnrollmentFormCntrl.getchSlcdAccDetails(customerObj.Id, true);
         NewEnrollmentFormCntrl.CourseFeeWrapper curseFeeWrp = NewEnrollmentFormCntrl.fetchCrsClsDetails(courseObj.Id);
         curseFeeWrp.slcdClsWrapObj = clsWrp;
         NewEnrollmentFormCntrl.getRelatedFeeApex(feeObj.Id);
         NewEnrollmentFormCntrl.editCrsClsDetails(JSON.serialize(curseFeeWrp));
+        NewEnrollmentFormCntrl.fetchCourseDiscount(courseObj.Id);
         
         discount.Global__c = true;
         discount.Start_Date__c = system.today().addDays(-2);
         update discount;
-        NewEnrollmentFormCntrl.fetchOtherDiscount();
+        NewEnrollmentFormCntrl.fetchOtherDiscount(5000);
         
         discount.Code__c = '001';
         discount.Type__c = ConstantClass.promoType;
         update discount;
-        NewEnrollmentFormCntrl.fetchOtherDiscount();
+        NewEnrollmentFormCntrl.fetchOtherDiscount(5000);
         
         discount.Type__c = 'Discount';
         update discount;
-        NewEnrollmentFormCntrl.fetchOtherDiscount();
+        NewEnrollmentFormCntrl.fetchOtherDiscount(5000);
         
         NewEnrollmentFormCntrl.getPicklistValues('Discount__c','Type__c');
         
@@ -128,7 +132,7 @@ public class NewEnrollmentFormCntrlTest {
         
         Class__c classObj = BlufyTestUtil.createClassRec('Name', courseObj.Id, 'Classroom', 'Open', teacherObj.Id, 20,
                                                          'Ongoing', 24, Date.today().addDays(1), Time.newInstance(10, 00, 00, 00),
-                                                         'Hours', 2,'Term');
+                                                         'Hours', 2,'Term',null);
         classObj.Days_of_Week__c 	  = 'Fri;Mon;Tue;Wed;Sat;Thu;Sun';
         classObj.Location__c          = locationObj.Id;
         classObj.End_Date__c = Date.today().addMonths(6);
@@ -140,8 +144,12 @@ public class NewEnrollmentFormCntrlTest {
 		Class_Term__c classTermObj = BlufyTestUtil.createClassTerms('Term 1',classObj.id,14,Date.today().addDays(1),Date.today().addMonths(6),1, ConstantClass.ScheduledStatus ,termObj.id);
         insert classTermObj;
         
-        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id,teacherObj.Id, classObj.Id, Date.today().addDays(7), Time.newInstance(10, 00, 00, 00), 'Scheduled', 'Hours', 2,'Standard');
+        Room__c roomObj = BlufyTestUtil.createRoom(locationObj.Id, 'Room1', 'Group', 35);
+        insert roomObj;
+        
+        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id,teacherObj.Id, classObj.Id, Date.today().addDays(7), Time.newInstance(10, 00, 00, 00), 'Scheduled', 'Hours', 2,'Standard', roomObj.Id);
         insert sessionObj;
+        
         sessionObj.Class_Term__c = classTermObj.Id;
         update sessionObj;
         
@@ -182,7 +190,7 @@ public class NewEnrollmentFormCntrlTest {
         Test.startTest();
         
         NewEnrollmentFormCntrl.fetchCourses();
-        NewEnrollmentFormCntrl.getchSlcdAccDetails(customerObj.Id);
+        NewEnrollmentFormCntrl.getchSlcdAccDetails(customerObj.Id, true);
         NewEnrollmentFormCntrl.CourseFeeWrapper curseFeeWrp = NewEnrollmentFormCntrl.fetchCrsClsDetails(courseObj.Id);
         curseFeeWrp.slcdClsWrapObj = clsWrp;
         curseFeeWrp.tutionFeeWrapperList = NewEnrollmentFormCntrl.fetchClsTermSessionAmount(JSON.serialize(clsWrp),JSON.serialize(curseFeeWrp.tutionFeeWrapperList));
@@ -197,6 +205,7 @@ public class NewEnrollmentFormCntrlTest {
         List<NewEnrollmentFormCntrl.CustomerWrapper> listTest = new List<NewEnrollmentFormCntrl.CustomerWrapper>{custWrp};
         NewEnrollmentFormCntrl.completeEnrolment(JSON.serialize(customerObj),JSON.serialize(listTest),JSON.serialize(curseFeeWrp.disWrapperList),500,'1','Credit Card');
         NewEnrollmentFormCntrl.addStudents(listTest);
+        NewEnrollmentFormCntrl.fetchCourseDiscount(courseObj.Id);
         
         NewEnrollmentFormCntrl.blankInitializeCstmrWrpr();
         
