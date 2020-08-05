@@ -6,7 +6,7 @@
 *
 * Object :-  Session__c
   Trigger:- After Update
-  Desc:- to records of child object Student_Session__c once Session Status is canceled
+  Desc:- to records of child object Student_Session__c once Session Status is cancelled
 */
 trigger SessionTrigger on Session__c(after insert,after update) {
     if(Trigger.isUpdate && Trigger.isAfter){

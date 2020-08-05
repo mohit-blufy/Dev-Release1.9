@@ -136,7 +136,7 @@ public class BlufyTestUtil {
     public static Term__c createTermRec(String termName, String year, String status, Date startDate, Date endDate,Double session, Double seq ){
         return new Term__c(Name = termName, Year__c = year, status__c = status, Start_Date__c = startDate, End_Date__c= endDate,Sessions__c = session,Sequence__c = seq);
     }
-    
+   
     public static Class__c createClassRec(String className, String courseId, String format, String status, String teacherId, Integer capacity ,String type, Integer sessions, date startDate, time startTime, String durationUnit, Integer duration, String frequency, String currentCourseModuleId){
         //return new Class__c(Name = className, Course__c = courseId, Format__c = format, Status__c = status, Teacher__c = teacherId, Capacity__c = capacity, Type__c = type, Sessions__c = sessions, Start_Date__c = startDate, Start_Time__c = startTime,End_Date__c = Date.newInstance(2020,03,27), Duration_Unit__c = durationUnit, Duration__c = duration, Frequency__c = frequency);
         return new Class__c(Name = className, Course__c = courseId, Format__c = format, Status__c = status, Teacher__c = teacherId, Capacity__c = capacity, Type__c = type, Sessions__c = sessions, Start_Date__c = startDate, Start_Time__c = startTime, Duration__c = duration, Frequency__c = frequency, Current_Course_Module__c = currentCourseModuleId);

@@ -21,7 +21,7 @@ public class FullCalendarDataServiceTest {
         List<Class__c>  classList = [SELECT id,Name FROM Class__C WHERE Course__c =: cousrList[0].Id AND Teacher__c =: teacherList[0].Id];
         System.assert(classList.size() > 0, 'Fail to create Class!');
         
-        List<Session__c> sessionList = [SELECT Id, Name, Sequence__c, Class__c, Session_Date__c, Start_Time__c, End_Time__c, Teacher__c,Teacher__r.Name, Status__c, Event_Color__c,Type__c  FROM Session__c WHERE Status__c !=: ConstantClass.sessionCancel];
+        List<Session__c> sessionList = [SELECT Id, Name, Sequence__c, Class__c, Session_Date__c, Start_Time__c, End_Time__c, Teacher__c,Teacher__r.Name, Status__c, Event_Color__c,Type__c  FROM Session__c WHERE Status__c !=: ConstantClass.cancelledStatus];
         System.assert(sessionList.size() > 0, 'Fail to create  Session!');
         
         List<Room__c> roomList = [SELECT Id, Name, Type__c, Location__c, Capacity__c FROM Room__c];

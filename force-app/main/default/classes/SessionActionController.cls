@@ -234,7 +234,7 @@ Developer   :
         if(isStudentSessionAccessible){
             if(String.isNotBlank(sessionStudentsId)){
                 Student_Session__c sessionStuObj = new Student_Session__c(id = sessionStudentsId);            
-                sessionStuObj.status__c = 'Canceled';
+                sessionStuObj.status__c = ConstantClass.cancelledStatus;
                 try{
                     update sessionStuObj;
                 }catch(Exception ex){
@@ -254,7 +254,7 @@ Developer   :
     global static void cancelSession(String sessionId){
         if(String.isNotBlank(sessionId)){
             Session__c sessionObj = new Session__c(id = sessionId);            
-            sessionObj.status__c = 'Canceled';
+            sessionObj.status__c = ConstantClass.cancelledStatus;
             try{
                 update sessionObj;
             }catch(Exception ex){

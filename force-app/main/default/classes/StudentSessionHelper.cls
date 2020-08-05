@@ -37,7 +37,7 @@ public class StudentSessionHelper {
         if(isEnrollmentAccessible){
             AggregateResult[] groupedResults = [SELECT COUNT(Id), status__c,Enrollment__c 
                                                 FROM Student_Session__c 
-                                                where Enrollment__c IN :enrolmentsIds And status__c IN ('Attended','Canceled') 
+                                                where Enrollment__c IN :enrolmentsIds And status__c IN ('Attended','Cancelled') 
                                                 group by status__c,Enrollment__c 
                                                ];
             System.debug('groupedResults'+groupedResults);
@@ -56,9 +56,9 @@ public class StudentSessionHelper {
                     //objEnrollment.No_Attended_Session__c = mapOfStatusAndCount.get(EnrollmentId +'-'+'Attended');
                     objEnrollment.put('No_Attended_Session__c',mapOfStatusAndCount.get(EnrollmentId +'-'+'Attended'));
                 }
-                if(mapOfStatusAndCount.containsKey(EnrollmentId +'-'+'Canceled')){
+                if(mapOfStatusAndCount.containsKey(EnrollmentId +'-'+ConstantClass.cancelledStatus)){
                     //objEnrollment.No_of_canceled_Session__c = mapOfStatusAndCount.get(EnrollmentId +'-'+'Canceled');
-                    objEnrollment.put('No_of_canceled_Session__c',mapOfStatusAndCount.get(EnrollmentId +'-'+'Canceled'));
+                    objEnrollment.put('No_of_canceled_Session__c',mapOfStatusAndCount.get(EnrollmentId +'-'+ConstantClass.cancelledStatus));
                 }
                 lstEnrollment.add(objEnrollment);
             }

@@ -23,11 +23,11 @@ public class StudentSessionTriggerTest {
     private static testMethod void studentSessionTriggerUpdation2(){
         list<Student_Session__c>lstStudentSession = [ SELECT Id, Status__c, Session__c, Enrollment__c FROM Student_Session__c];
         for(Student_Session__c objStudentSession : lstStudentSession){
-            objStudentSession.Status__c = 'Canceled';
+            objStudentSession.Status__c = ConstantClass.cancelledStatus;
         }
         update lstStudentSession;
         
-        System.assertEquals(1,[SELECT Id FROM Student_Session__c WHERE Status__c = 'Canceled'].size());
+        System.assertEquals(1,[SELECT Id FROM Student_Session__c WHERE Status__c =: ConstantClass.cancelledStatus].size());
     }
     
 }
