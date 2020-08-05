@@ -7,8 +7,9 @@
         var valueId = event.getParam("selectedOption");  
         var value = event.getParam("inputValue");
         var indx = event.getParam("slctIndex");
-        
+        var type = event.getParam("type")
         var sessionList= component.get("v.sessionList");
+        
         if(type == 'Room'){
             sessionList[indx].roomId = valueId;
             sessionList[indx].roomName = value;        
@@ -17,8 +18,7 @@
             sessionList[indx].tchrId = valueId;
             sessionList[indx].tchrName = value;
         }
-        console.log(JSON.stringify(sessionList));
-        component.set("v.sessionList",sessionList);
+        helper.checkAvailabilityHelper(component,event,sessionList,indx);
     },
     
     closeQuickActionModel : function(component,event,helper){
@@ -26,26 +26,37 @@
     },
     
     saveQuickActionModel : function(component,event,helper){
-        component.set("v.showSpinner",true);
-        var res=component.get("v.sessionList");
-        console.log('res-->'+res);
-        var artId = component.get("v.recordId");
-        
-        var action =component.get("c.insertSessions");
-        action.setParams({
-            "sessList": res,
-            "recordId": artId
-        });
-        action.setCallback(this,function(response){
-            var state =  response.getState();
-            if(state=='SUCCESS'){
-                helper.showToast(component,event,"Success","Class term have been successfully scheduled.");
-                $A.get("e.force:closeQuickAction").fire();
-                $A.get('e.force:refreshView').fire();
+        var count = 0;
+        for(var i=0; i< component.get("v.sessionList").length ; i++){
+            if($A.util.isEmpty(component.get("v.sessionList")[i].tchrId)){
+                document.getElementById([i]+'_sTchr').classList.add('slds-has-error');
+                document.getElementById('sTchrErr_'+[i]).style.display = 'block';
+                count=1;
             }
-            component.set("v.showSpinner",false);
-        });
-        $A.enqueueAction(action);
+        }
+        
+        if(count == 0){
+            component.set("v.showSpinner",true);
+            var res=component.get("v.sessionList");
+            console.log('res-->'+res);
+            var artId = component.get("v.recordId");
+            
+            var action =component.get("c.insertSessions");
+            action.setParams({
+                "sessList": res,
+                "recordId": artId
+            });
+            action.setCallback(this,function(response){
+                var state =  response.getState();
+                if(state=='SUCCESS'){
+                    helper.showToast(component,event,"Success","Class term have been successfully scheduled.");
+                    $A.get("e.force:closeQuickAction").fire();
+                    $A.get('e.force:refreshView').fire();
+                }
+                component.set("v.showSpinner",false);
+            });
+            $A.enqueueAction(action);	   
+        }
     },
     
 })

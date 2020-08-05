@@ -1,5 +1,5 @@
 <aura:component implements="force:hasRecordId,force:lightningQuickActionWithoutHeader" controller="UpdateClassSessionsCompApex" access="global" >
-	<aura:html tag="style">
+    <aura:html tag="style">
         .cuf-scroller-content{
         background:#fff;
         }
@@ -20,7 +20,6 @@
     <aura:attribute name="recordError" type="String"/>
     
     <aura:handler name="myApplicationEvent" event="c:AutoCompleteEvent" action="{!c.handleMyApplicationEvent}"/>
-    
     <force:recordData aura:id="recordLoader"
                       recordId="{!v.recordId}"
                       targetFields="{!v.simpleRecord}"
@@ -32,7 +31,7 @@
     
     <lightning:card title="">
         <aura:if isTrue="{!v.showSpinner}">
-            <lightning:spinner style="margin:200px"  variant="brand" size="medium" />
+            <lightning:spinner variant="brand" size="medium" />
         </aura:if>
         <aura:set attribute="title">
             <div class="slds-modal__footer slds-modal__header" style="background-color: #2F5597;height:50px">
@@ -65,25 +64,39 @@
                         <aura:iteration items="{!v.sessionList}" var="item" indexVar="key" >
                             <tr style="height:50px">                                
                                 <th data-label="S.No.">
-                                    <div class="slds-truncate" title="{!item.sessSequence}">
-                                        <lightning:input name="seqnce" value="{!item.sessSequence}"/>
+                                    <div class="" title="{!item.sessSequence}" id="{!key+'_sSeq'}">
+                                        <lightning:input  name="seqnce" value="{!item.sessSequence}"/>
+                                        <div style="display:none;color:#C23934" id="{!'sSeqErr_'+key}">Complete this field</div>
                                     </div>
                                 </th>                               
                                 <th data-label="Session Date">
-                                    <div class="slds-truncate" title="{!item.stDate}">
-                                        <lightning:input type="date" name="sessDate" label="" value="{!item.stDate}" />
+                                    <div class="" title="{!item.stDate}" id="{!key+'_sDate'}">
+                                        <lightning:input type="date" name="{!key}" label="" value="{!item.stDate}" onchange="{!c.checkAvailablity}" />
+                                        <div style="display:none;color:#C23934" id="{!'sDateErr_'+key}">Complete this field</div>
                                     </div>
                                 </th>                                                                    
                                 <th data-label="Start Time">
-                                    <div class="slds-truncate" title="{!item.stTime}">
-                                        <lightning:input style="width:160px;" type="time" name="stTime" value="{!item.stTime}" />
+                                    <div class="" title="{!item.stTime}" id="{!key+'_sTime'}">
+                                        <lightning:input style="width:160px;" type="time" name="{!key}" value="{!item.stTime}" onchange="{!c.checkAvailablity}" />
+                                        <div style="display:none;color:#C23934" id="{!'sTimeErr_'+key}">Complete this field</div>
                                     </div>
                                 </th>
                                 <th data-label="Teacher">
-                                    <c:AutoCompleteCmp showLabel="false" type="Teacher" borderColor="" extendedWhereClause=" AND Recordtype.name = 'Teacher' " valueFieldApiName="Name" placeHolder="Search Teacher.." inputId="{!key+'_tchrId'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!item.tchrId}" inputValue="{!item.tchrName}"/>
+                                    <div class="" title="{!item.tchrName}" id="{!key+'_sTchr'}">
+                                        <c:AutoCompleteCmp showLabel="false" type="Teacher" borderColor="{!or(item.tchrId.length == 0,item.isTeacherNotAvailable) ? 'red': ''}" extendedWhereClause=" AND Recordtype.name = 'Teacher' " valueFieldApiName="Name" placeHolder="Search Teacher.." inputId="{!key+'_tchrId'}" slcdIndex="{!key}"  label="" objectApiName="Account" selectedOption="{!item.tchrId}" inputValue="{!item.tchrName}"/>
+                                        <div style="display:none;color:#C23934" id="{!'sTchrErr_'+key}">Complete this field</div>
+                                        <aura:if isTrue="{!and(item.isTeacherNotAvailable,item.tchrId.length > 0)}">
+                                            <div style="color:#C23934">Teacher Not Available</div>
+                                        </aura:if>
+                                    </div>
                                 </th>
                                 <th data-label="Room">
-                                    <c:AutoCompleteCmp showLabel="false" type="Room" borderColor="" extendedWhereClause="" valueFieldApiName="Name" placeHolder="Search Room..." inputId="{!key+'_roomId'}" slcdIndex="{!key}"  label="" objectApiName="Room__c" selectedOption="{!item.roomId}" inputValue="{!item.roomName}"/>
+                                    <div class="" id="{!key+'_sRoom'}" title="{!item.roomName}">
+                                        <c:AutoCompleteCmp showLabel="false" type="Room" borderColor="{!and(item.isRoomNotAvailable,item.roomId.length > 0) ? 'red': ''}" extendedWhereClause="" valueFieldApiName="Name" placeHolder="Search Room..." inputId="{!key+'_roomId'}" slcdIndex="{!key}"  label="" objectApiName="Room__c" selectedOption="{!item.roomId}" inputValue="{!item.roomName}"/>
+                                        <aura:if isTrue="{!and(item.isRoomNotAvailable,item.roomId.length > 0)}">
+                                            <div style="color:#C23934">Room Not Available</div>
+                                        </aura:if>
+                                    </div>
                                 </th>
                             </tr> 
                         </aura:iteration>
@@ -93,10 +106,10 @@
                 <footer class="slds-modal__footer slds-p-top_small">
                     <lightning:button label="Cancel" onclick="{!c.doCancel}" variant="destructive" title="Base action" iconName="utility:close"  class="slds-m-right_medium" />
                     <span>
-                        <lightning:button label="Save" onclick="{!c.doSave}" variant="brand"  title="Base action" iconName="utility:download" />
+                        <lightning:button name="{!key}" label="Save" onclick="{!c.doSave}" variant="brand"  title="Base action" iconName="utility:download" />
                     </span>                   
                 </footer>
             </aura:if>
         </div> 
-        </lightning:card>
+    </lightning:card>
 </aura:component>

@@ -10,7 +10,65 @@ public class UpdateClassSessionsCompApex {
             }
             return listSessDataWrpCls;
         }
-        return null;
+        return listSessDataWrpCls;
+    }
+    
+    @AuraEnabled 
+    public static String doSaveApex(String listSessionString){
+        try{
+            List<Session__c> listSessionToUpdate = new List<Session__c>();
+            List<SessionDataWrapperClass> listSession = (List<SessionDataWrapperClass>)JSON.deserialize(listSessionString, List<SessionDataWrapperClass>.class);
+            if(listSession.size() > 0){
+                for(SessionDataWrapperClass sessWrap : listSession){
+                    listSessionToUpdate.add(fillSessionRecords(sessWrap));
+                }
+            }
+            
+            if(listSessionToUpdate.size() > 0){
+                SessionService.updateSessionRecords(listSessionToUpdate);
+            }
+            return 'SUCCESS';
+        }
+        catch(Exception e){
+            return e.getMessage()+e.getLineNumber();
+        }
+    }
+    
+    @AuraEnabled
+    public static SessionDataWrapperClass checkTeacherRoomAvailability(String session,String type){
+        //try{
+            SessionDataWrapperClass sess = (SessionDataWrapperClass)JSON.deserialize(session, SessionDataWrapperClass.class);
+            SessionDataWrapperClass updatedSess = new SessionDataWrapperClass();
+            
+            if(sess != NULL){
+                Session__c sessObj = fillSessionRecords(sess);
+                sessObj = UtilityClass.checkAvailabilityTeacherOrRoom(sessObj, type);
+                updatedSess = fillSessionDataWrapper(sessObj);
+            }
+            system.debug('updatedSess-->'+updatedSess);
+            return updatedSess;
+        //}
+        //catch(Exception e){
+          //  system.debug('Error-->'+e.getMessage()+e.getLineNumber());
+        //}
+        //return null;
+    }
+    
+    public static Session__c fillSessionRecords(SessionDataWrapperClass sessWrap){
+        Session__c sess =  new Session__c();
+        sess.Id = sessWrap.sessId;
+        sess.Teacher__c = (String.isNotBlank(sessWrap.tchrId) ? sessWrap.tchrId : null);
+        sess.Type__c = sessWrap.sType;
+        sess.Room__c = (String.isNotBlank(sessWrap.roomId) ? sessWrap.roomId : null);
+        sess.Sequence__c = sessWrap.sessSequence;
+        sess.Session_Date__c = sessWrap.stDate;
+        sess.Duration__c = sessWrap.sessDuration;  
+        sess.Exception__c = sessWrap.sException;
+        if(String.isNotBlank(sessWrap.stTime)){
+            List<String> listTimeValues = sessWrap.stTime.split(':');
+            sess.Start_Time__c = Time.newInstance(Integer.valueOf(listTimeValues[0]),Integer.valueOf(listTimeValues[1]),00,00);
+        }
+        return sess;
     }
     
     public static SessionDataWrapperClass fillSessionDataWrapper(Session__c session){
@@ -21,13 +79,22 @@ public class UpdateClassSessionsCompApex {
         sessDataWrpcls.roomName = session.Room__r.Name;
         sessDataWrpcls.sessId = session.Id;
         sessDataWrpcls.sessSequence = session.Sequence__c;
-        sessDataWrpcls.status = session.Status__c;
         sessDataWrpcls.stDate = session.Session_Date__c;
-        sessDataWrpcls.sessDay = ((Datetime)session.Session_Date__c).format('EEEE');
-        Date today = System.today();
-        DateTime strtTime = DateTime.newInstance(today,session.Start_Time__c);
-        sessDataWrpcls.stTime = strtTime.format('hh:mm:ss.sss');
-        sessDataWrpcls.endTime = session.End_Time__c;
+        sessDataWrpcls.sessDuration = session.Duration__c;
+        sessDataWrpcls.sException = session.Exception__c;
+        sessDataWrpcls.sType = session.Type__c;
+        if(String.isNotBlank(session.Type__c) && session.Type__c == ConstantClass.sessionExceptionType && 
+           String.isNotBlank(session.Exception__c) && session.Exception__c.contains('Teacher')){
+            sessDataWrpcls.isTeacherNotAvailable = true;
+        }
+        
+        if(String.isNotBlank(session.Type__c) && session.Type__c == ConstantClass.sessionExceptionType && 
+           String.isNotBlank(session.Exception__c) && session.Exception__c.contains('Room')){
+            sessDataWrpcls.isRoomNotAvailable = true;
+        }
+        Date today = Date.today();
+        DateTime strtTime = DateTime.newInstance(Date.today(),session.Start_Time__c);
+        sessDataWrpcls.stTime = strtTime.format('HH:mm:ss.sss');
         return sessDataWrpcls;
     }
     
@@ -38,10 +105,17 @@ public class UpdateClassSessionsCompApex {
         @AuraEnabled public String  tchrName{get;set;}
         @AuraEnabled public String  roomId{get;set;}
         @AuraEnabled public String  roomName{get;set;}
-        @AuraEnabled public String  status{get;set;}
         @AuraEnabled public Date    stDate{get;set;}
-        @AuraEnabled public String  sessDay{get;set;}
         @AuraEnabled public String    stTime{get;set;}
-        @AuraEnabled public Time    endTime{get;set;}        
+        @AuraEnabled public String    sType{get;set;}
+        @AuraEnabled public String    sException{get;set;}
+        @AuraEnabled public Boolean    isTeacherNotAvailable{get;set;}
+        @AuraEnabled public Boolean    isRoomNotAvailable{get;set;}
+        @AuraEnabled public Decimal sessDuration{get;Set;}
+        
+        public SessionDataWrapperClass(){
+            isTeacherNotAvailable = false;
+            isRoomNotAvailable = false;
+        } 
     }
 }

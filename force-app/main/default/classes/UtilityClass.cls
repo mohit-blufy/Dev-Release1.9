@@ -278,15 +278,16 @@ public class UtilityClass {
                                                                   }
                                                               }
                                                               else{
+                                                                  sess.Exception__c = '';
                                                                   if(mapTeacherIdToTeacherLeave.keySet().size() > 0){
                                                                       if(mapTeacherIdToTeacherLeave.containsKey(sess.Teacher__c)){
                                                                           if(mapTeacherIdToTeacherLeave.get(sess.Teacher__c) != NULL){
                                                                               List<Teacher_Leave__c> listTeacherLeave = mapTeacherIdToTeacherLeave.get(sess.Teacher__c);
                                                                               for(Teacher_Leave__c techrLv : listTeacherLeave){
                                                                                   if(techrLv.Start_Date__c <=  sess.Session_Date__c && techrLv.End_Date__c >= sess.Session_Date__c){                                                
-                                                                                      if(techrLv.Status__c == ConstantClass.approvedStatus)
+                                                                                      if(techrLv.Status__c == ConstantClass.approvedStatus && !sess.Exception__c.contains(ConstantClass.teacherOnLeaveComment))
                                                                                           sess.Exception__c = ConstantClass.teacherOnLeaveComment;
-                                                                                      else if(techrLv.Status__c == 'Requested')
+                                                                                      else if(techrLv.Status__c == 'Requested' && !sess.Exception__c.contains(ConstantClass.teacherRequestLeaveComment))
                                                                                           sess.Exception__c = ConstantClass.teacherRequestLeaveComment;                                           
                                                                                   }  
                                                                               } 
@@ -312,7 +313,7 @@ public class UtilityClass {
                                                                               if(!listTeachrId.contains(sess.Teacher__c)){         
                                                                                   if(String.isBlank(sess.Exception__c))
                                                                                       sess.Exception__c = ConstantClass.teacherNotAvailableComment;
-                                                                                  else
+                                                                                  else if(!sess.Exception__c.contains(ConstantClass.teacherNotAvailableComment))
                                                                                       sess.Exception__c += ' '+ConstantClass.teacherNotAvailableComment;
                                                                               }
                                                                           }
@@ -326,7 +327,7 @@ public class UtilityClass {
                                                                              && holiday.Start_Time__c < sessETime && holiday.End_Time__c > sessETime){
                                                                                  if(String.isBlank(sess.Exception__c))
                                                                                      sess.Exception__c = ConstantClass.holidayComment;
-                                                                                 else
+                                                                                 else if(!sess.Exception__c.contains(ConstantClass.holidayComment))
                                                                                      sess.Exception__c +=' '+ConstantClass.holidayComment;
                                                                              }  
                                                                       }
@@ -337,9 +338,12 @@ public class UtilityClass {
                                                                           if(mapTeacherIdToTeacherSessions.get(sess.Teacher__c) != NULL){
                                                                               Time sessETime = sess.Start_Time__c.addMinutes(Integer.valueOf(sess.Duration__c));
                                                                               List<Session__c> listRelatedSession = mapTeacherIdToTeacherSessions.get(sess.Teacher__c);
+                                                                             // system.debug('Sess-->'+sess);
                                                                               for(Session__c relSess : listRelatedSession){
+                                                                                  //system.debug('relSess-->'+relSess);
                                                                                   if(relSess.Session_Date__c == sess.Session_Date__c && relSess.Start_Time__c <= sess.Start_Time__c
-                                                                                     && sessETime >= relSess.End_Time__c){
+                                                                                     && relSess.Id != sess.Id && relSess.End_Time__c >= sessETime){
+                                                                                         system.debug('tesddyf');
                                                                                          if(String.isBlank(sess.Exception__c))
                                                                                              sess.Exception__c = ConstantClass.teacherOccupiedComment;
                                                                                          else if(!sess.Exception__c.contains(ConstantClass.teacherOccupiedComment))
@@ -357,21 +361,24 @@ public class UtilityClass {
                                                                               List<Session__c> listRelatedSession = mapRoomIdToRoomSessions.get(sess.Room__c);
                                                                               for(Session__c relSess : listRelatedSession){
                                                                                   if(relSess.Session_Date__c == sess.Session_Date__c && relSess.Start_Time__c <= sess.Start_Time__c
-                                                                                     && sessETime >= relSess.End_Time__c){
+                                                                                     && relSess.Id != sess.Id && relSess.End_Time__c >= sessETime){
                                                                                          sess.Notes__c = ConstantClass.roomOccupiedComment;                                          
                                                                                      }  
                                                                               } 
                                                                           }
                                                                       }
                                                                   }
-                                                                  
+
                                                                   if(String.isBlank(sess.Exception__c) && String.isNotBlank(sess.Notes__c))
                                                                       sess.Exception__c = sess.Notes__c;
                                                                   else if(String.isNotBlank(sess.Exception__c) && String.isNotBlank(sess.Notes__c))
                                                                       sess.Exception__c +=' '+sess.Notes__c;
-
+                                                                  
+                                                                  system.debug(' sess.Exception__c-->'+ sess.Exception__c);
                                                                   if(String.isNotBlank(sess.Exception__c))
                                                                       sess.Type__c = ConstantClass.sessionExceptionType;
+                                                                  else
+                                                                      sess.Type__c = ConstantClass.sessionStandardType;
                                                               }
                                                           }
                                                           
@@ -392,41 +399,42 @@ public class UtilityClass {
                                                               return sessList;
                                                       }
     
-    /*
-public static Map<Integer,Module_Lesson__c> generateModuleLessonBasedOnSessNum(Integer sequnNum,Integer totalSessions,Decimal clsDuration, List<Course_Module__c> crsModLst, Map<Id,Module__c> mapModuleToModuleLessons){
-Map<Integer,Module_Lesson__c> mapSessSeqToModuleLession = new Map<Integer,Module_Lesson__c>();
-Integer sessCount = sequnNum;
-for(Course_Module__c crsMod : crsModLst){
-if(mapModuleToModuleLessons.containsKey(crsMod.Module__c) && mapModuleToModuleLessons.get(crsMod.Module__c).Module_Lessons__r.size() > 0){
-for(Module_Lesson__c modLess: mapModuleToModuleLessons.get(crsMod.Module__c).Module_Lessons__r){
-Decimal modLessDuration = modLess.Lesson__r.Duration__c;
-While(modLessDuration > 0){
-if(totalSessions != NULL){
-if(sessCount <= totalSessions){
-mapSessSeqToModuleLession.put(sessCount,modLess);
-sessCount++;
-}
-}
-else{
-mapSessSeqToModuleLession.put(sessCount,modLess);
-sessCount++;
-}
-modLessDuration = modLessDuration - clsDuration;
-}
-}
-}
-}
-return mapSessSeqToModuleLession;
-}
-
-public static List<Session__c> mapModuleLessonOnSessions(List<Session__c> sessList,Map<Integer,Module_Lesson__c> crsModuleSeqMap){
-for(Session__c sess : sessList){
-if(sess.Sequence__c != null && crsModuleSeqMap.get(Integer.valueOf(sess.Sequence__c)) != null){
-sess.put('Module_Lesson__c',crsModuleSeqMap.get(Integer.valueOf(sess.Sequence__c)).Id);
-}
-}
-return sessList;
-}*/
+    public static Session__c checkAvailabilityTeacherOrRoom(Session__c sess,String type){
+        List<Holiday__c> listOfHolidays = new List<Holiday__c>();
+        Map<String,List<Teacher_Working_Hours__c>> mapTeacherIdToTechrWrkHour = new Map<String,List<Teacher_Working_Hours__c>>();
+        Map<String,List<Teacher_Leave__c>> mapTeacherIdToTeacherLeave = new Map<String,List<Teacher_Leave__c>>();
+        Map<String,List<Session__c>> mapTeacherIdToTeacherSessions = new Map<String,List<Session__c>>();
+        Map<String,List<Session__c>> mapRoomIdToRoomSessions = new Map<String,List<Session__c>>();
+        Boolean checkValidity = false;
+        
+        if(String.isBlank(type) && String.isNotBlank(sess.Teacher__c) && String.isNotBlank(sess.Room__c)){
+            mapTeacherIdToTeacherLeave = UtilityClass.getTeacherLeaves(new Set<String>{sess.Teacher__c});
+            mapTeacherIdToTechrWrkHour = UtilityClass.getTeacherWorkingHour(new Set<String>{sess.Teacher__c});
+            mapTeacherIdToTeacherSessions = UtilityClass.getTeacherRelatedSessions(new Set<String>{sess.Teacher__c});
+            mapRoomIdToRoomSessions = UtilityClass.getRoomRelatedSessions(new Set<String>{sess.Room__c});
+            listOfHolidays = UtilityClass.getHolidays();
+            checkValidity = true;                
+        }
+        else if(type.equalsIgnoreCase('Teacher') && String.isNotBlank(sess.Teacher__c)){                
+            mapTeacherIdToTeacherLeave = UtilityClass.getTeacherLeaves(new Set<String>{sess.Teacher__c});
+            mapTeacherIdToTechrWrkHour = UtilityClass.getTeacherWorkingHour(new Set<String>{sess.Teacher__c});
+            mapTeacherIdToTeacherSessions = UtilityClass.getTeacherRelatedSessions(new Set<String>{sess.Teacher__c});
+            listOfHolidays = UtilityClass.getHolidays();
+            checkValidity = true;
+        }
+        else if(type.equalsIgnoreCase('Room') && String.isNotBlank(sess.Room__c)){
+            mapRoomIdToRoomSessions = UtilityClass.getRoomRelatedSessions(new Set<String>{sess.Room__c});
+            checkValidity = true;
+        }
+        
+        if(checkValidity){
+            List<Session__c> listSession = UtilityClass.getUpdatedSessions(Integer.valueOf(sess.Sequence__c-1),
+                                                                           false,new List<Session__c>{sess}, mapTeacherIdToTeacherLeave, 
+                                                                           mapTeacherIdToTechrWrkHour, listOfHolidays,
+                                                                           mapTeacherIdToTeacherSessions,mapRoomIdToRoomSessions);
+        }
+        return sess;
+    }
     
     public static Decimal roundOffAmount(Decimal amount){
         Decimal value = 0;
