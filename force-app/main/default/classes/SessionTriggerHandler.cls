@@ -6,7 +6,7 @@
 *
 * Object :-  Session__c
   Trigger:- SessionTrigger
-  Desc:- to records of child object Student_Session__c once Session Status is canceled
+  Desc:- to records of child object Student_Session__c once Session Status is cancelled
 */
 public class SessionTriggerHandler {
     public static void updateStudentSession(Map<id,Session__c> oldSessionMap,Map<id,Session__c> newSessionMap){
@@ -17,7 +17,7 @@ public class SessionTriggerHandler {
             //get ids of session whose status is cancelled
             for (Session__c sessionObj: newSessionMap.values()) {
                 if(oldSessionMap.get(sessionObj.id).Status__c != sessionObj.Status__c
-                    && sessionObj.Status__c == 'Canceled'){
+                    && sessionObj.Status__c == ConstantClass.cancelledStatus){
                     sessionIds.add(sessionObj.id);
                 }
             }
@@ -31,7 +31,7 @@ public class SessionTriggerHandler {
                         if(studentSessionToUpdate.containsKey(sessionIdObj)){
                             for (Student_Session__c studentSessionRecord : studentSessionToUpdate.get(sessionIdObj))
                             {
-                                newStudentSessionToUpdate.add(new Student_Session__c(Status__c = 'Canceled',
+                                newStudentSessionToUpdate.add(new Student_Session__c(Status__c = ConstantClass.cancelledStatus,
                                                                                 id = studentSessionRecord.id,
                                                                                 Session__c = sessionIdObj)
                                                               );
@@ -78,10 +78,10 @@ public class SessionTriggerHandler {
         
         List<Class__c> updateClasList = new List<Class__c>();
         for(String clsId: clsIds){
-            Class__c cls = new Class__c(Id=clsId, Total_Sessions__c=0, Scheduled_Sessions__c=0, Completed_Sessions__c=0, Canceled_Sessions__c=0);
+            Class__c cls = new Class__c(Id=clsId, Total_Sessions__c=0, Scheduled_Sessions__c=0, Completed_Sessions__c=0, Cancelled_Sessions__c=0);
             String schKey   = clsId+':'+ConstantClass.ScheduledStatus;
             String cmpKey   = clsId+':'+ConstantClass.sessionCompleted;
-            String cncldKey = clsId+':'+ConstantClass.sessionCancel;
+            String cncldKey = clsId+':'+ConstantClass.cancelledStatus;
 
             if(clsSessionMap.get(schKey) != null){
                 cls.Total_Sessions__c = clsSessionMap.get(schKey);
@@ -92,7 +92,7 @@ public class SessionTriggerHandler {
                 cls.Completed_Sessions__c = clsSessionMap.get(cmpKey);
             }
             if(clsSessionMap.get(cncldKey) != null){
-                cls.Canceled_Sessions__c = clsSessionMap.get(cncldKey);
+                cls.Cancelled_Sessions__c = clsSessionMap.get(cncldKey);
             }
 
             updateClasList.add(cls);

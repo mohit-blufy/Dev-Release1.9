@@ -16,7 +16,7 @@ public class TeacherLeaveCmpApexControllerTest {
                                                                  ConstantClass.draftStatus, tch.Id, 40, 
                                                                  ConstantClass.ongoingClsType, 21, Date.today()+1,
                                                                  Time.newInstance(4,4,5,6),ConstantClass.minutesDurationPicklist,
-                                                                 4, ConstantClass.monthlyFrequency);
+                                                                 4, ConstantClass.monthlyFrequency, null);
         cls.Advance_Scheduling_Unit__c = ConstantClass.schedulingPicklistMonth;
         cls.Advance_Scheduling__c = 2;
 		insert cls;
@@ -38,7 +38,7 @@ public class TeacherLeaveCmpApexControllerTest {
                                                    WHERE Id =: tchLeave.Id];
         
         List<Session__c	> sessList = [SELECT Id,Name,Session_Date__c,Start_Time__c,End_Time__c,Status__c,Teacher__c,Teacher__r.Name
-                                      FROM Session__c WHERE Teacher__c =:tchLeave.Teacher__c AND Status__c !=: ConstantClass.sessionCancel
+                                      FROM Session__c WHERE Teacher__c =:tchLeave.Teacher__c AND Status__c !=: ConstantClass.cancelledStatus
                                       AND Session_Date__c >=: tchLeave.Start_Date__c AND Session_Date__c <=: tchLeave.End_Date__c];
         Test.startTest();
         TeacherLeaveCmpApexController.doInitApex(tchLeave.Id);
