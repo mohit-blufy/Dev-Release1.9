@@ -1,5 +1,5 @@
 global with sharing class FullCalendarDataService {         
-    static String status = ConstantClass.sessionCancel;
+    static String status = ConstantClass.cancelledStatus;
     static String sessionType = ConstantClass.sessionType;
     static Set<String> fieldsApiName ;
     static boolean isSessionAccessible;  

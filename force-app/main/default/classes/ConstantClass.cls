@@ -70,7 +70,7 @@ public class ConstantClass {
     public static String primaryFeeRecordTypeId  = Schema.SObjectType.Fee__c.getRecordTypeInfosByName().get('Primary').getRecordTypeId();
     public static String secondaryFeeRecordTypeId= Schema.SObjectType.Fee__c.getRecordTypeInfosByName().get('Secondary').getRecordTypeId();
     public static String inActiveCourse          = 'Inactive';
-    public static String sessionCancel           = 'Canceled';
+    //public static String sessionCancel           = 'Canceled';
     public static String sessionCompleted        = 'Completed';
     
     public static String sessionStandardType     = 'Standard';

@@ -15,7 +15,7 @@ public class TeacherLeaveCmpApexController {
             if(listTeacherLeave != NULL && listTeacherLeave.size() > 0){
                 Teacher_Leave__c teacherLeave = listTeacherLeave[0];
                 for(Session__c session : [SELECT Id,Name,Session_Date__c,Start_Time__c,End_Time__c,Status__c,Teacher__c,Teacher__r.Name
-                                          FROM Session__c WHERE Teacher__c =:teacherLeave.Teacher__c AND Status__c !=: ConstantClass.sessionCancel
+                                          FROM Session__c WHERE Teacher__c =:teacherLeave.Teacher__c AND Status__c !=: ConstantClass.cancelledStatus
                                           AND Session_Date__c >=: teacherLeave.Start_Date__c AND Session_Date__c <=: teacherLeave.End_Date__c
                                          ]){
                                              listSessDataWrpCls.add(fillSessionDataWrapper(session));             
