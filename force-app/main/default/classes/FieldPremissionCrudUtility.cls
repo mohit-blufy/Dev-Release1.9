@@ -3,18 +3,22 @@ public with sharing class FieldPremissionCrudUtility {
     public Static boolean checkReadPermission(String objApiName, Set<String> fieldsApiNameSet, Boolean isUpdate){
         system.debug('fieldsApiNameSet-> '+fieldsApiNameSet +' -- '+fieldsApiNameSet.size());
         
+        if(String.isNotBlank(objApiName) && (objApiName.endsWith('__c') || objApiName.endsWith('__mdt')))
+            objApiName = ConstantClass.nameSpace + objApiName;
         //check object's CRUD Permission
         if(!checkObjCRUD(objApiName, isUpdate)){
             return false;
         }
         boolean isAccessible = true;
+        
+        
         SObjectType obj = Schema.getGlobalDescribe().get(objApiName);
         if(obj != null && fieldsApiNameSet != null && fieldsApiNameSet.size()>0){
             DescribeSObjectResult objDef = obj.getDescribe();
             Map<String, SObjectField> fieldsMap = objDef.fields.getMap();
             for(String fieldName : fieldsApiNameSet){
                 if(String.isNotBlank(fieldName) && fieldName.endsWith('__c'))
-                    fieldName = ''+fieldName;
+                    fieldName = ConstantClass.nameSpace + fieldName;
                 system.debug('fieldName-->'+fieldName);
                 if(fieldsMap.containsKey(fieldName)){
                     SObjectField field = fieldsMap.get(fieldName);
@@ -92,13 +96,16 @@ public with sharing class FieldPremissionCrudUtility {
             return false;
         }
         boolean isAccessible = true;
+        
+        if(String.isNotBlank(objApiName) && (objApiName.endsWith('__c') || objApiName.endsWith('__mdt')))
+            objApiName = ConstantClass.nameSpace + objApiName;
         SObjectType obj = Schema.getGlobalDescribe().get(objApiName);
         if(obj != null && fieldsApiNameSet != null && fieldsApiNameSet.size()>0){
             DescribeSObjectResult objDef = obj.getDescribe();
             Map<String, SObjectField> fieldsMap = objDef.fields.getMap();
             for(String fieldName : fieldsApiNameSet){
                 if(String.isNotBlank(fieldName) && fieldName.endsWith('__c'))
-                    fieldName = ''+fieldName;
+                    fieldName = ConstantClass.nameSpace+fieldName;
                 
                 if(fieldsMap.containsKey(fieldName)){
                     SObjectField field = fieldsMap.get(fieldName);

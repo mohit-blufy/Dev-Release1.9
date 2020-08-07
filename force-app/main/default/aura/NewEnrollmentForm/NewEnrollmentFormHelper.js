@@ -137,6 +137,7 @@
         var grandTot = 0;
         var totDepFee = 0;
         var gstAppFeeAmount = 0;
+        var disAmt = 0;
         for(var i = 0; i < slctdCrsWithStuList.length; i++){
             var slcdCrsList = slctdCrsWithStuList[i].slctdClsDetails
             for(var j = 0; j < slcdCrsList.length; j++){
@@ -183,13 +184,13 @@
                     if(disList[k].isSelected){
                         if(disList[k].format == 'Percent'){
                             slcdTstionFeeAmt -= (tuitionfee * disList[k].amount/100);
+                            disList[k].amount = (tuitionfee * disList[k].amount/100)
                         }
                         else{
                             slcdTstionFeeAmt -= disList[k].amount;
                         }
+                        disAmt += disList[k].amount;
                     }
-                        
-                    
                 }
                 
                 //Early bird discount deduction
@@ -205,10 +206,10 @@
         
         var gstPrcnt = parseInt($A.get("{!$Label.c.GST_Rate}"));
         //var tempAmt = grandTot-totDepFee; 
-        var tempAmt = (gstAppFeeAmount*gstPrcnt/100);                            
+        var tempAmt = ((gstAppFeeAmount - disAmt)*gstPrcnt/100);                            
         component.set("v.gstAmount", tempAmt); 
         
-        component.set("v.enrFeeTotAmt", grandTot); 
+        component.set("v.enrFeeTotAmt", grandTot);
         component.set("v.grandTotAmt", grandTot + tempAmt); 
         component.set("v.stuClsWrapperList", slctdCrsWithStuList);
     },
