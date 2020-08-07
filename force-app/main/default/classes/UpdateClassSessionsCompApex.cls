@@ -36,7 +36,7 @@ public class UpdateClassSessionsCompApex {
     
     @AuraEnabled
     public static SessionDataWrapperClass checkTeacherRoomAvailability(String session,String type){
-        //try{
+        try{
             SessionDataWrapperClass sess = (SessionDataWrapperClass)JSON.deserialize(session, SessionDataWrapperClass.class);
             SessionDataWrapperClass updatedSess = new SessionDataWrapperClass();
             
@@ -47,11 +47,11 @@ public class UpdateClassSessionsCompApex {
             }
             system.debug('updatedSess-->'+updatedSess);
             return updatedSess;
-        //}
-        //catch(Exception e){
-          //  system.debug('Error-->'+e.getMessage()+e.getLineNumber());
-        //}
-        //return null;
+        }
+        catch(Exception e){
+            system.debug('Error-->'+e.getMessage()+e.getLineNumber());
+        }
+        return null;
     }
     
     public static Session__c fillSessionRecords(SessionDataWrapperClass sessWrap){
@@ -85,13 +85,13 @@ public class UpdateClassSessionsCompApex {
         sessDataWrpcls.sType = session.Type__c;
         if(String.isNotBlank(session.Type__c) && session.Type__c == ConstantClass.sessionExceptionType && 
            String.isNotBlank(session.Exception__c) && session.Exception__c.contains('Teacher')){
-            sessDataWrpcls.isTeacherNotAvailable = true;
-        }
+               sessDataWrpcls.isTeacherNotAvailable = true;
+           }
         
         if(String.isNotBlank(session.Type__c) && session.Type__c == ConstantClass.sessionExceptionType && 
            String.isNotBlank(session.Exception__c) && session.Exception__c.contains('Room')){
-            sessDataWrpcls.isRoomNotAvailable = true;
-        }
+               sessDataWrpcls.isRoomNotAvailable = true;
+           }
         Date today = Date.today();
         DateTime strtTime = DateTime.newInstance(Date.today(),session.Start_Time__c);
         sessDataWrpcls.stTime = strtTime.format('HH:mm:ss.sss');

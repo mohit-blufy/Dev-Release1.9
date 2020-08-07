@@ -9,10 +9,13 @@
             var res = result.getReturnValue();
             component.set("v.crsList",res);
             
-            // helper.fetchCntry(component, 'Account', 'BillingCountryCode');
-            helper.fetchGender(component, 'Account', 'Gender__c');
-            helper.fetchRelationsShip(component, 'Account', 'Relationship_with_contact__c');
-            helper.fetchPayMode(component, 'Payment__c', 'Cash_Mode__c');
+            var nameSpacelabel = '';
+            if(!$A.util.isEmpty($A.get("$Label.c.Namespace")) && $A.get("$Label.c.Namespace") != 'None')
+                nameSpacelabel = $A.get("$Label.c.Namespace")+'__';
+            component.set("v.namespace",nameSpacelabel)
+            helper.fetchGender(component, nameSpacelabel+'Account', nameSpacelabel+'Gender__c');
+            helper.fetchRelationsShip(component, nameSpacelabel+'Account', nameSpacelabel+'Relationship_with_contact__c');
+            helper.fetchPayMode(component, nameSpacelabel+'Payment__c', nameSpacelabel+'Cash_Mode__c');
             helper.initilizeCstmrList(component, event);
             helper.fetchTermAndCon(component, event);            
             component.set("v.toggleSpinner", false);
@@ -74,6 +77,7 @@
             helper.alertToast(component, event, "error", "Please fill all required contact detail.");
         }
     },
+    
     deleteStudent : function(component, event, helper) {
         var slctdCrsList= component.get("v.stuClsWrapperList");
         // console.log('@@@@@ slctdCrsList '+JSON.stringify(slctdCrsList));
@@ -82,6 +86,7 @@
         component.set("v.stuClsWrapperList",slctdCrsList);      
         helper.alertToast(component, event, "Success", "Student successfully removed.");
     },
+    
     selectClass : function(component, event, helper) {
         var selectedCheckText = event.getSource().get("v.text");
         var getAllId = component.find("clsSlcd");
@@ -165,6 +170,7 @@
         }
         component.set("v.slcdCrsObject", crsObj);
     },
+    
     tutionFeeOnCheck : function(component, event, helper) {
         var selectedCheckText = event.getSource().get("v.text");
         var getAllId = component.find("tutionFeeChk");
@@ -269,14 +275,17 @@
         crsObj.totFee = slcdTstionFeeAmt;
         component.set("v.slcdCrsObject", crsObj);*/
     },
+    
     feeOnCheck : function(component, event, helper) {
         var crsObj = component.get("v.slcdCrsObject");
         helper.calculationOnFeeCheck(component, event, crsObj,false);
     },
+    
     crsDiscountOnCheck : function(component, event, helper) {
         var isEarlyBirdDis = false;
         helper.calculationOnDisCheck(component, event, isEarlyBirdDis);
     },
+    
     discountOnCheck : function(component, event, helper) {
         /* var selectedCheckText = event.getSource().get("v.text");
         var indx = parseInt(selectedCheckText);
@@ -304,11 +313,13 @@
         
         component.set("v.discountModal", true);
     },
+    
     closeDiscountModel:function(component, event) {
         var glbDisLst = [];
         component.set("v.globalDisList", glbDisLst);
         component.set("v.discountModal", false);
     },
+    
     globalDiscountOnCheck : function(component, event, helper) {
         var selectedCheckText = event.getSource().get("v.text");
         var indx = parseInt(selectedCheckText);
@@ -323,50 +334,31 @@
             
         }
     },
+    
     saveGlobalDiscount : function(component, event, helper) {
         var glbDisLst = component.get("v.globalDisList");
-        var enrFeeTotAmt = component.get("v.enrFeeTotAmt"); 
+        var grndTotAmt = component.get("v.grandTotAmt"); 
         var tempGlbDisLst = [];
         var totDisAmt = 0;
         for(var i = 0; i < glbDisLst.length; i++){
             if(glbDisLst[i].isSelected){
                 tempGlbDisLst.push(glbDisLst[i]);
-                if(glbDisLst[i].format == 'Percent'){
-                 	totDisAmt += enrFeeTotAmt * parseInt(glbDisLst[i].amount)/100;
-                    glbDisLst[i].amount = enrFeeTotAmt * parseInt(glbDisLst[i].amount)/100;
-                }
-                else
-                    totDisAmt += parseInt(glbDisLst[i].amount);
-            }
-        }
-        //calcuting total deposit fee for exclude 
-        var slctdCrsWithStuList= component.get("v.stuClsWrapperList");
-        var totDepFee = 0;
-        for(var i = 0; i < slctdCrsWithStuList.length; i++){
-            var slcdCrsList = slctdCrsWithStuList[i].slctdClsDetails;
-            for(var j = 0; j < slcdCrsList.length; j++){
-                var feeList = slcdCrsList[j].depositWrapperList;
-                for(var k = 0; k < feeList.length; k++){
-                    if(feeList[k].isSelected)
-                        totDepFee += feeList[k].feeAmount;
-                }
+                totDisAmt += parseInt(glbDisLst[i].amount);
             }
         }
         
-        
-        var grandTotAmt  = enrFeeTotAmt - (totDepFee+totDisAmt);
         var gstPrcnt 	 = parseInt($A.get("{!$Label.c.GST_Rate}"));
-        var tempGstAmt	 = (grandTotAmt*gstPrcnt/100);                            
-        var grandTotAmt  = enrFeeTotAmt - totDisAmt + tempGstAmt;
-        component.set("v.gstAmount", tempGstAmt);
-        /* var gstAmt       = component.get("v.gstAmount");
-        var enrFeeTotAmt = component.get("v.enrFeeTotAmt"); 
-        var grandTotAmt  = enrFeeTotAmt - totDisAmt + gstAmt;*/
+        var tempGstAmt	 = (totDisAmt*gstPrcnt/100);  
+        var updatedGSTAmt = component.get("v.gstAmount") - tempGstAmt;
+        var grandTotAmt  = grndTotAmt - totDisAmt - tempGstAmt;
+        component.set("v.gstAmount", updatedGSTAmt);
+        
         component.set("v.grandTotAmt", grandTotAmt);
         
         component.set("v.globalDisList", tempGlbDisLst);
         component.set("v.discountModal", false);
     },
+    
     mymodal : function(component, event, helper) {
         var indx = parseInt(event.target.id);
         var slctdCrsList= component.get("v.stuClsWrapperList");
@@ -426,6 +418,7 @@
         console.log('called2');
         component.set("v.showModal", false);
     },
+    
     deleteCls : function(component, event, helper) {
         /* var selectedCheckText = event.target.id;
         var indexList = selectedCheckText.split("_");
@@ -513,6 +506,7 @@
         component.set("v.grandTotAmt", grandTot + tempAmt); 
         component.set("v.stuClsWrapperList", slctdCrsWithStuList);*/
     },
+    
     editCls : function(component, event) {
         var selectedCheckText = event.target.id;
         var indexList = selectedCheckText.split("_");
@@ -661,11 +655,13 @@
             $A.enqueueAction(action);
         }
     },
+    
     sameAsContact:function(component,event,helper){
         var contactDetail = component.get("v.contactDetail");  
         component.set("v.stuClsWrapper.studentDetail.FirstName",contactDetail.FirstName);
         component.set("v.stuClsWrapper.studentDetail.LastName",contactDetail.LastName);
     },
+    
     addCourses:function(component,event,helper){
         var clsList 	= component.get("v.clsList");  
         var slctdCrsList= component.get("v.stuClsWrapperList"); 
@@ -709,6 +705,7 @@
             component.set("v.dateValidationError" , false);
         }
     },
+    
     saveStudentCrs:function(component,event,helper){      
         var isError = true;
         var errMsg  = "";
@@ -1058,9 +1055,11 @@
             $A.enqueueAction(action);
         }
     },
+    
     showSpinner : function(component,event,helper){
         component.set("v.toggleSpinner", true);  
     },
+    
     hideSpinner : function(component,event,helper){
         component.set("v.toggleSpinner", false);
     },        

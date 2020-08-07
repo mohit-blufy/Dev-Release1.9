@@ -703,11 +703,10 @@ return crsFeeWrap;
                                   Global__c = true AND (Start_Date__c <= Today AND  End_Date__c >= Today)]){
                                       DisWrapper dw = new DisWrapper();
                                       if(dis.Format__c.equalsIgnoreCase(ConstantClass.amountFormat)){
-                                       //   dw.amount = dis.Value__c;
+                                         dw.amount = dis.Value__c;
                                       }else if(dis.Format__c.equalsIgnoreCase(ConstantClass.percentFormat)){
                                         //  dw.amount = dis.Value__c;
                                       }  
-                                      dw.amount = dis.Value__c;
                                       dw.disId   = dis.Id;                
                                       dw.name    = dis.Name;
                                       dw.format  = dis.Format__c;
@@ -1202,7 +1201,6 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                                         stuSess.Status__c= ConstantClass.draftStatus;
                                         stuSess.Billable__c= True;
                                         stuSessList.add(stuSess); 
-                                        system.debug('stuSessList-->'+stuSessList);
                                         noOfSess = noOfSess+1;
                                         if(isNeedToCheckStuSess && slcdTutionFee.noOfUnit < noOfSess)
                                             break;
@@ -1282,6 +1280,7 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                 }
                 //Invoice line items for global Discount Amount
                 DisWrapper referralDis;
+                system.debug('globalDisList-->'+globalDisList);
                 for(DisWrapper dis: globalDisList){
                     Invoice_Line_Item__c invLnItm = UtilityClass.fillInvLineItem(inv.Id, null, null, null, dis.disId, ConstantClass.discountType, dis.amount, true);
                     invLnItms.add(invLnItm);
@@ -1290,7 +1289,7 @@ WHERE Id IN: clsSessonMap.keySet()]);*/
                         referralDis = dis;
                     }
                 }
-                
+                system.debug('invLnItms-->'+invLnItms.size());
                 //update class
                 if(listClass.size() > 0)
                     update listClass;
