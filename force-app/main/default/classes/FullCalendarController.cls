@@ -15,6 +15,7 @@ global with sharing class FullCalendarController {
     public List<SelectOption> roomList{get;set;}
     public Full_Calendar_Configuration__mdt calendarConfigMetadataObject {get;set;}
     public boolean isUserHaveAllAccess{get;set;}
+    public String nameSpace{get;set;}
     private List<Full_Calendar_Configuration__mdt> calendarConfigMetaList;
     private Map<Id, String> teacherMap;
     private String profileName;
@@ -32,7 +33,7 @@ global with sharing class FullCalendarController {
         fieldsApiName.add('Course__c');
         fieldsApiName.add('Teacher__c');
         isClassAccessible = FieldPremissionCrudUtility.checkReadPermission('Course__c',fieldsApiName,false);
-
+        nameSpace = ConstantClass.nameSpace;
         fieldsApiName = new Set<String>{'Id','Name','Type__c'};
         isRommAccessible = FieldPremissionCrudUtility.checkReadPermission('Room__c',fieldsApiName,false);
         
