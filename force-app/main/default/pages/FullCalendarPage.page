@@ -14,10 +14,11 @@
                             selectedTeacher="{!selectedTeacher}"
                             TodayDate="{!TodayDate}"
                             customMetaDataConfig="{!calendarConfigMetadataObject}"
-                            selectedCourse="{!selectedCourse}">
+                            selectedCourse="{!selectedCourse}"
+                            nameSpace="{!nameSpace}">
         </c:full_calendar_js>           
         <div class="session-action slds-hide">
-            <c:session_action_component customMetaDataConfig="{!calendarConfigMetadataObject}"></c:session_action_component>
+            <c:session_action_component customMetaDataConfig="{!calendarConfigMetadataObject}" nameSpace="{!nameSpace}"></c:session_action_component>
         </div>      
     </head>     
     <body class="slds-scope" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">

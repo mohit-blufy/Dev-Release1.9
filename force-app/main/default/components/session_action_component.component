@@ -1,6 +1,7 @@
 <apex:component controller="SessionActionController">
     <apex:attribute name="customMetaDataConfig" type="Full_Calendar_Configuration__mdt" description="for custom data Configration"
     />
+    <apex:attribute name="nameSpace" type="String"  description="for name space"  />
     <style>
         .custom-anchor {
             text-decoration: none !important;
@@ -69,7 +70,7 @@
         var selectedStudRecords = [];
 
         var oldCalendarInfoForStudent;
-
+        var nameSpace = '{!nameSpace}';    
         function handleChangeTab(event) {
             //console.log(event);
             let evt = event;
@@ -184,29 +185,29 @@
                     }
                     if (result != null) {
                         for (idx of result) {
-                            if (idx.Type__c != undefined && idx.Type__c == 'Placeholder') {
+                            if (idx[nameSpace+'Type__c'] != undefined && idx[nameSpace+'Type__c'] == 'Placeholder') {
                                 isPhType = true;
                             }
                             contentDiv += '<div class="slds-grid slds-wrap"><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label  class="slds-text-heading_small font-label-weight">Location : </label><span class="slds-text-heading_small custom-text-color">';
                             contentDiv += document.querySelector('.select-location').selectedOptions[0].label;
                             contentDiv += '</span></div><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Teacher : </label><span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += idx.Teacher__r == undefined ? '' : idx.Teacher__r.Name;
+                            contentDiv += idx[nameSpace+'Teacher__r'] == undefined ? '' : idx[nameSpace+'Teacher__r']['Name'];
                             contentDiv += '</span></div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Date : </label><span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += getLongDate(new Date(idx.Session_Date__c));
+                            contentDiv += getLongDate(new Date(idx[nameSpace+'Session_Date__c']));
                             contentDiv += '</span> </div><div class="slds-col slds-size_6-of-12 slds-p-around_xx-small">   <label class="slds-text-heading_small font-label-weight">Time : </label>  <span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += timeConvert(msToTime(idx.Start_Time__c, true));
+                            contentDiv += timeConvert(msToTime(idx[nameSpace+'Start_Time__c'], true));
                             contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Course : </label> <span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += idx.Class__r.Course__r.Name == undefined ? '' : idx.Class__r.Course__r.Name;
+                            contentDiv += idx[nameSpace+'Class__r'][nameSpace+'Course__r']['Name'] == undefined ? '' : idx[nameSpace+'Class__r'][nameSpace+'Course__r']['Name'];
                             contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Class : </label><span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += idx.Class__r == undefined ? '' : idx.Class__r.Name;
+                            contentDiv += idx[nameSpace+'Class__r'] == undefined ? '' : idx[nameSpace+'Class__r']['Name'];
                             contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Module : </label><span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += idx.Module__c == undefined ? '' : idx.Module__c;
+                            contentDiv += idx[nameSpace+'Module__c'] == undefined ? '' : idx[nameSpace+'Module__c'];
                             contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Lesson : </label><span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += idx.Lesson__c == undefined ? '' : idx.Lesson__c;
+                            contentDiv += idx[nameSpace+'Lesson__c'] == undefined ? '' : idx[nameSpace+'Lesson__c'];
                             contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"><label class="slds-text-heading_small font-label-weight">Duration : </label> <span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += idx.Duration__c + ' ' + idx.Duration_Unit__c;
+                            contentDiv += idx[nameSpace+'Duration__c'] + ' ' + idx[nameSpace+'Duration_Unit__c'];
                             contentDiv += '</span> </div> <div class="slds-col slds-size_6-of-12 slds-p-around_xx-small"> <label class="slds-text-heading_small font-label-weight">Notes : </label><span class="slds-text-heading_small custom-text-color">';
-                            contentDiv += idx.Notes__c == undefined ? '' : idx.Notes__c;
+                            contentDiv += idx[nameSpace+'Notes__c'] == undefined ? '' : idx[nameSpace+'Notes__c'];
                             contentDiv += '</span> </div></div></div>';
 
                             var sessName = document.getElementById('sessId');
@@ -294,13 +295,13 @@
                             table += '<tr> <td>';
                             table += '<div class="slds-form-element__control"><div class="slds-checkbox"><input type="checkbox" class="tbody-checkboxes" name="options" id=' + idx.Id + ' onchange="getCheckBoxState(this);" /> <label class="slds-checkbox__label" for="' + idx.Id + '"><span class="slds-checkbox_faux"></span><span class="slds-form-element__label"> </span> </label></div></div>';
                             table += '</td> <td>';
-                            table += idx.Account__r != undefined ? idx.Account__r.Name : '';
+                            table += idx[nameSpace+'Account__r'] != undefined ? idx[nameSpace+'Account__r']['Name'] : '';
                             table += '</td> <td>';
-                            table += idx.Status__c;
+                            table += idx[nameSpace+'Status__c'];
                             table += '</td> <td>';
-                            table += idx.Session__r.Teacher__r.Name;
+                            table += idx[nameSpace+'Session__r'][nameSpace+'Teacher__r']['Name'];
                             table += '</td> <td>';
-                            table += idx.Session__r.Class__r.Name;
+                            table += idx[nameSpace+'Session__r'][nameSpace+'Class__r']['Name'];
                             if (currentDate.getTime() < newDate.getTime() && currentUserProfileName != 'Teacher') {
                                 table += '</td> <td>';
                                 //commment line after discussed with Dharam And NITIN
@@ -347,7 +348,7 @@
                     }
                     let assessmenetObj = [];
                     if (result.length > 0) {
-                        selectedCourseId = result[0].stuSess.Session__r.Class__r.Course__c;
+                        selectedCourseId = result[0].stuSess[nameSpace+'Session__r'][nameSpace+'Class__r'][nameSpace+'Course__c'];
                         //console.log('selectedCourseId@@'+selectedCourseId);      
                         fetchCrsAssessmentPlist(selectedCourseId);
                         assessmenetObj = result[0].studentAssList;
@@ -376,7 +377,7 @@
                             table += '</td> <td>';
                             table += indx != null ? counter + 1 : '';
                             table += '</td> <td>';
-                            table += indx.stuSess.Account__r != undefined ? indx.stuSess.Account__r.Name : '';
+                            table += indx.stuSess[nameSpace+'Account__r'] != undefined ? indx.stuSess[nameSpace+'Account__r']['Name'] : '';
                             table += '</td>';
                             if (assessmenetObj.length > 0) {                            
                                 console.log(assessmenetObj);
