@@ -196,7 +196,7 @@ Developer   :
     global static List<Location_Working_Hours__c> getWorkingHours(String locationId){
         List<Location_Working_Hours__c> workingHourList = new List<Location_Working_Hours__c>();
         fieldsApiName = new Set<String>{'Id', 'Name', 'Day__c', 'Start_Time__c', 'End_Time__c', 'Active__c', 'Location__c'};
-            isLocationWorkingHoursAccessible = FieldPremissionCrudUtility.checkReadPermission('Location_Working_Hours__c', fieldsApiName, false);
+        isLocationWorkingHoursAccessible = FieldPremissionCrudUtility.checkReadPermission('Location_Working_Hours__c', fieldsApiName, false);
         if(isLocationWorkingHoursAccessible){
             if(String.isNotBlank(locationId)){
                 for(Location_Working_Hours__c wokObj : LocationWorkingHoursService.getByLocationId(new Set<Id>{locationId})){
@@ -478,7 +478,7 @@ Developer   :
                 List<Blufy_Config__mdt> blufyList = [SELECT Id, Overlap_Holiday_For_Monthly_Session__c FROM Blufy_Config__mdt LIMIT 1];
                 List<Session__c> sessionList = SessionService.getById(new set<Id>{sessionId});
                 if(sessionList.size() > 0){
-                    for(Holiday__c holiObj : [SELECT Id, Start_Time__c, Start_Date__c, End_Time__c, End_Date__c FROM Holiday__c WHERE CALENDAR_YEAR(Start_Date__c) =: sessionList[0].Session_Date__c.year() ]){
+                    for(Holiday__c holiObj : HolidayService.getByYear(sessionList[0].Session_Date__c)){
                         VacationModel vacObj = new VacationModel();
                         vacObj.Start_Date = holiObj.Start_Date__c;
                         vacObj.End_Date = holiObj.End_Date__c;                
@@ -504,7 +504,7 @@ Developer   :
                                             Type__c = 'Placeholder'];
                         }               
                     }else{
-                        for(Teacher_Leave__c teacherObj :  [SELECT Id, Teacher__c, Start_Date__c, End_Date__c FROM Teacher_Leave__c WHERE Teacher__c  =: sessionList[0].Teacher__c AND Status__c = 'Approved']){
+                        for(Teacher_Leave__c teacherObj : TeacherLeaveService.getByTeacherId(new Set<String>{sessionList[0].Teacher__c})){
                             VacationModel vacObj = new VacationModel();
                             vacObj.Start_Date = teacherObj.Start_Date__c;
                             vacObj.End_Date = teacherObj.End_Date__c;
@@ -579,7 +579,7 @@ Developer   :
         List<VacationModel> vacationList = new List<VacationModel>();
         if(String.isNotBlank(teacherId)){
             if(FieldPremissionCrudUtility.checkReadPermission('Teacher_Leave__c', new Set<String>{'Id', 'Teacher__c', 'Start_Date__c', 'End_Date__c', 'Status__c'}, false)){
-                for(Teacher_Leave__c teacherObj :  [SELECT Id, Teacher__c, Start_Date__c, End_Date__c FROM Teacher_Leave__c WHERE Teacher__c  =: teacherId AND Status__c = 'Approved']){
+                for(Teacher_Leave__c teacherObj :  TeacherLeaveService.getByTeacherId(new Set<String>{teacherId})){
                     VacationModel vacObj = new VacationModel();
                     vacObj.Start_Date = teacherObj.Start_Date__c;
                     vacObj.End_Date = teacherObj.End_Date__c;
@@ -588,7 +588,7 @@ Developer   :
             }        
         }
         if(FieldPremissionCrudUtility.checkReadPermission('Holiday__c', new Set<String>{'Id', 'Start_Time__c', 'Start_Date__c', 'End_Date__c', 'End_Time__c'}, false)){
-            for(Holiday__c holiObj : [SELECT Id, Start_Time__c, Start_Date__c, End_Time__c, End_Date__c FROM Holiday__c WHERE CALENDAR_YEAR(Start_Date__c) =: currentSessionDate.year()]){
+            for(Holiday__c holiObj :  HolidayService.getByYear(currentSessionDate)){
                 VacationModel vacObj = new VacationModel();
                 vacObj.Start_Date = holiObj.Start_Date__c;
                 vacObj.End_Date = holiObj.End_Date__c;
@@ -696,7 +696,7 @@ Developer   :
             ,'Start_Date__c','End_Date__c','Status__c'}, false);
         if(isTeacherLeaveAccessible){
             if(String.isNotBlank(teacherIds)){
-                leaveList = [SELECT Id, Teacher__c, Start_Date__c, End_Date__c FROM Teacher_Leave__c WHERE Status__c = 'Approved' AND Teacher__c IN: setId];
+                leaveList = TeacherLeaveService.getByTeacherId(setId);//[SELECT Id, Teacher__c, Start_Date__c, End_Date__c FROM Teacher_Leave__c WHERE Status__c = 'Approved' AND Teacher__c IN: setId];
                 if(leaveList.size() > 0){
                     return leaveList;
                 }   
@@ -713,7 +713,7 @@ Developer   :
         date startDt = date.valueOf(selectedDate); 
         List<Holiday__c> holidayList = new List<Holiday__c>();
         if(FieldPremissionCrudUtility.checkReadPermission('Holiday__c', new Set<String>{'Id', 'Start_Date__c', 'End_Date__c'}, false)){
-            holidayList = [SELECT id, Start_Date__c, End_Date__c FROM Holiday__c WHERE CALENDAR_YEAR(Start_Date__c) =: startDt.year()];
+            holidayList = HolidayService.getByYear(startDt);//[SELECT id, Start_Date__c, End_Date__c FROM Holiday__c WHERE CALENDAR_YEAR(Start_Date__c) =: startDt.year()];
             if(holidayList.size() > 0){
                 return holidayList;
             }

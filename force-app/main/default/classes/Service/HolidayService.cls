@@ -13,5 +13,20 @@ public class HolidayService {
         }
         return null;
     }
+    //Added on 17-08-20 to get holiday by year
+    public static List<Holiday__c> getByYear(Date startDate){
+        if(startDate !=  null){
+            try {
+                return [SELECT Id, Start_Time__c, Start_Date__c, 
+                        End_Time__c, End_Date__c
+                        FROM Holiday__c WHERE 
+                        CALENDAR_YEAR(Start_Date__c) =: startDate.year()
+                        WITH SECURITY_ENFORCED];
+            }catch (System.QueryException e) {
+                System.debug(e.getMessage());
+            }          
+        }
+        return null;   
+    }
 }
     

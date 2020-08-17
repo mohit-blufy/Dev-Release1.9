@@ -119,7 +119,7 @@ Description :   Now we fetch the teacher records from teacher_working_hours base
         // Id devRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Teacher').getRecordTypeId();    
         if(profileName != 'Teacher'){
             teacherList.add( new SelectOption( 'All_Teachers', 'All Teachers'));  
-            for (Teacher_Working_Hours__c teacherObj : [SELECT Id, Teacher__r.id, teacher__r.Name FROM Teacher_Working_Hours__c WHERE location__c =: selectedLocation AND teacher__r.recordtype.Id =: ConstantClass.teacherRecordTypeId]){
+            for (Teacher_Working_Hours__c teacherObj : TeacherWorkingHoursService.getByLocationIdAndTeacherRecordsTypeId(new Set<String>{selectedLocation})){//[SELECT Id, Teacher__r.id, teacher__r.Name FROM Teacher_Working_Hours__c WHERE location__c =: selectedLocation AND teacher__r.recordtype.Id =: ConstantClass.teacherRecordTypeId]
                 //teacherList.add( new SelectOption( teacherObj.Teacher__r.id, teacherObj.teacher__r.Name ));
                 teacherMap.put( teacherObj.Teacher__r.id, teacherObj.teacher__r.Name);
             } 
@@ -154,7 +154,7 @@ Developer   :
                 locationList.add( new SelectOption( accObj.Id, accObj.name ));
             }        
         }else if(profileName == 'Teacher' && teacherList.size() > 0){
-            for(Teacher_Working_Hours__c tlObj : [SELECT Id, Location__c FROM Teacher_Working_Hours__c WHERE Teacher__c =: teacherList.get(0).getValue()]){
+            for(Teacher_Working_Hours__c tlObj : TeacherWorkingHoursService.getByTeacherId(new Set<String>{teacherList.get(0).getValue()})){//[SELECT Id, Location__c FROM Teacher_Working_Hours__c WHERE Teacher__c =: teacherList.get(0).getValue()]
                 teacherLocationIds.add(tlObj.Location__c);
             }
             if(teacherLocationIds.size() > 0){
@@ -188,7 +188,7 @@ Developer   :
             teacherIds.add(selectedTeacher);
         }
         if(String.isNotBlank(selectedTeacher) && teacherIds.size() > 0){
-            for(Class__c classObj : [SELECT id, Course__c FROM Class__c WHERE Teacher__c IN: teacherIds]){
+            for(Class__c classObj : ClassService.getByTeacherId(teacherIds)){//[SELECT id, Course__c FROM Class__c WHERE Teacher__c IN: teacherIds]
                 if(classObj.Course__c != null)
                     courseId.add(classObj.Course__c);
             }

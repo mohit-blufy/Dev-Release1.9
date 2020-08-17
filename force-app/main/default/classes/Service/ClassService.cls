@@ -61,4 +61,19 @@ public  class ClassService{
         }
         return null;
     }
+
+    //Added on 17-08-20 get records by Teacher Id
+    public static List<Class__c> getByTeacherId(Set<String> teacherIds){
+        if(teacherIds.size() > 0){
+            try{
+                return [ SELECT id, Course__c 
+                FROM Class__c 
+                WHERE Teacher__c IN: teacherIds  
+                WITH SECURITY_ENFORCED];
+            }catch(System.QueryException e) {
+                System.debug(e.getMessage());
+            }        
+        }
+        return null;
+    }
 }
