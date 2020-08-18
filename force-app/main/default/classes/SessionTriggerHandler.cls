@@ -41,7 +41,8 @@ public class SessionTriggerHandler {
                 }
             }
             if(newStudentSessionToUpdate.size() > 0){
-                update newStudentSessionToUpdate;
+                // update newStudentSessionToUpdate;
+                StudentSessionService.updateStudentSessionRecords(newStudentSessionToUpdate);
             }
         }catch(Exception e){
             system.debug('Exception==='+e.getMessage());
@@ -51,9 +52,7 @@ public class SessionTriggerHandler {
     //Divya: to get Student Sessions Map by session id
     public static Map<Id, List<Student_Session__c>> getStudentSessions(Set<Id> sessionIds){
         Map<Id, List<Student_Session__c>> studentSessionWithSessionMap = new Map<Id, List<Student_Session__c>>();
-        for(Student_Session__c studentSessionObj : [SELECT Id,Session__c, Status__c 
-                                                    from Student_Session__c
-                                                    WHERE Session__c IN :sessionIds ]){
+        for(Student_Session__c studentSessionObj : StudentSessionService.getBySessionId(sessionIds)){//[SELECT Id,Session__c, Status__c from Student_Session__c WHERE Session__c IN :sessionIds ]
             if(!studentSessionWithSessionMap.containsKey(studentSessionObj.Session__c)){
                 studentSessionWithSessionMap.put(studentSessionObj.Session__c, new List<Student_Session__c>());
             }

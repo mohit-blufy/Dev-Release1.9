@@ -40,4 +40,21 @@ public class EnrollmentService {
         return null;
     }
     
+    public static List<Enrollment__c> updateByList(List<Enrollment__c> enrollList){
+        if(enrollList.size() > 0){
+            try{
+                SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.UPDATABLE,enrollList,true);
+                if(securityDecision.getRemovedFields().keySet().size() > 0){
+                    System.debug('Enrollemet Removed Fields-->'+securityDecision.getRemovedFields());
+                }
+                else{
+                    update securityDecision.getRecords();
+                    return securityDecision.getRecords();
+                }
+            }catch(Exception e) {
+                System.debug('Error While saving enrollemet records'+e.getMessage());   
+            }
+        }
+        return null;
+    }
 }

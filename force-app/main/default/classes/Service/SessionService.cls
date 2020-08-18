@@ -34,6 +34,28 @@ public class SessionService {
         }
         return null;
     }
+
+    //update of Session Records    
+    public static List<Session__c> updateSessionRecords(List<Session__c> listSession){
+        if(listSession.size() > 0){
+            try{        
+                    SObjectAccessDecision securityDecision = Security.stripInaccessible(AccessType.UPDATABLE, listSession,true);
+                    if(securityDecision.getRemovedFields().keySet().size() > 0){
+                        System.debug('Session Removed Fields-->'+securityDecision.getRemovedFields());
+                    }
+                    else{
+                        update securityDecision.getRecords();
+                        return securityDecision.getRecords();
+                    }
+                }
+            
+            catch(Exception e){
+                System.debug('Session Error Message-->'+e.getMessage());
+            }
+        }
+        return null;
+    }
+
     //get of Session Records
     public static List<Session__c> getById(set<Id> sessionId){
         try{

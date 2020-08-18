@@ -62,7 +62,7 @@ Developer   :
                 if(FieldPremissionCrudUtility.checkReadPermission('Session__c', new Set<String>{'Id','Name'}, false) &&  FieldPremissionCrudUtility.checkReadPermission('Account', new Set<String>{'Id','Name'}, false) && FieldPremissionCrudUtility.checkReadPermission('Class__c', new Set<String>{'Id','Name'}, false)){
                     isStudentSessionAccessible = FieldPremissionCrudUtility.checkReadPermission('Student_Session__c', fieldsApiName, false);
                     if(isStudentSessionAccessible){
-                        studentList = [SELECT Session__c, Session__r.Teacher__r.Name, Account__r.Name, Session__r.Class__r.Name, Status__c, Notes__c, Session__r.Class__r.Course__r.Name, Enrollment__c  FROM Student_Session__c WHERE Session__c =: sessionId];
+                        studentList = StudentSessionService.getBySessionId(new Set<Id>{sessionId});//[SELECT Session__c, Session__r.Teacher__r.Name, Account__r.Name, Session__r.Class__r.Name, Status__c, Notes__c, Session__r.Class__r.Course__r.Name, Enrollment__c  FROM Student_Session__c WHERE Session__c =: sessionId];
                         if(studentList.size() > 0){
                             return studentList;
                         }
@@ -117,7 +117,7 @@ Developer   :
     @RemoteAction
     global static List<Course_Assessment__c> getCrsAssessmentNames(String crsId){
         System.debug('crsId@@@'+crsId);
-        List<Course_Assessment__c> crsAssessmentPlist = [SELECT Name,Course__c FROM Course_Assessment__c where Course__c =: crsId];
+        List<Course_Assessment__c> crsAssessmentPlist = CourseAssessmentService.getByCourseId(new Set<String>{crsId});//[SELECT Name,Course__c FROM Course_Assessment__c where Course__c =: crsId];
         system.debug('crsAssessmentPlist-->'+crsAssessmentPlist);
         if (crsAssessmentPlist.size() > 0){
             return crsAssessmentPlist; 
@@ -152,7 +152,7 @@ Developer   :
                     assessmentObj.put(ConstantClass.nameSpace+'Course_Assessment__c',crsAssId);
                     assessmentObj.put(ConstantClass.nameSpace+'Status__c',ConstantClass.ScheduledStatus);
                     assessmentObj.put(ConstantClass.nameSpace+'Assessment_Date__c',Date.Today());
-                    if(obj.keyValues.size() > 0){
+                    if(obj.keyValues != null&& obj.keyValues.size() > 0){
                         for(KeyValuesWrapper keyValueObj : obj.keyValues){
                             if(keyValueObj.type == 'Date'){
                                 assessmentObj.put(keyValueObj.name,Date.valueOf(keyValueObj.value));
@@ -170,11 +170,12 @@ Developer   :
                 }
             }
             if (assessList.size() > 0){
-                try{
-                    insert assessList;
-                }catch(Exception ex){
-                    system.debug('Error -> '+ex.getMessage());                   
-                }
+                AssessmentService.insertRecords(assessList);
+                // try{
+                //     insert assessList;
+                // }catch(Exception ex){
+                //     system.debug('Error -> '+ex.getMessage());                   
+                // }
             }
         }
     }
@@ -205,17 +206,26 @@ Developer   :
                     studentList.add(sessionObj);
                 }
                 if(studentList.size() > 0){
-                    try{
-                        update studentList;
-                        if(String.isNotBlank(sessionId) && status == 'Completed'){
-                            session__c sessObj = new session__c(id = sessionId);
-                            sessObj.Attendance_Update__c = true;
-                            update sessObj;
-                            
-                        }
-                    }catch(Exception ex){
-                        system.debug('Error -> '+ex.getMessage());                   
+
+                    StudentSessionService.updateStudentSessionRecords(studentList);
+
+                    if(String.isNotBlank(sessionId) && status == 'Completed'){
+                        session__c sessObj = new session__c(id = sessionId);
+                        sessObj.Attendance_Update__c = true;
+                        SessionService.updateSessionRecords(new List<Session__c>{sessObj});
+                                
                     }
+                    // try{
+                    //     update studentList;
+                    //     if(String.isNotBlank(sessionId) && status == 'Completed'){
+                    //         session__c sessObj = new session__c(id = sessionId);
+                    //         sessObj.Attendance_Update__c = true;
+                    //         update sessObj;
+                            
+                    //     }
+                    // }catch(Exception ex){
+                    //     system.debug('Error -> '+ex.getMessage());                   
+                    // }
                 }
             }
         }
@@ -236,7 +246,8 @@ Developer   :
                 Student_Session__c sessionStuObj = new Student_Session__c(id = sessionStudentsId);            
                 sessionStuObj.status__c = ConstantClass.cancelledStatus;
                 try{
-                    update sessionStuObj;
+                    StudentSessionService.updateStudentSessionRecords(new List<Student_Session__c>{sessionStuObj});
+                    //update sessionStuObj;
                 }catch(Exception ex){
                     system.debug('Error -> '+ex.getMessage());                   
                 }
@@ -256,7 +267,8 @@ Developer   :
             Session__c sessionObj = new Session__c(id = sessionId);            
             sessionObj.status__c = ConstantClass.cancelledStatus;
             try{
-                update sessionObj;
+                SessionService.updateSessionRecords(new List<Session__c>{sessionObj});
+                //update sessionObj;
             }catch(Exception ex){
                 system.debug('Error -> '+ex.getMessage());                   
             }

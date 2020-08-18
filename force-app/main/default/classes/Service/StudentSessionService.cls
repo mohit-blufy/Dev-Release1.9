@@ -39,4 +39,21 @@ public class StudentSessionService {
         }
         return null;
     }
+
+    public static List<Student_Session__c> getBySessionId(Set<Id> sessionIds){
+        if(sessionIds.size() > 0){
+            try{
+                return [SELECT Session__c, Session__r.Teacher__r.Name,
+                        Account__r.Name, Session__r.Class__r.Name, 
+                        Status__c, Notes__c, Enrollment__c,
+                        Session__r.Class__r.Course__r.Name
+                        FROM Student_Session__c
+                        WHERE Session__c IN :sessionIds
+                        WITH SECURITY_ENFORCED];
+            }catch(System.QueryException e){
+                System.debug(e.getMessage());
+            }        
+        }
+        return null;
+    }
 }

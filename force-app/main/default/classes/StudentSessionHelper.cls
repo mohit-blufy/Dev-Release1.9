@@ -18,7 +18,8 @@ public class StudentSessionHelper {
                 mapOfEnrollment.put(objEnrollment.id,objEnrollment);
             }
             if(isEnrollmentAccessible){
-                update mapOfEnrollment.values();
+               // update mapOfEnrollment.values();
+               EnrollmentService.updateByList(mapOfEnrollment.values());
             }
             else{
                 system.debug('FLS not found for Enrollment ');
@@ -74,7 +75,8 @@ public class StudentSessionHelper {
                 lstEnrollment.add(objEnrollment);
             }
             if(isEnrollmentUpdatable)
-                update lstEnrollment;
+                //update lstEnrollment;
+                EnrollmentService.updateByList(lstEnrollment);
             else
                 system.debug('FLS not found for Enrollment ');
         }
