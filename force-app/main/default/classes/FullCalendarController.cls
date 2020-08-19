@@ -53,7 +53,7 @@ global with sharing class FullCalendarController {
             getFullCalendatMetadata();
             getProfileName();
             
-            if(profileName == 'Teacher'){
+            if(profileName == ConstantClass.teacherRecType){
                 populateTeachers();
                 populateLocations();
                 if(locationList.size() > 0){
@@ -117,7 +117,7 @@ Description :   Now we fetch the teacher records from teacher_working_hours base
         teacherMap = new Map<Id, String>();
         //system.debug('selectedLocation '+selectedLocation);            
         // Id devRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Teacher').getRecordTypeId();    
-        if(profileName != 'Teacher'){
+        if(profileName != ConstantClass.teacherRecType){
             teacherList.add( new SelectOption( 'All_Teachers', 'All Teachers'));  
             for (Teacher_Working_Hours__c teacherObj : TeacherWorkingHoursService.getByLocationIdAndTeacherRecordsTypeId(new Set<String>{selectedLocation})){//[SELECT Id, Teacher__r.id, teacher__r.Name FROM Teacher_Working_Hours__c WHERE location__c =: selectedLocation AND teacher__r.recordtype.Id =: ConstantClass.teacherRecordTypeId]
                 //teacherList.add( new SelectOption( teacherObj.Teacher__r.id, teacherObj.teacher__r.Name ));
@@ -149,11 +149,11 @@ Developer   :
 */
     private void populateLocations(){
         //Id devRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Location').getRecordTypeId();            
-        if(profileName != 'Teacher'){
+        if(profileName != ConstantClass.teacherRecType){
             for(Account accObj : [SELECT Id,Name FROM Account WHERE recordtype.Id =: ConstantClass.locationRecordsTypeId]){
                 locationList.add( new SelectOption( accObj.Id, accObj.name ));
             }        
-        }else if(profileName == 'Teacher' && teacherList.size() > 0){
+        }else if(profileName == ConstantClass.teacherRecType && teacherList.size() > 0){
             for(Teacher_Working_Hours__c tlObj : TeacherWorkingHoursService.getByTeacherId(new Set<String>{teacherList.get(0).getValue()})){//[SELECT Id, Location__c FROM Teacher_Working_Hours__c WHERE Teacher__c =: teacherList.get(0).getValue()]
                 teacherLocationIds.add(tlObj.Location__c);
             }
@@ -178,7 +178,7 @@ Developer   :
         set<Id> courseId = new set<Id>();
         set<String> teacherIds = new set<String>();
         String status = ConstantClass.inActiveCourse;
-        String query = 'SELECT Id, Name FROM Course__c WHERE Status__c !=: status ';
+        String query = 'SELECT Id, Name FROM Course__c WHERE Status__c != \''+string.escapeSingleQuotes(status)+ '\' ';
         system.debug('teacherMap '+teacherMap);
         if(selectedTeacher == 'All_Teachers' && !teacherMap.isEmpty()){           
             for(id teachId : teacherMap.keySet()){
@@ -194,13 +194,19 @@ Developer   :
             }
         }
         if(courseId.size() > 0){
-            query += ' AND Id IN: courseId';
+            query += ' AND Id IN (';
+            for(Id cId : courseId){                
+                query += '\''+string.escapeSingleQuotes(cId)+ '\',';
+            }
+            query = query.removeEnd(',');
+            query += ')';
+            //query += ' AND Id IN: courseId';
         }
         system.debug('selectedTeacher'+selectedTeacher);
         system.debug('coursequery'+courseId);
         system.debug('coursequery'+query);
         if(courseId.size() > 0){
-            for(Course__c courObj : Database.query(query)){
+            for(Course__c courObj : CourseService.getByStringQuery(query)){//Database.query(query)
                 courseList.add(new SelectOption(courObj.Id, courObj.Name));
             }
         }
@@ -219,7 +225,7 @@ Developer   :
         String query = 'SELECT Id, Course__c, Name, Teacher__c FROM Class__c WHERE ';
         //system.debug('selectedCourse  ->'+selectedCourse);
         if(String.isNotBlank(selectedCourse) && selectedCourse != 'All_Courses'){
-            query += ' Course__c =: selectedCourse AND ';
+            query += ' Course__c =\''+string.escapeSingleQuotes(selectedCourse)+'\' AND ';
         }
         if(String.isNotBlank(selectedTeacher) && selectedTeacher == 'All_Teachers' && teacherList.size() > 1){
             query += 'Teacher__c IN (';
@@ -230,17 +236,17 @@ Developer   :
             query = query.removeEnd(',');
             query += ') AND ';
         }else if(String.isNotBlank(selectedTeacher) && selectedTeacher != 'All_Teachers'){
-            query += ' Teacher__c =: selectedTeacher AND';
+            query += ' Teacher__c =\''+string.escapeSingleQuotes(selectedTeacher)+'\' AND';
         }
         if(String.isNotBlank(selectedLocation)){
-            query += ' Location__c =: selectedLocation';
+            query += ' Location__c = \''+string.escapeSingleQuotes(selectedLocation)+'\'';
         }else{
             query = query.removeEnd(' AND');    
         }    
         //system.debug('selectedTeacher '+selectedTeacher);
         //system.debug('selectedLocation '+selectedLocation);
         system.debug(query);
-        for(Class__c classObj : Database.query(query)){
+        for(Class__c classObj : ClassService.getByStringQuery(query)){//Database.query(query)
             classList.add(new SelectOption(classObj.Id, classObj.Name));
         }
     }

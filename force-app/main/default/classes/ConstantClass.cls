@@ -88,6 +88,6 @@ public class ConstantClass {
     public static boolean isSkipHolidayForMonthlySess = false;
 
     public static string section =  'Calendar Assessment';
-    public static String nameSpace = System.Label.Namespace == 'None' ? '' : System.Label.Namespace;
+    public static String nameSpace = System.Label.Namespace == 'None' ? '' : System.Label.Namespace + '__';
     
 }
