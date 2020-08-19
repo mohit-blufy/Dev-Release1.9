@@ -11,5 +11,14 @@ public class CourseService {
         }
         return null;
     }
-
+    public static List<Course__c> getByStringQuery(String query){
+        if(String.isNotBlank(query)){
+            try{
+                return Database.query(query+' WITH SECURITY_ENFORCED');
+            }catch(Exception e){
+                System.debug('Error while excute dynamic query in Course services '+e.getMessage());
+            }
+        }
+        return null;
+    }
 }
