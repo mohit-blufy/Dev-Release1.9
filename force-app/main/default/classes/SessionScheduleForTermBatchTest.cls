@@ -1,5 +1,5 @@
 @isTest
-public class SessionScheduleForTermBatchTest {
+public class SessionScheduleForTermBatchTest{
 	@testSetup
     static void testDataSetup(){
         BlufyTestUtil.init();        

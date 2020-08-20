@@ -29,7 +29,7 @@ public class TermFullInvoiceHandler extends iBlufyInvoiceEngine {
                     if(objTerm.Start_Date__c!= NULL && objTerm.Start_Date__c > objLineItem.Class_Term__r.Start_Date__c && 
                        objTerm.Sequence__c > objLineItem.Class_Term__r.Sequence__c ){
                            System.debug('effective term '+objTerm);
-                           objLineItem.put('Class_Term__c',objTerm.Id);
+                           objLineItem.put(ConstantClass.nameSpace+'Class_Term__c',objTerm.Id);
                            //objLineItem.Class_Term__c = objTerm.Id;
                            //System.debug('advance billing '+objTerm.Class__r.Advance_Billing__c);
                            Integer unit = (Integer)(-1*objTerm.Class__r.Advance_Billing__c);
@@ -45,7 +45,7 @@ public class TermFullInvoiceHandler extends iBlufyInvoiceEngine {
                            }else if(unitType == 'Month(s)'){
                                nextDate = objTerm.Start_Date__c.addMonths(unit);
                            }
-                           objLineItem.put('Next_Bill_Date__c',nextDate);
+                           objLineItem.put(ConstantClass.nameSpace+'Next_Bill_Date__c',nextDate);
                            //objLineItem.Next_Bill_Date__c = nextDate;
                            break;
                        }else{

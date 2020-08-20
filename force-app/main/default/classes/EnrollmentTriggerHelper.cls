@@ -22,7 +22,9 @@ public with sharing class EnrollmentTriggerHelper {
         
         Map<String, Decimal> perDaySessFeeMap = new Map<String, Decimal>();
         List<Fee_Allocation__c> feeAllList = new List<Fee_Allocation__c>();
+        System.debug('@@@@Enrollmap'+enrolmap.values());
         for(Enrollment__c enrol : enrolmap.values()){ 
+            System.debug('@@@@'+enrol.Invoice_Line_Items__r);
             if(enrol.Invoice_Line_Items__r.size() > 0){
                 Decimal tutionFee = enrolmap.get(enrol.Id).Invoice_Line_Items__r.get(0).Amount__c;
                 
@@ -170,7 +172,7 @@ public with sharing class EnrollmentTriggerHelper {
                        Integer stuSessSize = enrolmnt.Student_Sessions__r.size()-1;
                        currClsTrmStrtDate = enrolmnt.Student_Sessions__r[stuSessSize].Session__r.Class_Term__r.Start_Date__c;
                    }
-                   
+                   System.debug(mapClassToClassTerms.containsKey(enrolmnt.Class__c)+'----'+currClsTrmStrtDate);
                    if(mapClassToClassTerms.containsKey(enrolmnt.Class__c) && currClsTrmStrtDate != NULL){
                        List<Class_Term__c> listClsTrm = mapClassToClassTerms.get(enrolmnt.Class__c);
                        for(Class_Term__c clsTrm : listClsTrm){

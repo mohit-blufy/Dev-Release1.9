@@ -1,6 +1,6 @@
 @isTest
 //------- Insertion of Class Term when term status changes to Open in Classes with type ongoing & term frequency -----//
-public class TermTriggerTest {
+public class TermTriggerTest { 
     public static testmethod void validateTermTrigger(){
         
         Course__c course  		  = BlufyTestUtil.createCourseRec('Test', 'Active', 'Test');
@@ -16,7 +16,7 @@ public class TermTriggerTest {
                                                                  ConstantClass.draftStatus, tch.Id, 40, 
                                                                  ConstantClass.ongoingClsType, 21, Date.today()+1,
                                                                  Time.newInstance(4,4,5,6),ConstantClass.minutesDurationPicklist,
-                                                                 4, ConstantClass.termFrequency);
+                                                                 4, ConstantClass.termFrequency, null);
 		insert cls;
         Class_Session__c clsSess = BlufyTestUtil.createClassSessionRec(cls.Id,Time.newInstance(10,30,00,00),120);
         insert clsSess;
@@ -24,9 +24,9 @@ public class TermTriggerTest {
   		// create term with different status
         List<Term__c> trmList = new List<Term__c>();
         
-        trmList.add(new Term__c(Name = 'Test1', Year__c=''+System.today().year(), Status__c = ConstantClass.draftStatus, Start_Date__c = System.today().addDays(1),End_Date__c = System.today().addDays(6),
+        trmList.add(new Term__c(Name = 'Test1', Year__c=String.valueOf(Date.today().Year()), Status__c = ConstantClass.draftStatus, Start_Date__c = System.today().addDays(1),End_Date__c = System.today().addDays(6),
                     Sessions__c = 21, Sequence__c = 1));
-        trmList.add(new Term__c(Name = 'Test2',Year__c=''+System.today().year(), Status__c = ConstantClass.draftStatus, Start_Date__c = System.today().addDays(1),End_Date__c = System.today().addDays(6),
+        trmList.add(new Term__c(Name = 'Test2',Year__c=String.valueOf(Date.today().Year()), Status__c = ConstantClass.draftStatus, Start_Date__c = System.today().addDays(1),End_Date__c = System.today().addDays(6),
                     Sessions__c = 24, Sequence__c = 2));        
         insert trmList;
         
@@ -43,6 +43,7 @@ public class TermTriggerTest {
         update trmUpdate;
         
         clsTermList = [select Name,id from Class_Term__c where Class__c =: cls.Id];
+                
         System.assertEquals(1, clsTermList.size());
     }
 }

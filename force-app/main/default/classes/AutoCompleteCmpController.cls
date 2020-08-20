@@ -3,7 +3,7 @@ public class AutoCompleteCmpController {
     public static List<SObject> getRecords(String searchString, String objectApiName, String idFieldApiName, String valueFieldApiName, String extendedWhereClause, Integer maxRecords){
         Set<String> fieldsApiName = new Set<String>{'Id', 'Name'};
         if(String.isNotBlank(objectApiName) && objectApiName.endsWith('__c'))
-            objectApiName = ''+objectApiName;
+            objectApiName = ConstantClass.nameSpace + objectApiName;
         Boolean isAccessible = FieldPremissionCrudUtility.checkReadPermission(objectApiName,fieldsApiName,false);    
         if(isAccessible){
             searchString = String.escapeSingleQuotes(searchString);
@@ -15,12 +15,12 @@ public class AutoCompleteCmpController {
                 extendedWhereClause = '';
             }
             System.debug('@@@@-->'+extendedWhereClause);
-            String query = 'SELECT '+idFieldApiName+', '+valueFieldApiName+' FROM '+objectApiName+' WHERE '+valueFieldApiName+' LIKE \'%'+String.escapeSingleQuotes(searchString)+'%\' '+extendedWhereClause+' LIMIT '+maxRecords;
+            String query = 'SELECT '+idFieldApiName+', '+valueFieldApiName+' FROM '+objectApiName+' WHERE '+valueFieldApiName+' LIKE \'%'+String.escapeSingleQuotes(searchString)+'%\' '+extendedWhereClause+' WITH SECURITY_ENFORCED LIMIT '+maxRecords;
             if(objectApiName.equalsIgnoreCase('Account')){
                 if(extendedWhereClause.startsWith('001'))
                     extendedWhereClause = ' AND Parent__c = \'' +extendedWhereClause+ '\' AND Recordtype.Name =\'Customer\' ';
                 //query = 'SELECT '+idFieldApiName+', '+valueFieldApiName+',LastName,PersonEmail FROM '+objectApiName+' WHERE Recordtype.Name =\'Customer\' AND '+valueFieldApiName+' LIKE \'%'+searchString+'%\' '+extendedWhereClause+' LIMIT '+maxRecords;
-                query = 'SELECT '+idFieldApiName+', '+valueFieldApiName+',LastName,PersonEmail FROM '+objectApiName+' WHERE '+valueFieldApiName+' LIKE \'%'+String.escapeSingleQuotes(searchString)+'%\' '+extendedWhereClause+' LIMIT '+maxRecords;
+                query = 'SELECT '+idFieldApiName+', '+valueFieldApiName+',LastName,PersonEmail FROM '+objectApiName+' WHERE '+valueFieldApiName+' LIKE \'%'+String.escapeSingleQuotes(searchString)+'%\' '+extendedWhereClause+' WITH SECURITY_ENFORCED LIMIT '+maxRecords;
             }       
             System.debug('@@@@-->'+query);
             return Database.query(query);

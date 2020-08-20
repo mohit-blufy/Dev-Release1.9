@@ -10,7 +10,7 @@ global with sharing class ClassAutoUpdateModuleBatchApex implements Database.Bat
     global Database.QueryLocator start(Database.BatchableContext bc) {
         
         // ****Retrieving Classes which having Auto Update Module checkbox is checked true**** //
-        String query = ' SELECT Id,Name,Auto_Update_Module__c,Starting_Module_Lesson__c,Course__c,';
+        String query = ' SELECT Id,Name,Auto_Update_Module__c,Starting_Module_Lesson__c,Course__c, ';
         query 		+= ' Current_Course_Module__c,Next_Module_Lesson__r.Sequence__c,Next_Module_Lesson__c FROM Class__c ';
         query 		+= ' WHERE Auto_Update_Module__c = true AND Next_Module_Lesson__c != NULL ';
         query       += ' AND Last_Session_Date__c = TODAY AND Current_Course_Module__c != NULL WITH SECURITY_ENFORCED ';

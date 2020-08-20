@@ -10,6 +10,7 @@ public class ConstantClass {
     public static String tutionFeeType       	 = 'Tuition Fee';
     public static String depositFeeType      	 = 'Deposit';
     public static String ScheduledStatus     	 = 'Scheduled';
+    public static String completedStatus     	 = 'Completed';
     public static String approvedStatus     	 = 'Approved';
     public static String termFrequency       	 = 'Term';
     public static String oneTimeFrequency        = 'One-time';  

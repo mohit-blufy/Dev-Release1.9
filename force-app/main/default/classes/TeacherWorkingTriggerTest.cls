@@ -22,14 +22,14 @@ public class TeacherWorkingTriggerTest {
         objTeacherWorkHours.End_Time__c = Time.newInstance(23, 00, 00, 00);
         insert objTeacherWorkHours;
         
-        Teacher_Working_Hours__c objTeacherWorkHours2 = new Teacher_Working_Hours__c();
+        /*Teacher_Working_Hours__c objTeacherWorkHours2 = new Teacher_Working_Hours__c();
         objTeacherWorkHours2.Location__c = objLocation.id;
         objTeacherWorkHours2.Teacher__c = objTeacher.id;
-        objTeacherWorkHours2.Day__c = 'Sun';
+        objTeacherWorkHours2.Day__c = 'Mon;Tue;Wed';
         objTeacherWorkHours2.Active__c = true;
         objTeacherWorkHours2.Start_Time__c = Time.newInstance(10, 00, 00, 00);
         objTeacherWorkHours2.End_Time__c = Time.newInstance(23, 00, 00, 00);
-        insert objTeacherWorkHours2;
+        insert objTeacherWorkHours2;*/
         
     }
     private static testMethod void TeacherWorkingInsertionTest(){
@@ -48,7 +48,7 @@ public class TeacherWorkingTriggerTest {
             System.debug('An error happened, as predicted!');
         }
         
-        System.assertEquals(2,[SELECT ID FRoM Teacher_Working_Hours__c].size());
+        System.assertEquals(1,[SELECT ID FRoM Teacher_Working_Hours__c].size());
     }
     private static testMethod void TeacherWorkingUpdationTest(){
         List<Teacher_Working_Hours__c> lstToUpdate = new List<Teacher_Working_Hours__c>();
@@ -69,7 +69,7 @@ public class TeacherWorkingTriggerTest {
         }catch (Exception e) { 
             System.debug('An error happened, as predicted!');
         }
-        System.assertEquals(2,[SELECT ID FRoM Teacher_Working_Hours__c].size());
+        System.assertEquals(1,[SELECT ID FRoM Teacher_Working_Hours__c].size());
     }
     
 }

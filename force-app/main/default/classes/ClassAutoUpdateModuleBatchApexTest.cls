@@ -1,6 +1,6 @@
 @isTest
 public class ClassAutoUpdateModuleBatchApexTest {
-    /*@testSetup
+    @testSetup
     static void testDataSetup(){
         BlufyTestUtil.init();        
     }
@@ -24,7 +24,8 @@ public class ClassAutoUpdateModuleBatchApexTest {
         clsObj.Auto_Update_Module__c     = true;
         clsObj.Current_Course_Module__c  = crsModuleObj.Id;
         clsObj.Starting_Module_Lesson__c = crsModuleObj.Id;
-        clsObj.Next_Module_Lesson__c  	  = crsModuleObj2.Id;
+        clsObj.Next_Module_Lesson__c  	 = crsModuleObj2.Id;
+        clsObj.Last_Session_Date__c      = System.today();
         update clsObj;
         
         Test.startTest();
@@ -32,5 +33,5 @@ public class ClassAutoUpdateModuleBatchApexTest {
         Database.executeBatch(obj);
         System.assertEquals(clsObj.Current_Course_Module__c = crsModuleObj2.Id, clsObj.Current_Course_Module__c = crsModuleObj2.Id);
         Test.stopTest();
-    }*/
+    }
 }

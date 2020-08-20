@@ -71,6 +71,8 @@ public class SessionScheduleCmpControllerTest {
         cls.Starting_Module__c   = cModule1.Id;
         update cls;
         
+        Room__c room = [Select Name, Type__c, Location__c, Capacity__c from Room__c where Location__c =: location.Id];
+        
         //create term and update for testing
         Term__c trm = [SELECT Name,Year__c,Status__c,Start_Date__c,End_Date__c,Sessions__c,Sequence__c FROM Term__c];
         
@@ -79,11 +81,21 @@ public class SessionScheduleCmpControllerTest {
                                 Exclude_Public_Holidays__c, Status__c, Class__r.Location__c
                                 FROM Class_Term__c WHERE Class__c =: cls.Id AND Status__c='Draft' LIMIT 1];
         
+        Class_Session__c clsSess = [Select Class__c, Start_Time__c, Duration__c from Class_Session__c where Class__c =: cls.Id];
+        clsSess.Teacher__c = tch.Id;
+        clsSess.Room__c    = room.Id;
+        update clsSess;
         
         Teacher_Leave__c tchLeave = [SELECT Name,Start_Date__c,End_Date__c,Teacher__c,Status__c FROM Teacher_Leave__c];
         
+        Location_Working_Hours__c LocationHours = new Location_Working_Hours__c(Location__c = location.Id, Active__c = true, 
+                                                                                Start_Time__c = Time.newInstance(4,4,4,4), 
+                                                                                Day__c = 'Sat;Sun;',
+                                                                                End_Time__c = Time.newInstance(9,9,9,9));
+        insert LocationHours;
+        
         Teacher_Working_Hours__c tchHours = new Teacher_Working_Hours__c(Teacher__c = tch.Id, Location__c = location.Id, Active__c = true,
-                                                                         Start_Time__c = Time.newInstance(4,4,5,6), Day__c = 'Fri;Mon;Tue;Wed;Sat;Thu;Sun',
+                                                                         Start_Time__c = Time.newInstance(4,4,5,6), Day__c = 'Sat;Sun;',
                                                                          End_Time__c = Time.newInstance(8,8,8,8));
         insert tchHours;
         

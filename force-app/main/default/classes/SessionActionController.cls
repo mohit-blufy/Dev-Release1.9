@@ -150,7 +150,7 @@ Developer   :
                     assessmentObj.put(ConstantClass.nameSpace+'Enrollment__c',obj.stuSess.Enrollment__c);
                     assessmentObj.put(ConstantClass.nameSpace+'Score_Grade__c',obj.selectedGrade);
                     assessmentObj.put(ConstantClass.nameSpace+'Course_Assessment__c',crsAssId);
-                    assessmentObj.put(ConstantClass.nameSpace+'Status__c',ConstantClass.ScheduledStatus);
+                    assessmentObj.put(ConstantClass.nameSpace+'Status__c',ConstantClass.completedStatus);
                     assessmentObj.put(ConstantClass.nameSpace+'Assessment_Date__c',Date.Today());
                     if(obj.keyValues != null&& obj.keyValues.size() > 0){
                         for(KeyValuesWrapper keyValueObj : obj.keyValues){

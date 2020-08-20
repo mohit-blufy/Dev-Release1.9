@@ -14,9 +14,8 @@ getClassData on  10-07-20  get the class data based on class set Ids
                 List<Class__c> clasList = new List<Class__c>();
                 for(Class__c clsObj : [SELECT Id, Name, Course__c,Current_Course_Module__c, Current_Course_Module__r.Sequence__c,
                                        Start_Date__c, End_Date__c, Start_Time__c, End_Time__c, Location__c, Location__r.Name,  
-                                       Teacher__r.Name, Type__c, Frequency__c, Status__c, Capacity__c, Days_of_Week__c, 
-                                       Sessions__c,Advance_Scheduling_Unit__c, Last_Session_Date__c, Next_Schedule_Date__c,
-                                       Advance_Scheduling__c FROM Class__c WHERE  Id IN: classId WITH SECURITY_ENFORCED]){
+                                       Teacher__r.Name, Type__c, Frequency__c, Status__c, Capacity__c, Days_of_Week__c, Sessions__c
+                                       FROM Class__c WHERE  Id IN: classId WITH SECURITY_ENFORCED]){
                                            clasList.add(clsObj);
                                        }
                 return clasList;
@@ -43,7 +42,7 @@ getClassData on  10-07-20  get the class data based on class set Ids
         return null;
     }
     
-    //Updation of Class Records
+    //Update of Class Records
     public static List<Class__c> updateClassRecords(List<Class__c> listClass){
         try{
             if(listClass.size() > 0){
@@ -67,10 +66,7 @@ getClassData on  10-07-20  get the class data based on class set Ids
     public static List<Class__c> getByTeacherId(Set<String> teacherIds){
         if(teacherIds.size() > 0){
             try{
-                return [ SELECT id, Course__c 
-                        FROM Class__c 
-                        WHERE Teacher__c IN: teacherIds  
-                        WITH SECURITY_ENFORCED];
+                return [ SELECT id, Course__c FROM Class__c WHERE Teacher__c IN: teacherIds WITH SECURITY_ENFORCED];
             }catch(System.QueryException e) {
                 System.debug(e.getMessage());
             }        
@@ -78,26 +74,60 @@ getClassData on  10-07-20  get the class data based on class set Ids
         return null;
     }
     
-    //Added by Shubhi on 18/08/2020 for Service Implementation on SessionSecheduleComp
-    public static List<Class__c> getClassByClassIdAlongWithClassTermId(String clsTermId,String classId){
-        try{
-            List<Class__c> listClass = new List<Class__c>();
-            if(String.isNotBlank(clsTermId) && String.isNotBlank(classId)){
-                listClass = [SELECT Id, Name,Teacher__c,Teacher__r.Name,Start_Date__c,End_Date__c,Days_of_Week__c, 
-                             Sessions__c,Duration__c,Location__c,Course__c,Exclude_Public_Holidays__c,
-                             (SELECT Id,Name,Sessions__c,Start_Date__c,End_Date__c
-                              FROM Class_Terms__r WHERE Id=:clsTermId AND Status__c='Draft' LIMIT 1),
-                             (SELECT Id,Name,Duration__c,Start_Time__c,Teacher__c,Teacher__r.Name,Room__c,
-                              Room__r.Name FROM Class_Sessions__r ORDER BY Start_Time__c),
-                             (SELECT Id,Sequence__c FROM Sessions__r ORDER BY Sequence__c DESC LIMIT 1)
-                             FROM Class__c WHERE Id =: classId];
-                
+    public static List<Class__c> getByStringQuery(String query){
+        if(String.isNotBlank(query)){
+            try{
+                return Database.query(query+' WITH SECURITY_ENFORCED');
+            }catch(Exception e){
+                System.debug('Error while excute dynamic query in class services '+e.getMessage());
             }
-            return listClass;  
-        }
-        catch (System.QueryException e){
-            System.debug(e.getMessage());
         }
         return null;
     }
+    
+    public static List<Class__c> getByCourseIdAlongWithClassTerms(String courseId){
+        if(String.isNotBlank(courseId)){
+            try {
+                List<Class__c> clasList = [SELECT Id, Name, Start_Date__c, End_Date__c, Start_Time__c, End_Time__c,Location__c, 
+                                           Location__r.Name,Teacher__r.Name, Type__c, Frequency__c, Status__c, Capacity__c, 
+                                           Days_of_Week__c,Seats_Available__c,
+                                           (SELECT Id, Name, Start_Date__c, End_Date__c,Sessions__c, Status__c 
+                                            FROM  Class_Terms__r WHERE Status__c =:ConstantClass.ScheduledStatus AND 
+                                            Allow_Enrollment__c = True AND Sessions__c > 0 AND  Start_Date__c != null AND  
+                                            End_Date__c != null ORDER BY Sequence__c
+                                           ) FROM Class__c 
+                                           WHERE Course__c =:courseId AND  Type__c != null AND Frequency__c != null 
+                                           AND (Status__c =: ConstantClass.clsOpenStatus OR 
+                                                (Allow_Overbooking__c = True AND Status__c =: ConstantClass.clsClosedStatus))
+                                           WITH SECURITY_ENFORCED];
+                
+                return clasList;
+            }catch (System.QueryException e) {
+                System.debug(e.getMessage());
+            }        
+        }
+        return null;
+    } 
+    
+    public static List<Class__c> getByIdAlongWithEnrolDate(String classId,Date enrolDate){
+        if(String.isNotBlank(classId) && enrolDate != NULL){
+            try {
+                List<Class__c> clasList = [SELECT Id, Name, Start_Date__c, End_Date__c, Start_Time__c, End_Time__c, Location__c,
+                                           Location__r.Name,Teacher__r.Name, Type__c, Frequency__c, Status__c, Capacity__c, 
+                                           Days_of_Week__c, Sessions__c,
+                                           (SELECT Id, Name, Sequence__c, Sessions__c, Start_Date__c, End_Date__c 
+                                            FROM Class_Terms__r WHERE Status__c =:ConstantClass.ScheduledStatus 
+                                            AND Allow_Enrollment__c = True AND Sessions__c > 0 AND Start_Date__c != null AND 
+                                            End_Date__c >: enrolDate ORDER BY Sequence__c)
+                                           FROM Class__c WHERE Id =:classId AND Days_of_Week__c != null AND Format__c != null 
+                                           WITH SECURITY_ENFORCED];
+                
+                return clasList;
+            }catch (System.QueryException e) {
+                System.debug(e.getMessage());
+            }        
+        }
+        return null;
+    } 
+    
 }

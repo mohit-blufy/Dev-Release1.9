@@ -196,7 +196,7 @@ Developer   :
     global static List<Location_Working_Hours__c> getWorkingHours(String locationId){
         List<Location_Working_Hours__c> workingHourList = new List<Location_Working_Hours__c>();
         fieldsApiName = new Set<String>{'Id', 'Name', 'Day__c', 'Start_Time__c', 'End_Time__c', 'Active__c', 'Location__c'};
-        isLocationWorkingHoursAccessible = FieldPremissionCrudUtility.checkReadPermission('Location_Working_Hours__c', fieldsApiName, false);
+            isLocationWorkingHoursAccessible = FieldPremissionCrudUtility.checkReadPermission('Location_Working_Hours__c', fieldsApiName, false);
         if(isLocationWorkingHoursAccessible){
             if(String.isNotBlank(locationId)){
                 for(Location_Working_Hours__c wokObj : LocationWorkingHoursService.getByLocationId(new Set<Id>{locationId})){
