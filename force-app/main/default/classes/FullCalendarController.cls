@@ -128,7 +128,7 @@ Description :   Now we fetch the teacher records from teacher_working_hours base
                 teacherList.add( new SelectOption( teacherId, teacherMap.get(teacherId) ));
             }
         }else{
-            List<account> teachList = [SELECT Id, Name FROM Account WHERE recordtype.Id =: ConstantClass.teacherRecordTypeId AND Teacher_user__c =: UserInfo.getUserId()];
+            List<account> teachList = AccountService.getByTeacherRecTypeId();//[SELECT Id, Name FROM Account WHERE recordtype.Id =: ConstantClass.teacherRecordTypeId AND Teacher_user__c =: UserInfo.getUserId()];
             if(teachList.size() > 0){
                 teacherList.add( new SelectOption( teachList[0].Id ,teachList[0].Name ));
             }
@@ -150,7 +150,7 @@ Developer   :
     private void populateLocations(){
         //Id devRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Location').getRecordTypeId();            
         if(profileName != ConstantClass.teacherRecType){
-            for(Account accObj : [SELECT Id,Name FROM Account WHERE recordtype.Id =: ConstantClass.locationRecordsTypeId]){
+            for(Account accObj : AccountService.getByLocationRecTypeId()){//[SELECT Id,Name FROM Account WHERE recordtype.Id =: ConstantClass.locationRecordsTypeId]
                 locationList.add( new SelectOption( accObj.Id, accObj.name ));
             }        
         }else if(profileName == ConstantClass.teacherRecType && teacherList.size() > 0){
@@ -158,7 +158,7 @@ Developer   :
                 teacherLocationIds.add(tlObj.Location__c);
             }
             if(teacherLocationIds.size() > 0){
-                for(Account accObj : [SELECT Id,Name FROM Account WHERE recordtype.Id =: ConstantClass.locationRecordsTypeId AND Id IN: teacherLocationIds]){
+                for(Account accObj : AccountService.getByTeacherLocationId(teacherLocationIds)){//[SELECT Id,Name FROM Account WHERE recordtype.Id =: ConstantClass.locationRecordsTypeId AND Id IN: teacherLocationIds]
                     locationList.add( new SelectOption( accObj.Id, accObj.name ));
                 } 
             }
@@ -370,10 +370,11 @@ Developer   :
             'Mode_Button_Color__c','Scheduler_License_Key__c','Selected_Mode_Button_Color__c','Selected_View_Button_Color__c','View_Button_Color__c',
             'Non_Business_Hours_Color__c','Modal_Header_Footer_Color__c','Business_Hours_Color__c','Calendar_Border_Color__c'}, false);
         if(isFullCalConfigmdtAccesible){
-            calendarConfigMetaList = [SELECT Mode_Button_Color__c,Scheduler_License_Key__c, Selected_Mode_Button_Color__c, Selected_View_Button_Color__c, View_Button_Color__c,Non_Business_Hours_Color__c, Modal_Header_Footer_Color__c, Business_Hours_Color__c, Calendar_Border_Color__c  
-                                      FROM Full_Calendar_Configuration__mdt LIMIT 1];       
-            calendarConfigMetadataObject = calendarConfigMetaList.get(0);
-            
+            calendarConfigMetaList = FullCalendarConfigurationService.getMetadata();//[SELECT Mode_Button_Color__c,Scheduler_License_Key__c, Selected_Mode_Button_Color__c, Selected_View_Button_Color__c, View_Button_Color__c,Non_Business_Hours_Color__c, Modal_Header_Footer_Color__c, Business_Hours_Color__c, Calendar_Border_Color__c  
+                                      //FROM Full_Calendar_Configuration__mdt LIMIT 1];      
+            if(calendarConfigMetaList.size() > 0){
+                calendarConfigMetadataObject = calendarConfigMetaList.get(0);
+            }                     
         }
         //system.debug('calendarConfigMetaList  -> '+calendarConfigMetaList);
     }
