@@ -30,6 +30,8 @@ public class UpdateClassSessionsCompApex {
             return 'SUCCESS';
         }
         catch(Exception e){
+            System.debug('e.getMessage()'+e.getMessage());
+            System.debug('e.getLineNumber()'+e.getLineNumber());
             return e.getMessage()+e.getLineNumber();
         }
     }

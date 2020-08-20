@@ -16,7 +16,7 @@ public class FullCalendarControllerTest {
         fullCalendarObj.refreshClasses();
         fullCalendarObj.refreshCourseAndClasses();
         String todayDate = fullCalendarObj.getTodayDate();
-        
+        LocationWorkingHoursService.getByLocationId(new set<Id>());
         system.assertEquals(todayDate,Datetime.now().format('YYYY-MM-dd'));
     }    
 }

@@ -24,13 +24,23 @@ public class TeacherLeaveCmpApexControllerTest {
         Class_Session__c clsSess = BlufyTestUtil.createClassSessionRec(cls.Id,Time.newInstance(10,30,00,00),120);
         insert clsSess;
         
-        Class__c clsUpdate = new Class__c(Id = cls.Id, Status__c = ConstantClass.clsOpenStatus, Days_of_Week__c = 'Fri;Mon;Tue;Wed;Sat;Thu;Sun',
-                                          Frequency__c = ConstantClass.monthlyFrequency, Type__c = ConstantClass.ongoingClsType,
-                                          Advance_Scheduling_Unit__c = ConstantClass.schedulingPicklistMonth,
-                                          Advance_Scheduling__c = ConstantClass.defaultNextScheDtDiff);
-        update clsUpdate;
+        
+        cls.Status__c = ConstantClass.clsOpenStatus;
+        cls.Days_of_Week__c = 'Fri;Mon;Tue;Wed;Sat;Thu;Sun';
+        cls.Frequency__c = ConstantClass.monthlyFrequency;
+        cls.Type__c = ConstantClass.ongoingClsType;
+        cls.Advance_Scheduling_Unit__c = ConstantClass.schedulingPicklistMonth;
+        cls.Advance_Scheduling__c = ConstantClass.defaultNextScheDtDiff;
+        update cls;
+
+        Room__c roomObj = BlufyTestUtil.createRoom(location.Id, 'Name', 'Group', 50);
+        insert roomObj;
+        
+        Session__c sessObj = BlufyTestUtil.createSessionRec(location.Id, tch.Id, cls.Id, Date.today()+2, Time.newInstance(10,30,00,00),
+                                                            ConstantClass.ScheduledStatus, null, 120, 'Standard', roomObj.Id);
+        insert sessObj;
       
-        Teacher_Leave__c tchLeave = new Teacher_Leave__c(Start_Date__c = Date.today()+1, End_Date__c = Date.today()+1,
+        Teacher_Leave__c tchLeave = new Teacher_Leave__c(Start_Date__c = Date.today()+2, End_Date__c = Date.today()+2,
                                                          Teacher__c = tch.Id, Status__c = 'Requested');
         insert tchLeave;
         

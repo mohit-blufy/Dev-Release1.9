@@ -43,17 +43,15 @@ Invoice handler.
         return this.objInv;
     }
     
-    
-    
-    
     /*
      * return sessions related to class and time limit
     *  timeLimit e.g. Next_Month, THIS_Month
     */
     public static Map<String,List<Session__c>> getClassSessions(Set<String> classIds, String timeLimit){
         Map<String,List<Session__c>> classSessionsMap = new Map<String,List<Session__c>>();
-        String query = 'SELECT Id, Session_Date__c, Class__c FROM Session__c WHERE Session_Date__c ='+timeLimit +' AND Class__c =: classIds';
-        for(Session__c objSession : Database.query(query)){
+        String query = 'SELECT Id, Session_Date__c, Class__c FROM Session__c WHERE Session_Date__c ='+timeLimit +' AND Class__c =: classIds  WITH SECURITY_ENFORCED';
+        for(SObject sObj : InvoiceService.getExecutedQueryRecords(query)){
+            Session__c objSession = (Session__c)sObj;
             List<Session__c> sessionsList = classSessionsMap.containsKey(objSession.Class__c) ? classSessionsMap.get(objSession.Class__c) : 
                                             new List<Session__c>();
             sessionsList.add(objSession);
@@ -70,16 +68,12 @@ Invoice handler.
     public static Map<String,List<Class_Term__c>> getClassTermMap(Set<String> setOfClassIDs){
         System.debug('@@@setOfClassIDs'+setOfClassIDs);
         Map<String,List<Class_Term__c>> mapOfclassTerm = new Map<String,List<Class_Term__c>>();
-        for(Class_Term__c objTerm : [SELECT Sessions__c, Sequence__c,Start_Date__c,Class__c, Class__r.Advance_Billing__c,
-                                     Class__r.Advance_Billing_Unit__c 
-                                     FROM Class_Term__c WHERE Class__c IN: setOfClassIDs  
-                                     ORDER By Start_Date__c]){
+        for(Class_Term__c objTerm : ClassTermService.getByClassIds(setOfClassIDs)){
             List<Class_Term__c> listOfTerm = mapOfClassTerm.containsKey(objTerm.Class__c) ? mapOfClassTerm.get(objTerm.Class__c) :
-                                                new List<Class_Term__c>();
-                                         listOfTerm.add(objTerm);
-                                         mapOfClassTerm.put(objTerm.Class__c,listOfTerm);
-       }
-        
+            new List<Class_Term__c>();
+            listOfTerm.add(objTerm);
+            mapOfClassTerm.put(objTerm.Class__c,listOfTerm);
+        }
         return mapOfClassTerm;
     }
     
@@ -93,11 +87,6 @@ Invoice handler.
     public static Invoice_Line_Item__c createInvLineItem(Subscription_Line_Item__c objLineItem,String type,Decimal amount,String invId){
        Invoice_Line_Item__c objInvoiceItem = UtilityClass.fillInvLineItem(invId, objLineItem.Enrollment__c, objLineItem.id, 
                                                                           objLineItem.Fee__c, null,type, amount, true);
-        /* Invoice_Line_Item__c objInvoiceItem = new Invoice_Line_Item__c(Subscription_Line_Item__c = objLineItem.id,
-                                                                      Enrollment__c = objLineItem.Enrollment__c,
-                                                                      Fee__c = objLineItem.Fee__c,Invoice__c = invId,
-                                                                      Type__c = type,Amount__c = amount);*/
-        
         return objInvoiceItem;
     }
     

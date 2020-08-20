@@ -14,36 +14,28 @@ public class TermTriggerHelper {
         List<Class__c> listClass = new List<Class__c>();
         List<Class_Term__c> listClassTerm = new List<Class_Term__c>();
         
-        Boolean isClassAccessible = FieldPremissionCrudUtility.checkReadPermission('Class__c',new Set<String>{'Id','Status__c','Frequency__c'},false);
-        Boolean isTermAccessible = FieldPremissionCrudUtility.checkReadPermission('Term__c',new Set<String>{'Id','Name','Start_Date__c','End_Date__c','Sessions__c','Status__c','Sequence__c'},false);    
-        Boolean isClsTermAccessible = FieldPremissionCrudUtility.checkReadPermission('Class_Term__c',  new Set<String>{'Name','Start_Date__c','End_Date__c','Sessions__c','Status__c','Sequence__c','Term__c'},true,false);
+        for(Term__c term :triggerNew){
+            if(String.isNotBlank(term.Status__c) && oldMap.get(term.Id).Status__c.equalsIgnoreCase(ConstantClass.draftStatus) 
+               && term.Status__c.equalsIgnoreCase(ConstantClass.termOpenStatus)){
+                   mapTermIdToTerm.put(term.Id,term);
+               }
+        }
         
-        if(isClassAccessible && isTermAccessible && isClsTermAccessible){
-            for(Term__c term :triggerNew){
-                if(String.isNotBlank(term.Status__c) && String.isNotBlank(oldMap.get(term.Id).Status__c) 
-                   && oldMap.get(term.Id).Status__c.equalsIgnoreCase(ConstantClass.draftStatus) && term.Status__c.equalsIgnoreCase(ConstantClass.termOpenStatus)){
-                    mapTermIdToTerm.put(term.Id,term);
-                }
-            }
-            
-            if(mapTermIdToTerm.keySet().size() > 0){
-                //*********Fetching classes with open status & term frequency *********************// 
-                listClass = [SELECT Id FROM Class__c WHERE Status__c =: ConstantClass.clsOpenStatus AND Frequency__c =: ConstantClass.termFrequency];
-                if(listClass.size() > 0){
-                    for(Class__c classRec: listClass){
-                        for(String key : mapTermIdToTerm.keySet()){
-                            listClassTerm.add(createClassTerm(mapTermIdToTerm.get(key),classRec.Id));
-                        }
+        if(mapTermIdToTerm.keySet().size() > 0){
+            //*********Fetching classes with open status & term frequency *********************// 
+            listClass = [SELECT Id FROM Class__c WHERE Status__c =: ConstantClass.clsOpenStatus AND Frequency__c =: ConstantClass.termFrequency];
+            if(listClass.size() > 0){
+                for(Class__c classRec: listClass){
+                    for(String key : mapTermIdToTerm.keySet()){
+                        listClassTerm.add(createClassTerm(mapTermIdToTerm.get(key),classRec.Id));
                     }
                 }
             }
-            
-            if(listClassTerm.size() > 0)
-                insert listClassTerm;
         }
-        else{
-            system.debug('FLS NOT FOUND');
-        }
+        
+        if(listClassTerm.size() > 0)
+            ClassTermService.insertClassTermRecords(listClassTerm);
+        
     }
     
     //**********Class Term creation when Term status changes from Draft To Open***********//

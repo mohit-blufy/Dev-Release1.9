@@ -41,8 +41,10 @@ public class BlufyTestUtil {
         insert termObj;
         
         Class__c classObj = BlufyTestUtil.createClassRec('Name', courseObj.Id, 'Classroom', 'Open', teacherObj.Id, 20, 'Fixed', 24, Date.today().addDays(1), Time.newInstance(10, 00, 00, 00), 'Minutes', 120,'One-time', cModule.Id);
-        classObj.Advance_Billing__c = 2;
-        classObj.End_Date__c = Date.today().addMonths(6);
+        classObj.Advance_Billing__c         = 2;
+        classObj.Days_of_Week__c            = 'Fri;Mon;Tue;Wed;Sat;Thu;Sun';
+        classObj.End_Date__c        		= Date.today().addMonths(6);
+        classObj.Exclude_Public_Holidays__c = true;
         insert classObj;
         system.debug('classObj ->'+classObj);
         
@@ -57,7 +59,7 @@ public class BlufyTestUtil {
         Room__c roomObj = BlufyTestUtil.createRoom(locationObj.Id, 'Room1', 'Group', 35);
         insert roomObj;
         
-        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id , teacherObj.Id, classObj.Id, Date.today().addMonths(1), Time.newInstance(10, 00, 00, 00), 'Scheduled', 'Hours', 2, 'Standard', roomObj.id);
+        Session__c sessionObj = BlufyTestUtil.createSessionRec(locationObj.Id , teacherObj.Id, classObj.Id, Date.today().addMonths(1), Time.newInstance(10, 00, 00, 00), 'Scheduled', '', 60, 'Standard', roomObj.id);
         insert sessionObj;
         
         Class_Session__c clsSess = BlufyTestUtil.createClassSessionRec(classObj.Id,Time.newInstance(10,30,00,00),120);
@@ -67,7 +69,7 @@ public class BlufyTestUtil {
         Account customerObj = new Account(LastName = 'lie',personEmail = 'Test1@gmail.com',RecordTypeId =ConstantClass.stuCustomerRecordTypeId);
         insert customerObj;
         
-        Enrollment__c enrollObj = BlufyTestUtil.createEnrollment(classObj.Id, Date.newInstance(2020,03,24), locationObj.Id, studentObj.Id, 'Enrolled', true,  Date.newInstance(2020,03,24),customerObj.id);
+        Enrollment__c enrollObj = BlufyTestUtil.createEnrollment(classObj.Id, Date.today().addDays(-4), locationObj.Id, studentObj.Id, 'Enrolled', true,  Date.today().addDays(-4),customerObj.id);
         insert enrollObj;
         
         Student_Session__c studentSessionObj = BlufyTestUtil.createStudentSession(sessionObj.Id, 'Scheduled', studentObj.Id, enrollObj.id);
@@ -88,16 +90,17 @@ public class BlufyTestUtil {
         Course_Discount__c courseDiscount =  BlufyTestUtil.createCourseDiscunt(courseObj.Id,discount.Id);
         insert courseDiscount;
         
-        Subscription__c subscriptionobj = BlufyTestUtil.createSubscription(locationObj.id,studentObj.id,'Term',Date.newInstance(2020,03,24),Date.newInstance(2020,03,28),'Active');
+        Subscription__c subscriptionobj = BlufyTestUtil.createSubscription(locationObj.id,studentObj.id,'Term',Date.today(),Date.today().addMonths(2),'Active');
         insert subscriptionobj;
-        Subscription__c subscriptionobj2 = BlufyTestUtil.createSubscription(locationObj.id,studentObj.id,'Monthly',Date.newInstance(2020,03,24),Date.newInstance(2020,03,28),'Active');
+        Subscription__c subscriptionobj2 = BlufyTestUtil.createSubscription(locationObj.id,studentObj.id,'Monthly',Date.today().addDays(7),Date.today(),'Active');
         insert subscriptionobj2;
         
-        Subscription_Line_Item__c objSubscriptionlines = BlufyTestUtil.createSubscriptionLineItems(enrollObj.id,classTermObj.id,subscriptionobj.id,System.today(),feeObj.id,Date.newInstance(2020,04,14),'Active',Date.newInstance(2020,05,13));
+        Subscription_Line_Item__c objSubscriptionlines = BlufyTestUtil.createSubscriptionLineItems(enrollObj.id,classTermObj.id,subscriptionobj.id,Date.today().addDays(7),feeObj.id,Date.today(),'Active',Date.today());
         insert objSubscriptionlines;
-        Subscription_Line_Item__c objSubscriptionlines2 = BlufyTestUtil.createSubscriptionLineItems(enrollObj.id,classTermObj.id,subscriptionobj2.id,Date.newInstance(2020,05,1),feeObj.id,Date.newInstance(2020,04,14),'Active',Date.newInstance(2020,05,13));
+        Subscription_Line_Item__c objSubscriptionlines2 = BlufyTestUtil.createSubscriptionLineItems(enrollObj.id,classTermObj.id,subscriptionobj2.id,Date.today().addDays(7),feeObj.id,Date.today(),'Active',Date.today().addMonths(1));
         insert objSubscriptionlines2;
-       
+       	Subscription_Line_Item__c objSubscriptionlines3 = BlufyTestUtil.createSubscriptionLineItems(enrollObj.id,classTermObj.id,subscriptionobj2.id,Date.today().addDays(7),feeObj.id,Date.today(),'Active',Date.today().addYears(1));
+        insert objSubscriptionlines3;
         
         Invoice__c invoiceObj = BlufyTestUtil.createInvoice(studentObj.Id,ConstantClass.dueStatus,Date.today());
         insert invoiceObj;
@@ -105,6 +108,8 @@ public class BlufyTestUtil {
         Invoice_Line_Item__c invLinItm = BlufyTestUtil.createInvoiceLineItem(invoiceObj.Id,enrollObj.Id,ConstantClass.depositFeeType,100);
         insert invLinItm;
         
+        Payment__c payment = BlufyTestUtil.createPayment(200,studentObj.Id,'Paid',invoiceObj.Id,'Transaction',enrollObj.Id);
+        insert payment;
         //Credit_Note__c createNoteObj = BlufyTestUtil.createCreditRec(studentObj.id, 'Issued',Date.today(),Date.newInstance(2020,6,24),50 );
         //insert createNoteObj;
         
@@ -115,7 +120,7 @@ public class BlufyTestUtil {
         insert teacherLeaveObj;
         
         Holiday__c  holidayObj = BlufyTestUtil.createHoliday(Date.today().addDays(1), Date.today().addDays(1), Time.newInstance(10, 00, 00, 00), Time.newInstance(23, 00, 00, 00));
-        insert holidayObj;
+        insert holidayObj; 
     }
     
     public static Account createLocationRec(String locationName){                
@@ -165,7 +170,7 @@ public class BlufyTestUtil {
         return new Class_Session__c(Class__c = clssId,Start_Time__c = strtTime,Duration__c = duration);
     }
     
-    public static Fee__C createFeeRecords(String name,String type, Double Amount,Boolean required, Boolean overi, String schedule, String freq, Double unit ,Double unitPrice){
+    public static Fee__c createFeeRecords(String name,String type, Double Amount,Boolean required, Boolean overi, String schedule, String freq, Double unit ,Double unitPrice){
         return new fee__c(Name= name, Type__c= type,Amount__c = Amount, Required__c = required,Override__c = overi,Schedule__c=schedule, Frequency__c =freq ,Units__c = unit, Unit_Price__c = unitPrice);
     }
     
@@ -201,6 +206,10 @@ public class BlufyTestUtil {
         return new Invoice_Line_Item__c(Invoice__c = invoiceId,Enrollment__c = enrollmentId,Type__c = type,Amount__c = amount);
     }
     
+    public static Payment__c createPayment(Decimal amount,String customer,String status,String invoice,String type,String enrolmnt){
+        return new Payment__c(Amount__c = amount,Parent__c = customer,Status__c = status,Invoice__c = invoice,
+                          Type__c = type,Enrollment__c = enrolmnt);
+    }
     public static Teacher_Leave__c createTeacherLeave(String teacherId, String Start_Date, String End_Date, String status){
         Date newSrtDate = Date.valueOf(Start_Date);
         Date newEndDate = Date.valueOf(End_Date);
@@ -232,4 +241,5 @@ public class BlufyTestUtil {
     public static Room__c createRoom(String locationId, String name, String roomType, Integer capacity){
         return new room__c(Name = name, Type__c = roomType, Location__c = locationId, Capacity__c = capacity);
     }
+    
 }

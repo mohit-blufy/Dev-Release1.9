@@ -31,14 +31,7 @@ public class SessionScheduleCmpController {
         Map<String,String> mapTeacherIdToTeacherName = new Map<String,String>();
         Map<String,String> mapRoomIdToRoomName = new Map<String,String>();
         
-        List<Class__c> listClass = [SELECT Id, Name,Teacher__c,Teacher__r.Name,Start_Date__c,End_Date__c,Days_of_Week__c, 
-                                    Sessions__c,Duration__c,Location__c,Course__c,Exclude_Public_Holidays__c,
-                                    (SELECT Id,Name,Sessions__c,Start_Date__c,End_Date__c
-                                     FROM Class_Terms__r WHERE Id=:clsTermId AND Status__c='Draft' LIMIT 1),
-                                    (SELECT Id,Name,Duration__c,Start_Time__c,Teacher__c,Teacher__r.Name,Room__c,Room__r.Name 
-                                     FROM Class_Sessions__r ORDER BY Start_Time__c),
-                                    (SELECT Id,Sequence__c FROM Sessions__r ORDER BY Sequence__c DESC LIMIT 1)
-                                    FROM Class__c WHERE Id =: classId];
+        List<Class__c> listClass = ClassService.getClassByClassIdAlongWithClassTermId(clsTermId, classId);
         
         if(listClass != NULL && listClass.size() > 0 && listClass[0].Class_Terms__r.size() > 0){
             Class__c cls = listClass[0];
@@ -55,7 +48,7 @@ public class SessionScheduleCmpController {
             else{
                 wrpCls.message = 'No Class Session Found';
             }
-            system.debug('listClassSession-->'+listClassSession);
+
             if(mapTeacherIdToTeacherName.keySet().size() > 0){
                 Set<String> setTeacherId = mapTeacherIdToTeacherName.keySet();
                 mapTeacherIdToTeacherLeave = UtilityClass.getTeacherLeaves(setTeacherId);
@@ -82,8 +75,7 @@ public class SessionScheduleCmpController {
             if(cls.Sessions__r.size() > 0 && cls.Sessions__r[0].Sequence__c != NULL)  
                 seq = cls.Sessions__r[0].Sequence__c;
             
-            if(listClassSession.size() > 0 && mapTeacherIdToTeacherName.keySet().size() > 0 && 
-               mapRoomIdToRoomName.keySet().size() > 0){
+            if(listClassSession.size() > 0 && mapTeacherIdToTeacherName.keySet().size() > 0){
                 listSessionObj = UtilityClass.createSessions(cls,stDate,endDate,seq,clsTermId,listClassSession,clsTrm.Sessions__c);
                 if(listSessionObj.size() > 0){
                     listSessionObj = UtilityClass.getUpdatedSessions(Integer.valueOf(seq),cls.Exclude_Public_Holidays__c,listSessionObj, mapTeacherIdToTeacherLeave, 
@@ -134,17 +126,12 @@ public class SessionScheduleCmpController {
     @auraEnabled
     // inserting sessions when a schedule button is clicked on Class_Term__c UI
     public static List<Session__c> insertSessions (List<sessionWrapper> sessList,Id recordId) {
-        fieldsApiName = new Set<String>{'Class__c','Sequence__c','Teacher__c','Status__c','Location__c','Session_Date__c','Duration__c','Start_Time__c','Class_Term__c','Notes__c','Exception__c'};
-            isSessionAccessible = FieldPremissionCrudUtility.checkReadPermission('Session__c',fieldsApiName,true,false); 
-        Boolean isClsTermAccessible = FieldPremissionCrudUtility.checkReadPermission('Class_Term__c',  new Set<String>{'Name','Start_Date__c','End_Date__c','Status__c'},true,false);
-        Boolean isClassAccessible = FieldPremissionCrudUtility.checkReadPermission('Class__c',new Set<String>{'Type__c','End_Date__c','Advance_Scheduling_Unit__c','Next_Schedule_Date__c','Last_Session_Date__c','Last_Session_Scheduled_Date__c','Sessions__c'},true,false);
-        if(isSessionAccessible && isClsTermAccessible && isClassAccessible){    
-            List <Session__c> insertSessList = new List<Session__c>();
+        List <Session__c> insertSessList = new List<Session__c>();
             for(sessionWrapper sess : sessList){
                 insertSessList.add(fillSession(sess, recordId));
             } 
             if (insertSessList.size()>0){ 
-                insert insertSessList;
+                SessionService.insertSessionRecords(insertSessList);
                 createStudentSessions(insertSessList);
             }
             
@@ -155,12 +142,10 @@ public class SessionScheduleCmpController {
                 clsTerm.Status__c                               = ConstantClass.ScheduledStatus;
                 clsTerm.Start_Date__c                           = insertSessList[0].Session_Date__c;
                 clsTerm.End_Date__c                             = insertSessList[insertSessList.size()-1].Session_Date__c;
-                update clsTerm;   
+                //update clsTerm; 
+                clsTerm = ClassTermService.updateClassTermRecords(new List<Class_Term__c>{clsTerm})[0];
                 
-                List<Class__c> clsList = [SELECT Id, Advance_Scheduling_Unit__c, Last_Session_Date__c, Next_Schedule_Date__c,
-                                          Advance_Scheduling__c,Type__c 
-                                          FROM Class__c 
-                                          WHERE Id =: insertSessList[0].Class__c];
+                List<Class__c> clsList = ClassService.getById(new Set<Id>{insertSessList[0].Class__c});
                 
                 // update Class__c records when sessions are inserted
                 if(clsList.size() > 0){
@@ -188,12 +173,11 @@ public class SessionScheduleCmpController {
                             }              
                         }
                     }
-                    update clsUpd;
+                    //update clsUpd;
+                    ClassService.updateClassRecords(new List<Class__c>{clsUpd});
                 }
             }   
             return insertSessList;
-        }
-        return null;
     } 
     
     @AuraEnabled
@@ -242,7 +226,7 @@ public class SessionScheduleCmpController {
     public static void createStudentSessions (List<Session__c> sessList){
         Class__c clsId = new Class__c(id=sessList[0].Class__c);
         List<Student_Session__c> studSessList = new List<Student_Session__c>();
-        for(Enrollment__c enroll : [select name,class__c,Student__c from Enrollment__c where Class__c =: clsId.Id]){
+        for(Enrollment__c enroll : EnrollmentService.getByClassId(clsId.Id)){
             for (integer s=0; s<sessList.size(); s++){
                 Student_Session__c stuSess = new Student_Session__c();
                 stuSess.Session__c    = sessList[s].id;
@@ -254,7 +238,7 @@ public class SessionScheduleCmpController {
         }
         
         if(studSessList.size() > 0)
-            insert studSessList;
+            StudentSessionService.insertStudentSessionRecords(studSessList);
     }
     
     public Class WrapperClass{

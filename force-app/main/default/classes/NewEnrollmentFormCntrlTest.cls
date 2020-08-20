@@ -90,16 +90,16 @@ public class NewEnrollmentFormCntrlTest {
         discount.Global__c = true;
         discount.Start_Date__c = system.today().addDays(-2);
         update discount;
-        NewEnrollmentFormCntrl.fetchOtherDiscount(5000);
+        NewEnrollmentFormCntrl.fetchOtherDiscount();
         
         discount.Code__c = '001';
         discount.Type__c = ConstantClass.promoType;
         update discount;
-        NewEnrollmentFormCntrl.fetchOtherDiscount(5000);
+        NewEnrollmentFormCntrl.fetchOtherDiscount();
         
         discount.Type__c = 'Discount';
         update discount;
-        NewEnrollmentFormCntrl.fetchOtherDiscount(5000);
+        NewEnrollmentFormCntrl.fetchOtherDiscount();
         
         NewEnrollmentFormCntrl.getPicklistValues('Discount__c','Type__c');
         
@@ -112,6 +112,7 @@ public class NewEnrollmentFormCntrlTest {
         feeObj.Frequency__c = 'One-Time';
         update feeObj;
         system.debug('curseFeeWrp-->'+curseFeeWrp);
+        CourseDiscountService.getCourseDiscountByCourseId(null);
         curseFeeWrp.tutionFeeWrapperList = NewEnrollmentFormCntrl.fetchClsTermSessionAmount(JSON.serialize(clsWrp),JSON.serialize(curseFeeWrp.tutionFeeWrapperList));
         system.assertEquals(1,curseFeeWrp.tutionFeeWrapperList.size());
         Test.stopTest();

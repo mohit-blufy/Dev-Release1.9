@@ -68,8 +68,10 @@ public class SessionRecordsCreationBatchApexTest {
         update classObj;
         
         Test.startTest();
-        SessionRecordsCreationBatchApex obj = new SessionRecordsCreationBatchApex();
-        Database.executeBatch(obj);
+        //SessionRecordsCreationBatchApex obj = new SessionRecordsCreationBatchApex();
+        //Database.executeBatch(obj);
+        SessionRecordsCreationBatchApexScheduler sh1 = new SessionRecordsCreationBatchApexScheduler();
+	    sh1.execute(null);
         Test.stopTest();
         
         Class__c classOb = [SELECT Id,Type__c FROM Class__c WHERE Id =:classObj.Id]; 

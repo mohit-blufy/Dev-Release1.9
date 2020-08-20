@@ -9,6 +9,9 @@ public class FullCalendarDataServiceTest {
     static testmethod void validateDataServicesControllerMethod1() {
         BlufyTestUtil.init();
         
+        List<Account> CustomerList = [SELECT Id,Name FROM Account WHERE recordtypeid =: ConstantClass.customerRecTypeId];
+        System.assert(CustomerList.size() > 0, 'Fail to create Customer!');
+        
         List<Account>   locationList = [SELECT Id,Name FROM Account WHERE recordtypeid =: ConstantClass.locationRecordsTypeId];
         System.assert(locationList.size() > 0, 'Fail to create Location!');
         
@@ -46,10 +49,10 @@ public class FullCalendarDataServiceTest {
         FullCalendarDataService.getTeacherWorkingHours(locationList[0].Id);
         FullCalendarDataService.setNewSessionTiming(sessionList[0].Id, teacherList[0].Id, newTime, startDate);
         FullCalendarDataService.setNewTimeForAllSession(sessionList[0].Id, newTime);
-        FullCalendarDataService.setNewDateTimeForCurrentAndUpComingSession(sessionList[0].Id, newTime, dayDiff, previousDay, '');
+        FullCalendarDataService.setNewDateTimeForCurrentAndUpComingSession(sessionList[0].Id, newTime, dayDiff, previousDay, CustomerList[0].Id);
         sessionList[0].Type__c = 'Placeholder';
         update sessionList;
-        FullCalendarDataService.setNewDateTimeForCurrentAndUpComingSession(sessionList[0].Id, newTime, dayDiff, previousDay, '');
+        FullCalendarDataService.setNewDateTimeForCurrentAndUpComingSession(sessionList[0].Id, newTime, dayDiff, previousDay, CustomerList[0].Id);
         FullCalendarDataService.insertNewSession(locationList[0].Id, teacherList[0].Id, newTime, startDate, duration, endDate, repeat, description);
         repeat = 'None';
         FullCalendarDataService.insertNewSession(locationList[0].Id, teacherList[0].Id, newTime, startDate, duration, endDate, repeat, description);
