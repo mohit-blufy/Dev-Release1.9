@@ -35,7 +35,7 @@ public class AccountService {
         }
         return null;
     }
-
+    
     //Upsertion of Class Records
     public static List<Account> upsertClassRecords(List<Account> listAccount){
         try{
@@ -53,41 +53,6 @@ public class AccountService {
         catch(Exception e){
             System.debug('Class Error Message-->'+e.getMessage());
         }
-        return null;
-    }
-    
-    public static List<Account> getByTeacherRecTypeId(){
-        try {
-            return [SELECT Id, Name FROM Account 
-                    WHERE recordtype.Id =: ConstantClass.teacherRecordTypeId
-                    AND Teacher_user__c =: UserInfo.getUserId()
-                   WITH SECURITY_ENFORCED];
-        }catch (System.QueryException e) {
-            System.debug(e.getMessage());
-        } 
-        return null;
-    }
-    
-    public static List<Account> getByTeacherLocationId(Set<Id> teacherLocationIds){
-        try {
-            return [SELECT Id,Name FROM Account 
-                     WHERE recordtype.Id =: ConstantClass.locationRecordsTypeId 
-                     AND Id IN: teacherLocationIds
-                    WITH SECURITY_ENFORCED];
-        }catch (System.QueryException e) {
-            System.debug(e.getMessage());
-        } 
-        return null;
-    }
-    
-    public static List<Account> getByLocationRecTypeId(){
-        try {
-            return [SELECT Id,Name FROM Account 
-                    WHERE recordtype.Id =: ConstantClass.locationRecordsTypeId
-                    WITH SECURITY_ENFORCED];
-        }catch (System.QueryException e) {
-            System.debug(e.getMessage());
-        } 
         return null;
     }
 }

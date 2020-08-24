@@ -1,11 +1,11 @@
- /**
+/**
 Name        :   UserInterfaceConfigService
 Date        :   28 JULY 2020
 Description :   This class is use for to get the User_Interface_Settings__mdt data
 */
 public class UserInterfaceConfigService {
 
-    /**  
+    /**
     getAssessmentData on 28-07-20 get User_Interface_Settings__mdt 
     */
     public static List<User_Interface_Settings__mdt> getAssessmentData(){

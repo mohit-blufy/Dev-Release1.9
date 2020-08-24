@@ -93,7 +93,7 @@ Developer   :
                 sobj.sequence = uiObj.Sequence__c;
                 sobj.require = uiObj.Required__c;
                 if(uiObj.Data_Type__c == 'Picklist'){
-                    sobj.picklistVal = UtilityClass.getPickValues(uiObj.Object_API_Name__c, uiObj.Field_API_Name__c);
+                    sobj.picklistVal = UtilityClass.getPickValues(ConstantClass.nameSpace+uiObj.Object_API_Name__c, ConstantClass.nameSpace+uiObj.Field_API_Name__c);
                 }
                 studentAssessmentList.add(sObj);
             }
