@@ -37,7 +37,7 @@ public class SessionActionControllerTest {
         
         
         //changeStudentStatus method
-        SessionActionController.changeStudentStatus(studentList[0].id, studentList[0].status__c, sessionList[0].Id);
+        SessionActionController.changeStudentsStatus(studentList[0].id, studentList[0].status__c, sessionList[0].Id);
         //cancelStudentForSession method
         SessionActionController.cancelStudentForSession(studentList[0].id);
         //getSessionHistoryRecords method         

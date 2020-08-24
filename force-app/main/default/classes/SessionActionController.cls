@@ -188,7 +188,7 @@ Developer   :
     Developer   :   
     */
     @RemoteAction
-    global static void changeStudentStatus(String sessionStudentsId,String status, String sessionId){ 
+    global static void changeStudentsStatus(String sessionStudentsId,String status, String sessionId){ 
         List<Student_Session__c> studentList = new List<Student_Session__c>();
         fieldsApiName = new Set<String>{'Status__c'};
             isStudentSessionAccessible = FieldPremissionCrudUtility.checkReadPermission('Student_Session__c', fieldsApiName, true);
@@ -206,29 +206,31 @@ Developer   :
                     studentList.add(sessionObj);
                 }
                 if(studentList.size() > 0){
-
-                    StudentSessionService.updateStudentSessionRecords(studentList);
-
-                    if(String.isNotBlank(sessionId) && status == 'Completed'){
-                        session__c sessObj = new session__c(id = sessionId);
-                        sessObj.Attendance_Update__c = true;
-                        SessionService.updateSessionRecords(new List<Session__c>{sessObj});
-                                
-                    }
-                    // try{
-                    //     update studentList;
-                    //     if(String.isNotBlank(sessionId) && status == 'Completed'){
-                    //         session__c sessObj = new session__c(id = sessionId);
-                    //         sessObj.Attendance_Update__c = true;
-                    //         update sessObj;
+                    try{
+                        update studentList;
+                        if(String.isNotBlank(sessionId) && status == 'Completed'){
+                            session__c sessObj = new session__c(id = sessionId);
+                            sessObj.Attendance_Update__c = true;
+                            update sessObj;
                             
-                    //     }
-                    // }catch(Exception ex){
-                    //     system.debug('Error -> '+ex.getMessage());                   
-                    // }
+                        }
+                    }catch(Exception ex){
+                        system.debug('Error -> '+ex.getMessage());                   
+                    }
                 }
             }
         }
+    }
+
+    /**
+    Name        :   changeStudentStatus
+    Date        :   04 Mar 2020
+    Description :   it's use for change the status of students
+    Developer   :   
+    */
+    @RemoteAction
+    global static void changeStudentStatus(String sessionStudentsId,String status){ 
+        //we are not using this function
     }
     
     /**
