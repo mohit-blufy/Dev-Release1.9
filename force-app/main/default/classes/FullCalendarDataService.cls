@@ -361,7 +361,7 @@ Description :
 Developer   :   
 */
     @RemoteAction
-    global static void setNewSessionTiming(Id recId, Id parentId, String newStartTime, String currentDate){
+    global static void setNewSessionTiming(Id recId, String parentId, String newStartTime, String currentDate){
         //system.debug('recId  '+recId);
         Session__c sessionObj;
         List<Session_Resource__c> sessionResList = new List<Session_Resource__c>();
@@ -370,7 +370,7 @@ Developer   :
             if(sObjName == 'Session__c'){
                 sessionObj = new Session__c(id = recId);            
                 if(String.isNotBlank(parentId)){
-                    String parentName = parentId.getSObjectType().getDescribe().getName();
+                    String parentName = Id.valueOf(parentId).getSObjectType().getDescribe().getName();
                     if(parentName == 'Room__c'){
                         sessionObj.Room__c = parentId;
                     }else{
@@ -457,7 +457,7 @@ Description :   function is use for set new date and time for current selected s
 Developer   :   
 */
     @RemoteAction 
-    global static void setNewDateTimeForCurrentAndUpComingSession(String sessionId, String newStartTime,  Integer dayDiffernce, Integer previousDay, Id parentId){
+    global static void setNewDateTimeForCurrentAndUpComingSession(String sessionId, String newStartTime,  Integer dayDiffernce, Integer previousDay, String parentId){
         if(String.isNotBlank(sessionId)){
             List<VacationModel> vacationList = new List<VacationModel>();
             boolean isHoliday = false;        
@@ -545,7 +545,7 @@ Developer   :
                             sessionObj.Start_Time__c = startTime;                         
                             sessionObj.Session_Date__c = currentDate.addDays(dayDiffernce);
                             if(String.isNotBlank(parentId)){
-                                String parentName = parentId.getSObjectType().getDescribe().getName();
+                                String parentName = Id.valueOf(parentId).getSObjectType().getDescribe().getName();
                                 if(parentName == 'Room__c'){
                                     sessionObj.Room__c = parentId;
                                 }else{

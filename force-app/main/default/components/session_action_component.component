@@ -652,7 +652,7 @@
             if (selectedStudentsId != '') {
                 document.getElementById("spinner").style.display = "block";
                 Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.SessionActionController.changeStudentStatus}',
+                    '{!$RemoteAction.SessionActionController.changeStudentsStatus}',
                     selectedStudentsId, status, selectedSessionId,
                     function (result, event) {
                         document.getElementById("spinner").style.display = "none";
